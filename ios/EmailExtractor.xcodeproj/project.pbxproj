@@ -24,8 +24,8 @@
 		5709B34CF0A7D63546082F79 /* Pods-EmailExtractor.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-EmailExtractor.release.xcconfig"; path = "Target Support Files/Pods-EmailExtractor/Pods-EmailExtractor.release.xcconfig"; sourceTree = "<group>"; };
 		5DCACB8F33CDC322A6C60F78 /* libPods-EmailExtractor.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-EmailExtractor.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		761780EC2CA45674006654EE /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AppDelegate.swift; path = EmailExtractor/AppDelegate.swift; sourceTree = "<group>"; };
-		A1B2C3D4E5F6A7B8C9D0E1F3 /* EmailExtractionModule.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = EmailExtractionModule.m; path = EmailExtractor/EmailExtractionModule.m; sourceTree = "<group>"; };
 		81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = LaunchScreen.storyboard; path = EmailExtractor/LaunchScreen.storyboard; sourceTree = "<group>"; };
+		A1B2C3D4E5F6A7B8C9D0E1F3 /* EmailExtractionModule.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = EmailExtractionModule.m; path = EmailExtractor/EmailExtractionModule.m; sourceTree = "<group>"; };
 		ED297162215061F000B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 

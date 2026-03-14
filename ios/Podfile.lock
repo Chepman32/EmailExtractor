@@ -1944,6 +1944,28 @@ PODS:
     - Yoga
   - RNFS (2.20.0):
     - React-Core
+  - RNVectorIcons (10.3.0):
+    - hermes-engine
+    - RCTRequired
+    - RCTTypeSafety
+    - React-Core
+    - React-Core-prebuilt
+    - React-debug
+    - React-Fabric
+    - React-featureflags
+    - React-graphics
+    - React-ImageManager
+    - React-jsi
+    - React-NativeModulesApple
+    - React-RCTFabric
+    - React-renderercss
+    - React-rendererdebug
+    - React-utils
+    - ReactCodegen
+    - ReactCommon/turbomodule/bridging
+    - ReactCommon/turbomodule/core
+    - ReactNativeDependencies
+    - Yoga
   - RNZipArchive (7.0.2):
     - React-Core
     - RNZipArchive/Core (= 7.0.2)
@@ -2034,6 +2056,7 @@ DEPENDENCIES:
   - ReactNativeDependencies (from `../node_modules/react-native/third-party-podspecs/ReactNativeDependencies.podspec`)
   - "RNCClipboard (from `../node_modules/@react-native-clipboard/clipboard`)"
   - RNFS (from `../node_modules/react-native-fs`)
+  - RNVectorIcons (from `../node_modules/react-native-vector-icons`)
   - RNZipArchive (from `../node_modules/react-native-zip-archive`)
   - Yoga (from `../node_modules/react-native/ReactCommon/yoga`)
 
@@ -2199,6 +2222,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/@react-native-clipboard/clipboard"
   RNFS:
     :path: "../node_modules/react-native-fs"
+  RNVectorIcons:
+    :path: "../node_modules/react-native-vector-icons"
   RNZipArchive:
     :path: "../node_modules/react-native-zip-archive"
   Yoga:
@@ -2283,10 +2308,11 @@ SPEC CHECKSUMS:
   ReactNativeDependencies: 88ec4b33388511bafeff7a552ae3501a397538b6
   RNCClipboard: 88d7eeb555d1183915f0885bdbc5c97eb6f7f3ba
   RNFS: 89de7d7f4c0f6bafa05343c578f61118c8282ed8
+  RNVectorIcons: 4351544f100d4f12cac156a7c13399e60bab3e26
   RNZipArchive: 4304f5100eab004eeb7349adc51997b3a28deb76
   SSZipArchive: c69881e8ac5521f0e622291387add5f60f30f3c4
   Yoga: c0b3f2c7e8d3e327e450223a2414ca3fa296b9a2
 
 PODFILE CHECKSUM: b4a153cd7cfd73eca4cd6d3e18653474481cb041
 
-COCOAPODS: 1.15.2
+COCOAPODS: 1.16.2

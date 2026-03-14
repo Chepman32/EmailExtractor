@@ -1,5 +1,6 @@
 import React from 'react';
 import {fireEvent, render, waitFor} from '@testing-library/react-native';
+import Clipboard from '@react-native-clipboard/clipboard';
 import {ExtractorScreen} from './ExtractorScreen';
 import * as historyStorage from '../../domain/history/historyStorage';
 import * as extractionEngine from './extractionEngine';
@@ -28,6 +29,20 @@ describe('ExtractorScreen', () => {
     const {getByTestId} = render(<ExtractorScreen />);
 
     expect(getByTestId('clear-button')).toBeTruthy();
+  });
+
+  it('pastes clipboard content into the text input when the paste icon is pressed', async () => {
+    jest
+      .spyOn(Clipboard, 'getString')
+      .mockResolvedValue('clipboard@example.com');
+
+    const {getByTestId, getByDisplayValue} = render(<ExtractorScreen />);
+
+    fireEvent.press(getByTestId('paste-button'));
+
+    await waitFor(() => {
+      expect(getByDisplayValue('clipboard@example.com')).toBeTruthy();
+    });
   });
 
   it('keeps extracted results visible when history persistence fails', async () => {

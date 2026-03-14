@@ -8,6 +8,7 @@ import {
   useWindowDimensions,
   View,
 } from 'react-native';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import {
   SafeAreaProvider,
   useSafeAreaInsets,
@@ -23,9 +24,21 @@ import {SettingsScreen} from './src/features/settings/SettingsScreen';
 import {HistorySession} from './src/shared/types';
 
 const TABS = [
-  {id: 'home', label: 'Home', badge: 'H'},
-  {id: 'history', label: 'History', badge: 'R'},
-  {id: 'settings', label: 'Settings', badge: 'S'},
+  {
+    id: 'home',
+    label: 'Home',
+    icon: {inactive: 'home-variant-outline', active: 'home-variant'},
+  },
+  {
+    id: 'history',
+    label: 'History',
+    icon: {inactive: 'history', active: 'history'},
+  },
+  {
+    id: 'settings',
+    label: 'Settings',
+    icon: {inactive: 'cog-outline', active: 'cog'},
+  },
 ] as const;
 
 type TabId = (typeof TABS)[number]['id'];
@@ -199,13 +212,11 @@ function AppShell() {
                         isActive && styles.tabBadgeActive,
                         {transform: [{scale: badgeScale}]},
                       ]}>
-                      <Text
-                        style={[
-                          styles.tabBadgeText,
-                          isActive && styles.tabBadgeTextActive,
-                        ]}>
-                        {tab.badge}
-                      </Text>
+                      <MaterialCommunityIcons
+                        color={isActive ? '#FFFFFF' : '#1D5F9D'}
+                        name={isActive ? tab.icon.active : tab.icon.inactive}
+                        size={18}
+                      />
                     </Animated.View>
                     <Text
                       style={[

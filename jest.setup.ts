@@ -39,6 +39,7 @@ jest.mock('react-native-image-picker', () => ({
 }));
 
 jest.mock('@react-native-clipboard/clipboard', () => ({
+  getString: jest.fn(async () => ''),
   setString: jest.fn(),
 }));
 
@@ -58,4 +59,12 @@ jest.mock('react-native-safe-area-context', () => {
       left: 0,
     }),
   };
+});
+
+jest.mock('react-native-vector-icons/MaterialCommunityIcons', () => {
+  const React = require('react');
+  const {Text} = require('react-native');
+
+  return ({name, ...props}: {name: string}) =>
+    React.createElement(Text, props, name);
 });

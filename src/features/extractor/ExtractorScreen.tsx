@@ -1,5 +1,6 @@
 import React, {
   forwardRef,
+  useRef,
   useImperativeHandle,
   useMemo,
   useState,
@@ -19,6 +20,7 @@ import {
   View,
 } from 'react-native';
 import Clipboard from '@react-native-clipboard/clipboard';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import {SafeAreaView} from 'react-native-safe-area-context';
 
 import {
@@ -165,6 +167,7 @@ export const ExtractorScreen = forwardRef<
   const [result, setResult] = useState<ExtractionResult | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isExtracting, setIsExtracting] = useState(false);
+  const textInputRef = useRef<TextInput>(null);
 
   const canExtract = useMemo(() => {
     if (source === 'text') {
@@ -182,6 +185,7 @@ export const ExtractorScreen = forwardRef<
     : source === 'text'
       ? 'Awaiting text'
       : 'Awaiting import';
+  const statusIconName = source === 'text' ? 'content-paste' : 'tray-arrow-down';
   const extractButtonHint = canExtract
     ? 'Extract unique addresses from the current input.'
     : source === 'text'
@@ -296,6 +300,28 @@ export const ExtractorScreen = forwardRef<
       setErrorMessage('Emails were extracted, but history could not be saved.');
     } finally {
       setIsExtracting(false);
+    }
+  };
+
+  const handlePasteFromClipboard = async () => {
+    if (source !== 'text') {
+      return;
+    }
+
+    try {
+      const clipboardText = await Clipboard.getString();
+
+      if (!clipboardText.trim()) {
+        setErrorMessage('Clipboard is empty.');
+        return;
+      }
+
+      setErrorMessage(null);
+      setResult(null);
+      setText(clipboardText);
+      textInputRef.current?.focus();
+    } catch {
+      setErrorMessage('Unable to paste from clipboard.');
     }
   };
 
@@ -437,13 +463,33 @@ export const ExtractorScreen = forwardRef<
               </Text>
               <Text style={styles.inputCardSubtitle}>{sourceHelperText}</Text>
             </View>
-            <View style={styles.statusPill}>
-              <Text style={styles.statusPillText}>{readyStateLabel}</Text>
-            </View>
+            <Pressable
+              accessibilityLabel={source === 'text' ? 'Paste from clipboard' : readyStateLabel}
+              accessibilityRole={source === 'text' ? 'button' : undefined}
+              onPress={() => {
+                if (source === 'text') {
+                  handlePasteFromClipboard().catch(() => {
+                    setErrorMessage('Unable to paste from clipboard.');
+                  });
+                }
+              }}
+              testID={source === 'text' ? 'paste-button' : 'input-status'}
+              style={({pressed}) => [
+                styles.statusPill,
+                source === 'text' && pressed && styles.statusPillPressed,
+              ]}>
+              <MaterialCommunityIcons
+                color="#245F99"
+                name={statusIconName}
+                size={20}
+                style={styles.statusPillIcon}
+              />
+            </Pressable>
           </View>
 
           {source === 'text' ? (
             <TextInput
+              ref={textInputRef}
               multiline
               placeholder="Paste text to scan for email addresses"
               placeholderTextColor="#8A97A8"
@@ -905,8 +951,19 @@ const styles = StyleSheet.create({
   statusPill: {
     borderRadius: 999,
     backgroundColor: '#E3EEF9',
+    minWidth: 44,
+    minHeight: 44,
+    alignItems: 'center',
+    justifyContent: 'center',
     paddingHorizontal: 12,
     paddingVertical: 8,
+  },
+  statusPillIcon: {
+    textAlign: 'center',
+  },
+  statusPillPressed: {
+    backgroundColor: '#D7E7F8',
+    transform: [{scale: 0.97}],
   },
   statusPillText: {
     fontSize: 12,
