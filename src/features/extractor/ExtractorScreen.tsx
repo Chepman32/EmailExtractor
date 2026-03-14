@@ -320,8 +320,9 @@ export function ExtractorScreen() {
               testID="extract-button"
               disabled={!canExtract || isExtracting}
               onPress={() => {
-                handleExtract().catch(() => {
-                  setErrorMessage('Extraction failed. Please verify permissions and file format.');
+                handleExtract().catch((err: unknown) => {
+                  const msg = err instanceof Error ? err.message : 'Unknown error';
+                  setErrorMessage(`Extraction failed: ${msg}`);
                 });
               }}
               style={[
