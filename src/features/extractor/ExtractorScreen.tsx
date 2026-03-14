@@ -1,10 +1,14 @@
-import React, {useEffect, useMemo, useState} from 'react';
+import React, {
+  forwardRef,
+  useImperativeHandle,
+  useMemo,
+  useState,
+} from 'react';
 import {
   ActivityIndicator,
   Alert,
   FlatList,
   KeyboardAvoidingView,
-  Modal,
   Platform,
   Pressable,
   Share,
@@ -19,14 +23,9 @@ import {SafeAreaView} from 'react-native-safe-area-context';
 
 import {
   addSessionToHistory,
-  clearHistory,
   createHistorySession,
 } from '../../domain/history/historyStore';
-import {
-  clearPersistedHistory,
-  persistHistory,
-  readHistory,
-} from '../../domain/history/historyStorage';
+import {persistHistory, readHistory} from '../../domain/history/historyStorage';
 import {ExtractionResult, HistorySession} from '../../shared/types';
 import {exportEmails} from '../../native/emailExtractionBridge';
 import {extractEmails} from './extractionEngine';
@@ -60,7 +59,18 @@ const SOURCE_ITEMS = [
   },
 ] as const;
 
+const SOURCE_ROWS = [SOURCE_ITEMS.slice(0, 2), SOURCE_ITEMS.slice(2)] as const;
+
 type SourceId = (typeof SOURCE_ITEMS)[number]['id'];
+
+type ExtractorScreenProps = {
+  onHistoryChanged?: (count: number) => void;
+};
+
+export type ExtractorScreenHandle = {
+  loadSession: (session: HistorySession) => void;
+  resetAll: () => void;
+};
 
 const CARD_SHADOW =
   Platform.select({
@@ -139,7 +149,13 @@ function getSourceHelperText(
   return `Choose a ${sourceLabel.toLowerCase()} source to continue.`;
 }
 
-export function ExtractorScreen() {
+export const ExtractorScreen = forwardRef<
+  ExtractorScreenHandle,
+  ExtractorScreenProps
+>(function ExtractorScreen(
+  {onHistoryChanged},
+  ref,
+) {
   const {width} = useWindowDimensions();
   const isTablet = width >= 768;
 
@@ -149,19 +165,6 @@ export function ExtractorScreen() {
   const [result, setResult] = useState<ExtractionResult | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isExtracting, setIsExtracting] = useState(false);
-  const [history, setHistory] = useState<HistorySession[]>([]);
-  const [historyVisible, setHistoryVisible] = useState(false);
-
-  useEffect(() => {
-    const loadHistory = async () => {
-      const sessions = await readHistory();
-      setHistory(sessions);
-    };
-
-    loadHistory().catch(() => {
-      setHistory([]);
-    });
-  }, []);
 
   const canExtract = useMemo(() => {
     if (source === 'text') {
@@ -190,6 +193,31 @@ export function ExtractorScreen() {
     styles.screen,
     isTablet && styles.screenTablet,
   ];
+
+  const handleClearAll = () => {
+    setText('');
+    setSelectedAsset(null);
+    setResult(null);
+    setErrorMessage(null);
+    setSource('text');
+  };
+
+  const handleLoadSession = (session: HistorySession) => {
+    setResult(mapSessionToResult(session));
+    setSource(session.source as SourceId);
+    setText(session.inputLabel);
+    setSelectedAsset(createHistoryAssetLabel(session));
+    setErrorMessage(null);
+  };
+
+  useImperativeHandle(
+    ref,
+    () => ({
+      loadSession: handleLoadSession,
+      resetAll: handleClearAll,
+    }),
+    [],
+  );
 
   const handleSourcePress = async (nextSource: SourceId) => {
     setErrorMessage(null);
@@ -254,28 +282,21 @@ export function ExtractorScreen() {
     }
 
     try {
+      const existingHistory = await readHistory();
       const session = createHistorySession(
         source,
         extraction.emails,
         buildInputLabel(source, text, selectedAsset),
       );
-      const nextHistory = addSessionToHistory(history, session);
+      const nextHistory = addSessionToHistory(existingHistory, session);
 
-      setHistory(nextHistory);
       await persistHistory(nextHistory);
+      onHistoryChanged?.(nextHistory.length);
     } catch {
       setErrorMessage('Emails were extracted, but history could not be saved.');
     } finally {
       setIsExtracting(false);
     }
-  };
-
-  const handleClearAll = () => {
-    setText('');
-    setSelectedAsset(null);
-    setResult(null);
-    setErrorMessage(null);
-    setSource('text');
   };
 
   const handleCopy = () => {
@@ -316,20 +337,6 @@ export function ExtractorScreen() {
     }
   };
 
-  const handleClearHistory = async () => {
-    const next = clearHistory(history);
-    setHistory(next);
-    await clearPersistedHistory();
-  };
-
-  const handleHistoryPick = (session: HistorySession) => {
-    setResult(mapSessionToResult(session));
-    setSource(session.source as SourceId);
-    setText(session.inputLabel);
-    setSelectedAsset(createHistoryAssetLabel(session));
-    setHistoryVisible(false);
-  };
-
   const renderEmailItem = ({item}: {item: string}) => (
     <Pressable
       accessibilityRole="button"
@@ -351,95 +358,76 @@ export function ExtractorScreen() {
         <View style={styles.heroGlowPrimary} />
         <View style={styles.heroGlowSecondary} />
 
-        <Text style={styles.heroEyebrow}>Fast and tidy extraction</Text>
-        <Text style={styles.title} testID="screen-title">
-          Email Extractor
-        </Text>
-        <Text style={styles.subtitle}>
-          Pull addresses from pasted text, camera captures, photos, or files with a
-          cleaner workflow and faster follow-up actions.
-        </Text>
-
-        <View style={styles.headerActions}>
-          <Pressable
-            accessibilityRole="button"
-            onPress={() => setHistoryVisible(true)}
-            testID="history-button"
-            style={({pressed}) => [styles.headerActionButton, pressed && styles.headerActionPressed]}>
-            <Text style={styles.headerActionLabel}>History</Text>
-            <Text style={styles.headerActionValue}>{history.length}</Text>
-          </Pressable>
-          <Pressable
-            accessibilityRole="button"
-            onPress={handleClearAll}
-            testID="clear-button"
-            style={({pressed}) => [styles.headerActionButton, pressed && styles.headerActionPressed]}>
-            <Text style={styles.headerActionLabel}>Reset</Text>
-            <Text style={styles.headerActionValue}>Now</Text>
-          </Pressable>
-        </View>
-
-        <View style={styles.heroFooter}>
-          <View style={styles.heroMetric}>
-            <Text style={styles.heroMetricValue}>{history.length}</Text>
-            <Text style={styles.heroMetricLabel}>saved scans</Text>
-          </View>
-          <View style={styles.heroDivider} />
-          <View style={styles.heroContext}>
-            <Text style={styles.heroContextTitle}>{activeSource.label} mode</Text>
-            <Text style={styles.heroContextText}>{sourceHelperText}</Text>
-          </View>
+        <View style={styles.heroSourceGrid}>
+          {SOURCE_ROWS.map((row, rowIndex) => (
+            <View key={`row-${rowIndex}`} style={styles.heroSourceRow}>
+              {row.map(item => (
+                <Pressable
+                  key={item.id}
+                  accessibilityRole="button"
+                  onPress={() => {
+                    handleSourcePress(item.id).catch(() => {
+                      setErrorMessage('Unable to import source. Please try again.');
+                    });
+                  }}
+                  testID={`source-${item.id}`}
+                  style={({pressed}) => [
+                    styles.sourceButton,
+                    styles.heroSourceButton,
+                    styles.heroSourceRowItem,
+                    source === item.id && styles.sourceButtonActive,
+                    pressed && styles.sourceButtonPressed,
+                  ]}>
+                  <View
+                    style={[
+                      styles.sourceBadge,
+                      source === item.id && styles.sourceBadgeActive,
+                    ]}>
+                    <Text
+                      style={[
+                        styles.sourceBadgeText,
+                        source === item.id && styles.sourceBadgeTextActive,
+                      ]}>
+                      {item.badge}
+                    </Text>
+                  </View>
+                  <Text
+                    style={[
+                      styles.sourceButtonText,
+                      source === item.id && styles.sourceButtonTextActive,
+                    ]}>
+                    {item.label}
+                  </Text>
+                  <Text style={styles.sourceButtonDescription}>{item.description}</Text>
+                </Pressable>
+              ))}
+            </View>
+          ))}
         </View>
       </View>
 
       <View style={styles.sectionCard}>
-        <Text style={styles.sectionEyebrow}>Source</Text>
-        <Text style={styles.sectionTitle}>Choose what to scan</Text>
-        <Text style={styles.sectionSubtitle}>
-          Switch between manual text and imported sources without losing your place.
-        </Text>
-
-        <View style={styles.sourceGrid}>
-          {SOURCE_ITEMS.map(item => (
-            <Pressable
-              key={item.id}
-              accessibilityRole="button"
-              onPress={() => {
-                handleSourcePress(item.id).catch(() => {
-                  setErrorMessage('Unable to import source. Please try again.');
-                });
-              }}
-              testID={`source-${item.id}`}
-              style={({pressed}) => [
-                styles.sourceButton,
-                {width: isTablet ? '23.5%' : '48.5%'},
-                source === item.id && styles.sourceButtonActive,
-                pressed && styles.sourceButtonPressed,
-              ]}>
-              <View
-                style={[
-                  styles.sourceBadge,
-                  source === item.id && styles.sourceBadgeActive,
-                ]}>
-                <Text
-                  style={[
-                    styles.sourceBadgeText,
-                    source === item.id && styles.sourceBadgeTextActive,
-                  ]}>
-                  {item.badge}
-                </Text>
-              </View>
-              <Text
-                style={[
-                  styles.sourceButtonText,
-                  source === item.id && styles.sourceButtonTextActive,
-                ]}>
-                {item.label}
-              </Text>
-              <Text style={styles.sourceButtonDescription}>{item.description}</Text>
-            </Pressable>
-          ))}
+        <View style={styles.sectionHeaderRow}>
+          <View style={styles.sectionHeaderCopy}>
+            <Text style={styles.sectionEyebrow}>Input</Text>
+            <Text style={styles.sectionTitle} testID="screen-title">
+              Email Extractor
+            </Text>
+          </View>
+          <Pressable
+            accessibilityRole="button"
+            onPress={handleClearAll}
+            testID="clear-button"
+            style={({pressed}) => [
+              styles.resetButton,
+              pressed && styles.resetButtonPressed,
+            ]}>
+            <Text style={styles.resetButtonText}>Reset</Text>
+          </Pressable>
         </View>
+        <Text style={styles.sectionSubtitle}>
+          Select a source above, prepare the content here, and run the scan when it is ready.
+        </Text>
 
         <View style={styles.inputCard}>
           <View style={styles.inputCardHeader}>
@@ -551,7 +539,9 @@ export function ExtractorScreen() {
 
         {emails.length > 0 ? (
           <View style={styles.actionsRow}>
-            <Pressable onPress={handleCopy} style={({pressed}) => [styles.actionButton, pressed && styles.actionButtonPressed]}>
+            <Pressable
+              onPress={handleCopy}
+              style={({pressed}) => [styles.actionButton, pressed && styles.actionButtonPressed]}>
               <Text style={styles.actionButtonText}>Copy</Text>
             </Pressable>
             <Pressable
@@ -588,7 +578,7 @@ export function ExtractorScreen() {
   );
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <SafeAreaView edges={['top']} style={styles.safeArea}>
       <KeyboardAvoidingView
         behavior={Platform.select({ios: 'padding', default: undefined})}
         style={styles.flex}>
@@ -610,80 +600,9 @@ export function ExtractorScreen() {
           renderItem={renderEmailItem}
         />
       </KeyboardAvoidingView>
-
-      <Modal
-        visible={historyVisible}
-        animationType="slide"
-        transparent
-        onRequestClose={() => setHistoryVisible(false)}>
-        <Pressable style={styles.modalBackdrop} onPress={() => setHistoryVisible(false)}>
-          <Pressable style={styles.historySheet} onPress={() => {}}>
-            <View style={styles.sheetHandle} />
-
-            <View style={styles.historyHeader}>
-              <View>
-                <Text style={styles.historyEyebrow}>Recent sessions</Text>
-                <Text style={styles.historyTitle}>Scan history</Text>
-              </View>
-              <Pressable
-                onPress={() => setHistoryVisible(false)}
-                style={({pressed}) => [styles.historyCloseButton, pressed && styles.historyCloseButtonPressed]}>
-                <Text style={styles.historyClose}>Close</Text>
-              </Pressable>
-            </View>
-
-            <Pressable
-              onPress={() => {
-                handleClearHistory().catch(() => {
-                  setErrorMessage('Unable to clear history.');
-                });
-              }}
-              testID="clear-history-button"
-              style={({pressed}) => [
-                styles.clearHistoryButton,
-                pressed && styles.clearHistoryButtonPressed,
-              ]}>
-              <Text style={styles.clearHistoryText}>Clear history</Text>
-            </Pressable>
-
-            <FlatList
-              data={history}
-              keyExtractor={item => item.id}
-              contentContainerStyle={history.length === 0 ? styles.historyListEmpty : undefined}
-              ListEmptyComponent={
-                <View style={styles.emptyHistoryCard}>
-                  <Text style={styles.emptyHistory}>No recent sessions yet.</Text>
-                </View>
-              }
-              renderItem={({item}) => {
-                const itemSource = findSourceItem(item.source);
-
-                return (
-                  <Pressable
-                    onPress={() => handleHistoryPick(item)}
-                    style={({pressed}) => [
-                      styles.historyRow,
-                      pressed && styles.historyRowPressed,
-                    ]}>
-                    <View style={styles.historyRowTop}>
-                      <Text style={styles.historyRowTitle}>{item.inputLabel}</Text>
-                      <View style={styles.historySourceBadge}>
-                        <Text style={styles.historySourceBadgeText}>{itemSource.label}</Text>
-                      </View>
-                    </View>
-                    <Text style={styles.historyRowSubtitle}>
-                      {item.emails.length} emails extracted
-                    </Text>
-                  </Pressable>
-                );
-              }}
-            />
-          </Pressable>
-        </Pressable>
-      </Modal>
     </SafeAreaView>
   );
-}
+});
 
 const styles = StyleSheet.create({
   safeArea: {
@@ -717,6 +636,16 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     marginBottom: 18,
     ...CARD_SHADOW,
+  },
+  heroSourceGrid: {
+    gap: 10,
+  },
+  heroSourceRow: {
+    flexDirection: 'row',
+    gap: 10,
+  },
+  heroSourceRowItem: {
+    flex: 1,
   },
   heroGlowPrimary: {
     position: 'absolute',
@@ -837,6 +766,16 @@ const styles = StyleSheet.create({
     marginBottom: 18,
     ...CARD_SHADOW,
   },
+  sectionHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    justifyContent: 'space-between',
+    gap: 12,
+    marginBottom: 6,
+  },
+  sectionHeaderCopy: {
+    flex: 1,
+  },
   sectionEyebrow: {
     fontSize: 12,
     fontWeight: '700',
@@ -873,6 +812,11 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#E5EDF6',
     ...SOFT_SHADOW,
+  },
+  heroSourceButton: {
+    minHeight: 144,
+    backgroundColor: 'rgba(255, 255, 255, 0.96)',
+    borderColor: 'rgba(255, 255, 255, 0.22)',
   },
   sourceButtonActive: {
     backgroundColor: '#EAF4FF',
@@ -914,6 +858,20 @@ const styles = StyleSheet.create({
     fontSize: 13,
     lineHeight: 19,
     color: '#617388',
+  },
+  resetButton: {
+    borderRadius: 999,
+    backgroundColor: '#E7F0FA',
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+  },
+  resetButtonPressed: {
+    backgroundColor: '#DCE8F6',
+  },
+  resetButtonText: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: '#1D5F9D',
   },
   inputCard: {
     backgroundColor: '#F6F9FD',
@@ -1211,137 +1169,5 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     color: '#617388',
     maxWidth: 320,
-  },
-  modalBackdrop: {
-    flex: 1,
-    backgroundColor: 'rgba(10, 20, 34, 0.34)',
-    justifyContent: 'flex-end',
-  },
-  historySheet: {
-    backgroundColor: '#F8FBFF',
-    borderTopLeftRadius: 30,
-    borderTopRightRadius: 30,
-    maxHeight: '76%',
-    paddingHorizontal: 18,
-    paddingTop: 12,
-    paddingBottom: 20,
-  },
-  sheetHandle: {
-    alignSelf: 'center',
-    width: 46,
-    height: 5,
-    borderRadius: 999,
-    backgroundColor: '#CFD9E4',
-    marginBottom: 16,
-  },
-  historyHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 14,
-  },
-  historyEyebrow: {
-    fontSize: 11,
-    fontWeight: '700',
-    letterSpacing: 0.9,
-    textTransform: 'uppercase',
-    color: '#5F7896',
-    marginBottom: 4,
-  },
-  historyTitle: {
-    fontSize: 28,
-    fontWeight: '800',
-    letterSpacing: -0.8,
-    color: '#132238',
-  },
-  historyCloseButton: {
-    borderRadius: 999,
-    backgroundColor: '#E7F0FA',
-    paddingHorizontal: 14,
-    paddingVertical: 10,
-  },
-  historyCloseButtonPressed: {
-    backgroundColor: '#DCE8F6',
-  },
-  historyClose: {
-    fontSize: 13,
-    fontWeight: '700',
-    color: '#1D5F9D',
-  },
-  clearHistoryButton: {
-    alignSelf: 'flex-start',
-    borderRadius: 999,
-    backgroundColor: '#FFF1F1',
-    paddingHorizontal: 14,
-    paddingVertical: 10,
-    marginBottom: 14,
-  },
-  clearHistoryButtonPressed: {
-    backgroundColor: '#F9E2E2',
-  },
-  clearHistoryText: {
-    color: '#B04B4B',
-    fontSize: 13,
-    fontWeight: '700',
-  },
-  historyListEmpty: {
-    flexGrow: 1,
-    justifyContent: 'center',
-  },
-  historyRow: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: '#E1EAF4',
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    marginBottom: 10,
-    ...SOFT_SHADOW,
-  },
-  historyRowPressed: {
-    backgroundColor: '#F4F8FD',
-  },
-  historyRowTop: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    gap: 10,
-    marginBottom: 6,
-  },
-  historyRowTitle: {
-    flex: 1,
-    fontSize: 15,
-    fontWeight: '700',
-    color: '#132238',
-  },
-  historySourceBadge: {
-    borderRadius: 999,
-    backgroundColor: '#E7F0FA',
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-  },
-  historySourceBadgeText: {
-    fontSize: 11,
-    fontWeight: '700',
-    color: '#1D5F9D',
-    textTransform: 'uppercase',
-  },
-  historyRowSubtitle: {
-    fontSize: 13,
-    color: '#617388',
-  },
-  emptyHistoryCard: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 22,
-    borderWidth: 1,
-    borderColor: '#E1EAF4',
-    paddingVertical: 28,
-    paddingHorizontal: 18,
-    alignItems: 'center',
-  },
-  emptyHistory: {
-    fontSize: 14,
-    color: '#617388',
-    textAlign: 'center',
   },
 });
