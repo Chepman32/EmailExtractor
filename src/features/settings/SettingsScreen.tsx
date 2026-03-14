@@ -1,6 +1,5 @@
 import React, {useMemo, useState} from 'react';
 import {
-  ActivityIndicator,
   Pressable,
   StyleSheet,
   Text,
@@ -12,9 +11,6 @@ import {SafeAreaView} from 'react-native-safe-area-context';
 import {AppTheme, createShadow, ThemeId, themeOptions, themes} from '../../theme/themes';
 
 type SettingsScreenProps = {
-  historyCount: number;
-  onClearHistory: () => Promise<void>;
-  onResetHome: () => void;
   onThemeChange: (themeId: ThemeId) => void;
   selectedThemeId: ThemeId;
   theme?: AppTheme;
@@ -28,42 +24,15 @@ const themeIcons: Record<ThemeId, string> = {
 };
 
 export function SettingsScreen({
-  historyCount,
-  onClearHistory,
-  onResetHome,
   onThemeChange,
   selectedThemeId,
   theme = themes.light,
 }: SettingsScreenProps) {
-  const [isClearing, setIsClearing] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const styles = useMemo(() => createStyles(theme), [theme]);
-
-  const handleResetHome = () => {
-    onResetHome();
-    setErrorMessage(null);
-    setMessage('Home screen reset. Current draft and results were cleared.');
-  };
-
-  const handleClearHistory = async () => {
-    setIsClearing(true);
-    setMessage(null);
-    setErrorMessage(null);
-
-    try {
-      await onClearHistory();
-      setMessage('Saved history cleared.');
-    } catch {
-      setErrorMessage('Unable to clear saved history.');
-    } finally {
-      setIsClearing(false);
-    }
-  };
 
   const handleThemePress = (nextThemeId: ThemeId) => {
     onThemeChange(nextThemeId);
-    setErrorMessage(null);
     setMessage(`${themes[nextThemeId].label} theme applied.`);
   };
 
@@ -74,8 +43,7 @@ export function SettingsScreen({
           <Text style={styles.heroEyebrow}>Settings</Text>
           <Text style={styles.heroTitle}>Adjust the atmosphere</Text>
           <Text style={styles.heroSubtitle}>
-            Swap the entire app palette, keep the Home workspace tidy, and clear
-            saved history whenever you need a reset.
+            Swap the entire app palette and preview each look before applying it.
           </Text>
         </View>
 
@@ -158,48 +126,7 @@ export function SettingsScreen({
           </View>
         </View>
 
-        <View style={styles.actionCard}>
-          <Text style={styles.actionTitle}>Reset Home screen</Text>
-          <Text style={styles.actionSubtitle}>
-            Clear the current source, draft text, extracted results, and inline errors.
-          </Text>
-          <Pressable
-            onPress={handleResetHome}
-            testID="reset-home-button"
-            style={({pressed}) => [styles.primaryButton, pressed && styles.primaryButtonPressed]}>
-            <Text style={styles.primaryButtonText}>Reset Home</Text>
-          </Pressable>
-        </View>
-
-        <View style={styles.actionCard}>
-          <Text style={styles.actionTitle}>Clear saved history</Text>
-          <Text style={styles.actionSubtitle}>
-            Remove every stored extraction session from this device. {historyCount}{' '}
-            {historyCount === 1 ? 'entry is' : 'entries are'} currently saved.
-          </Text>
-          <Pressable
-            disabled={isClearing}
-            onPress={() => {
-              handleClearHistory().catch(() => {
-                setErrorMessage('Unable to clear saved history.');
-              });
-            }}
-            testID="clear-history-settings-button"
-            style={({pressed}) => [
-              styles.secondaryButton,
-              isClearing && styles.secondaryButtonDisabled,
-              pressed && !isClearing && styles.secondaryButtonPressed,
-            ]}>
-            {isClearing ? (
-              <ActivityIndicator color={theme.colors.dangerText} />
-            ) : (
-              <Text style={styles.secondaryButtonText}>Clear History</Text>
-            )}
-          </Pressable>
-        </View>
-
         {message ? <Text style={styles.successText}>{message}</Text> : null}
-        {errorMessage ? <Text style={styles.errorText}>{errorMessage}</Text> : null}
       </View>
     </SafeAreaView>
   );
@@ -341,74 +268,10 @@ function createStyles(theme: AppTheme) {
       fontSize: 11,
       lineHeight: 16,
     },
-    actionCard: {
-      backgroundColor: theme.colors.surface,
-      borderRadius: 24,
-      borderWidth: 1,
-      borderColor: theme.colors.border,
-      paddingHorizontal: 18,
-      paddingVertical: 18,
-      marginBottom: 14,
-      ...createShadow(theme.colors.shadow, 0.08, 18, 10, 4),
-    },
-    actionTitle: {
-      fontSize: 18,
-      fontWeight: '700',
-      color: theme.colors.textPrimary,
-      marginBottom: 6,
-    },
-    actionSubtitle: {
-      fontSize: 14,
-      lineHeight: 21,
-      color: theme.colors.textSecondary,
-      marginBottom: 16,
-    },
-    primaryButton: {
-      borderRadius: 18,
-      backgroundColor: theme.colors.primary,
-      paddingHorizontal: 16,
-      paddingVertical: 14,
-      alignItems: 'center',
-    },
-    primaryButtonPressed: {
-      backgroundColor: theme.colors.primaryPressed,
-    },
-    primaryButtonText: {
-      fontSize: 14,
-      fontWeight: '700',
-      color: theme.colors.primaryOn,
-    },
-    secondaryButton: {
-      borderRadius: 18,
-      backgroundColor: theme.colors.dangerBackground,
-      borderWidth: 1,
-      borderColor: theme.colors.dangerBorder,
-      paddingHorizontal: 16,
-      paddingVertical: 14,
-      alignItems: 'center',
-      minHeight: 50,
-      justifyContent: 'center',
-    },
-    secondaryButtonPressed: {
-      opacity: 0.9,
-    },
-    secondaryButtonDisabled: {
-      opacity: 0.75,
-    },
-    secondaryButtonText: {
-      fontSize: 14,
-      fontWeight: '700',
-      color: theme.colors.dangerText,
-    },
     successText: {
       fontSize: 13,
       lineHeight: 19,
       color: theme.colors.successText,
-    },
-    errorText: {
-      fontSize: 13,
-      lineHeight: 19,
-      color: theme.colors.dangerText,
     },
   });
 }

@@ -14,7 +14,6 @@ import {
   useSafeAreaInsets,
 } from 'react-native-safe-area-context';
 
-import {clearPersistedHistory, readHistory} from './src/domain/history/historyStorage';
 import {ExtractorScreen, ExtractorScreenHandle} from './src/features/extractor/ExtractorScreen';
 import {HistoryScreen} from './src/features/history/HistoryScreen';
 import {SettingsScreen} from './src/features/settings/SettingsScreen';
@@ -47,7 +46,6 @@ function AppShell() {
   const insets = useSafeAreaInsets();
   const extractorRef = useRef<ExtractorScreenHandle>(null);
   const [activeTab, setActiveTab] = useState<TabId>('home');
-  const [historyCount, setHistoryCount] = useState(0);
   const [tabBarWidth, setTabBarWidth] = useState(0);
   const [themeId, setThemeId] = useState<ThemeId>('light');
   const animatedTabIndex = useRef(new Animated.Value(0)).current;
@@ -62,14 +60,6 @@ function AppShell() {
   const tabSegmentWidth = tabTrackWidth / TABS.length;
 
   useEffect(() => {
-    readHistory()
-      .then(sessions => {
-        setHistoryCount(sessions.length);
-      })
-      .catch(() => {
-        setHistoryCount(0);
-      });
-
     readThemePreference()
       .then(setThemeId)
       .catch(() => {
@@ -114,11 +104,6 @@ function AppShell() {
     setActiveTab('home');
   };
 
-  const handleClearHistory = async () => {
-    await clearPersistedHistory();
-    setHistoryCount(0);
-  };
-
   const handleThemeChange = (nextThemeId: ThemeId) => {
     setThemeId(nextThemeId);
     persistThemePreference(nextThemeId).catch(() => {});
@@ -135,7 +120,6 @@ function AppShell() {
           <View style={[styles.screenLayer, activeTab !== 'home' && styles.hiddenScreen]}>
             <ExtractorScreen
               ref={extractorRef}
-              onHistoryChanged={setHistoryCount}
               theme={theme}
             />
           </View>
@@ -150,9 +134,6 @@ function AppShell() {
 
           <View style={[styles.screenLayer, activeTab !== 'settings' && styles.hiddenScreen]}>
             <SettingsScreen
-              historyCount={historyCount}
-              onClearHistory={handleClearHistory}
-              onResetHome={() => extractorRef.current?.resetAll()}
               onThemeChange={handleThemeChange}
               selectedThemeId={themeId}
               theme={theme}
