@@ -1,5 +1,6 @@
 import React, {useEffect, useMemo, useState} from 'react';
 import {
+  ActivityIndicator,
   Alert,
   FlatList,
   KeyboardAvoidingView,
@@ -33,13 +34,61 @@ import {pickFromCamera, pickFromFiles, pickFromPhotoLibrary} from './sourcePicke
 import {SelectedAsset} from './types';
 
 const SOURCE_ITEMS = [
-  {id: 'text', label: 'Text'},
-  {id: 'camera', label: 'Camera'},
-  {id: 'photos', label: 'Photos'},
-  {id: 'files', label: 'Files'},
+  {
+    id: 'text',
+    label: 'Text',
+    description: 'Paste copied content',
+    badge: 'Aa',
+  },
+  {
+    id: 'camera',
+    label: 'Camera',
+    description: 'Capture on the spot',
+    badge: 'C',
+  },
+  {
+    id: 'photos',
+    label: 'Photos',
+    description: 'Pick from library',
+    badge: 'P',
+  },
+  {
+    id: 'files',
+    label: 'Files',
+    description: 'Import a document',
+    badge: 'F',
+  },
 ] as const;
 
 type SourceId = (typeof SOURCE_ITEMS)[number]['id'];
+
+const CARD_SHADOW =
+  Platform.select({
+    ios: {
+      shadowColor: '#0C2340',
+      shadowOpacity: 0.08,
+      shadowRadius: 18,
+      shadowOffset: {width: 0, height: 10},
+    },
+    android: {
+      elevation: 4,
+    },
+    default: {},
+  }) ?? {};
+
+const SOFT_SHADOW =
+  Platform.select({
+    ios: {
+      shadowColor: '#0C2340',
+      shadowOpacity: 0.05,
+      shadowRadius: 12,
+      shadowOffset: {width: 0, height: 6},
+    },
+    android: {
+      elevation: 2,
+    },
+    default: {},
+  }) ?? {};
 
 function buildInputLabel(source: SourceId, text: string, asset: SelectedAsset | null): string {
   if (source === 'text') {
@@ -68,6 +117,26 @@ function createHistoryAssetLabel(session: HistorySession): SelectedAsset | null 
     uri: session.inputLabel,
     name: session.inputLabel,
   };
+}
+
+function findSourceItem(source: string) {
+  return SOURCE_ITEMS.find(item => item.id === source) ?? SOURCE_ITEMS[0];
+}
+
+function getSourceHelperText(
+  source: SourceId,
+  sourceLabel: string,
+  selectedAsset: SelectedAsset | null,
+) {
+  if (source === 'text') {
+    return 'Paste any copied thread, note, or document text and the app will pull out unique email addresses.';
+  }
+
+  if (selectedAsset?.uri) {
+    return 'Source attached and ready to scan. Tap the same option again to replace it.';
+  }
+
+  return `Choose a ${sourceLabel.toLowerCase()} source to continue.`;
 }
 
 export function ExtractorScreen() {
@@ -102,7 +171,25 @@ export function ExtractorScreen() {
     return Boolean(selectedAsset?.uri);
   }, [source, text, selectedAsset]);
 
+  const activeSource = findSourceItem(source);
+  const emails = result?.emails ?? [];
   const extractButtonTitle = isExtracting ? 'Extracting...' : 'Extract Emails';
+  const readyStateLabel = canExtract
+    ? 'Ready'
+    : source === 'text'
+      ? 'Awaiting text'
+      : 'Awaiting import';
+  const extractButtonHint = canExtract
+    ? 'Extract unique addresses from the current input.'
+    : source === 'text'
+      ? 'Paste some text to enable extraction.'
+      : `Import a ${activeSource.label.toLowerCase()} source to enable extraction.`;
+  const sourceHelperText = getSourceHelperText(source, activeSource.label, selectedAsset);
+  const screenContentStyle = [
+    styles.scrollContent,
+    styles.screen,
+    isTablet && styles.screenTablet,
+  ];
 
   const handleSourcePress = async (nextSource: SourceId) => {
     setErrorMessage(null);
@@ -113,6 +200,9 @@ export function ExtractorScreen() {
       setSelectedAsset(null);
       return;
     }
+
+    setSource(nextSource);
+    setSelectedAsset(null);
 
     try {
       const picker =
@@ -127,7 +217,6 @@ export function ExtractorScreen() {
         return;
       }
 
-      setSource(nextSource);
       setSelectedAsset(asset);
     } catch {
       setErrorMessage('Unable to import source. Please try again.');
@@ -190,8 +279,6 @@ export function ExtractorScreen() {
   };
 
   const handleCopy = () => {
-    const emails = result?.emails ?? [];
-
     if (emails.length === 0) {
       return;
     }
@@ -200,9 +287,12 @@ export function ExtractorScreen() {
     Alert.alert('Copied', 'Emails copied to clipboard.');
   };
 
-  const handleShare = async () => {
-    const emails = result?.emails ?? [];
+  const handleCopyEmail = (email: string) => {
+    Clipboard.setString(email);
+    Alert.alert('Copied', `${email} copied to clipboard.`);
+  };
 
+  const handleShare = async () => {
     if (emails.length === 0) {
       return;
     }
@@ -211,8 +301,6 @@ export function ExtractorScreen() {
   };
 
   const handleExport = async (format: 'txt' | 'csv') => {
-    const emails = result?.emails ?? [];
-
     if (emails.length === 0) {
       return;
     }
@@ -242,146 +330,260 @@ export function ExtractorScreen() {
     setHistoryVisible(false);
   };
 
-  const emails = result?.emails ?? [];
-  const screenContentStyle = [
-    styles.scrollContent,
-    styles.screen,
-    isTablet && styles.screenTablet,
-  ];
-
   const renderEmailItem = ({item}: {item: string}) => (
-    <Text style={styles.resultItem} testID="result-email">
-      {item}
-    </Text>
+    <Pressable
+      accessibilityRole="button"
+      onPress={() => handleCopyEmail(item)}
+      style={({pressed}) => [styles.resultCard, pressed && styles.resultCardPressed]}>
+      <View style={styles.resultCardHeader}>
+        <View style={styles.resultDot} />
+        <Text style={styles.resultMeta}>Tap to copy</Text>
+      </View>
+      <Text style={styles.resultItem} testID="result-email">
+        {item}
+      </Text>
+    </Pressable>
   );
 
   const screenHeader = (
     <>
-      <View style={styles.headerRow}>
+      <View style={styles.heroCard}>
+        <View style={styles.heroGlowPrimary} />
+        <View style={styles.heroGlowSecondary} />
+
+        <Text style={styles.heroEyebrow}>Fast and tidy extraction</Text>
         <Text style={styles.title} testID="screen-title">
           Email Extractor
         </Text>
+        <Text style={styles.subtitle}>
+          Pull addresses from pasted text, camera captures, photos, or files with a
+          cleaner workflow and faster follow-up actions.
+        </Text>
+
         <View style={styles.headerActions}>
           <Pressable
             accessibilityRole="button"
             onPress={() => setHistoryVisible(true)}
             testID="history-button"
-            style={styles.iconButton}>
-            <Text style={styles.iconButtonText}>🕘</Text>
+            style={({pressed}) => [styles.headerActionButton, pressed && styles.headerActionPressed]}>
+            <Text style={styles.headerActionLabel}>History</Text>
+            <Text style={styles.headerActionValue}>{history.length}</Text>
           </Pressable>
           <Pressable
             accessibilityRole="button"
             onPress={handleClearAll}
             testID="clear-button"
-            style={styles.iconButton}>
-            <Text style={styles.iconButtonText}>🗑</Text>
+            style={({pressed}) => [styles.headerActionButton, pressed && styles.headerActionPressed]}>
+            <Text style={styles.headerActionLabel}>Reset</Text>
+            <Text style={styles.headerActionValue}>Now</Text>
           </Pressable>
+        </View>
+
+        <View style={styles.heroFooter}>
+          <View style={styles.heroMetric}>
+            <Text style={styles.heroMetricValue}>{history.length}</Text>
+            <Text style={styles.heroMetricLabel}>saved scans</Text>
+          </View>
+          <View style={styles.heroDivider} />
+          <View style={styles.heroContext}>
+            <Text style={styles.heroContextTitle}>{activeSource.label} mode</Text>
+            <Text style={styles.heroContextText}>{sourceHelperText}</Text>
+          </View>
         </View>
       </View>
 
-      <View style={styles.sourceRow}>
-        {SOURCE_ITEMS.map(item => (
-          <Pressable
-            key={item.id}
-            onPress={() => {
-              handleSourcePress(item.id).catch(() => {
-                setErrorMessage('Unable to import source. Please try again.');
-              });
-            }}
-            testID={`source-${item.id}`}
-            style={[
-              styles.sourceButton,
-              source === item.id && styles.sourceButtonActive,
-            ]}>
-            <Text
-              style={[
-                styles.sourceButtonText,
-                source === item.id && styles.sourceButtonTextActive,
+      <View style={styles.sectionCard}>
+        <Text style={styles.sectionEyebrow}>Source</Text>
+        <Text style={styles.sectionTitle}>Choose what to scan</Text>
+        <Text style={styles.sectionSubtitle}>
+          Switch between manual text and imported sources without losing your place.
+        </Text>
+
+        <View style={styles.sourceGrid}>
+          {SOURCE_ITEMS.map(item => (
+            <Pressable
+              key={item.id}
+              accessibilityRole="button"
+              onPress={() => {
+                handleSourcePress(item.id).catch(() => {
+                  setErrorMessage('Unable to import source. Please try again.');
+                });
+              }}
+              testID={`source-${item.id}`}
+              style={({pressed}) => [
+                styles.sourceButton,
+                {width: isTablet ? '23.5%' : '48.5%'},
+                source === item.id && styles.sourceButtonActive,
+                pressed && styles.sourceButtonPressed,
               ]}>
-              {item.label}
-            </Text>
-          </Pressable>
-        ))}
-      </View>
-
-      <View style={styles.inputBox}>
-        {source === 'text' ? (
-          <TextInput
-            multiline
-            placeholder="Paste text to scan for email addresses"
-            placeholderTextColor="#A5A5A5"
-            style={styles.textInput}
-            value={text}
-            onChangeText={setText}
-          />
-        ) : (
-          <Text style={styles.assetLabel}>
-            {selectedAsset?.name || selectedAsset?.uri || 'No source selected'}
-          </Text>
-        )}
-      </View>
-
-      <Pressable
-        testID="extract-button"
-        disabled={!canExtract || isExtracting}
-        onPress={() => {
-          handleExtract().catch((err: unknown) => {
-            const msg = err instanceof Error ? err.message : 'Unknown error';
-            setErrorMessage(`Extraction failed: ${msg}`);
-          });
-        }}
-        style={[
-          styles.extractButton,
-          (!canExtract || isExtracting) && styles.extractButtonDisabled,
-        ]}>
-        <Text style={styles.extractButtonText}>{extractButtonTitle}</Text>
-      </Pressable>
-
-      {errorMessage ? <Text style={styles.errorText}>{errorMessage}</Text> : null}
-      {result?.warnings.length ? (
-        <View style={styles.warningBox}>
-          {result.warnings.map(warning => (
-            <Text key={warning} style={styles.warningText}>
-              {warning}
-            </Text>
+              <View
+                style={[
+                  styles.sourceBadge,
+                  source === item.id && styles.sourceBadgeActive,
+                ]}>
+                <Text
+                  style={[
+                    styles.sourceBadgeText,
+                    source === item.id && styles.sourceBadgeTextActive,
+                  ]}>
+                  {item.badge}
+                </Text>
+              </View>
+              <Text
+                style={[
+                  styles.sourceButtonText,
+                  source === item.id && styles.sourceButtonTextActive,
+                ]}>
+                {item.label}
+              </Text>
+              <Text style={styles.sourceButtonDescription}>{item.description}</Text>
+            </Pressable>
           ))}
         </View>
-      ) : null}
 
-      {emails.length > 0 ? (
-        <View style={styles.actionsRow}>
-          <Pressable onPress={handleCopy} style={styles.actionButton}>
-            <Text style={styles.actionButtonText}>Copy</Text>
-          </Pressable>
-          <Pressable
-            onPress={() => {
-              handleShare().catch(() => {
-                setErrorMessage('Unable to share extracted emails.');
-              });
-            }}
-            style={styles.actionButton}>
-            <Text style={styles.actionButtonText}>Share</Text>
-          </Pressable>
-          <Pressable
-            onPress={() => {
-              handleExport('txt').catch(() => {
-                setErrorMessage('Unable to export TXT file.');
-              });
-            }}
-            style={styles.actionButton}>
-            <Text style={styles.actionButtonText}>Export TXT</Text>
-          </Pressable>
-          <Pressable
-            onPress={() => {
-              handleExport('csv').catch(() => {
-                setErrorMessage('Unable to export CSV file.');
-              });
-            }}
-            style={styles.actionButton}>
-            <Text style={styles.actionButtonText}>Export CSV</Text>
-          </Pressable>
+        <View style={styles.inputCard}>
+          <View style={styles.inputCardHeader}>
+            <View style={styles.inputCardCopy}>
+              <Text style={styles.inputCardTitle}>
+                {source === 'text' ? 'Paste text to scan' : `${activeSource.label} source`}
+              </Text>
+              <Text style={styles.inputCardSubtitle}>{sourceHelperText}</Text>
+            </View>
+            <View style={styles.statusPill}>
+              <Text style={styles.statusPillText}>{readyStateLabel}</Text>
+            </View>
+          </View>
+
+          {source === 'text' ? (
+            <TextInput
+              multiline
+              placeholder="Paste text to scan for email addresses"
+              placeholderTextColor="#8A97A8"
+              style={styles.textInput}
+              value={text}
+              onChangeText={setText}
+            />
+          ) : (
+            <View style={styles.assetCard}>
+              <View style={styles.assetBadge}>
+                <Text style={styles.assetBadgeText}>{activeSource.badge}</Text>
+              </View>
+              <View style={styles.assetCopy}>
+                <Text style={styles.assetLabel}>
+                  {selectedAsset?.name || selectedAsset?.uri || 'No source selected'}
+                </Text>
+                <Text style={styles.assetHint}>
+                  {selectedAsset?.uri
+                    ? 'Tap the same source option above to replace this file.'
+                    : `Select a ${activeSource.label.toLowerCase()} source to continue.`}
+                </Text>
+              </View>
+            </View>
+          )}
         </View>
-      ) : null}
+
+        <Pressable
+          testID="extract-button"
+          disabled={!canExtract || isExtracting}
+          onPress={() => {
+            handleExtract().catch((err: unknown) => {
+              const msg = err instanceof Error ? err.message : 'Unknown error';
+              setErrorMessage(`Extraction failed: ${msg}`);
+            });
+          }}
+          style={({pressed}) => [
+            styles.extractButton,
+            (!canExtract || isExtracting) && styles.extractButtonDisabled,
+            pressed && canExtract && !isExtracting && styles.extractButtonPressed,
+          ]}>
+          <View style={styles.extractButtonCopy}>
+            <Text style={styles.extractButtonText}>{extractButtonTitle}</Text>
+            <Text style={styles.extractButtonCaption}>{extractButtonHint}</Text>
+          </View>
+          {isExtracting ? (
+            <ActivityIndicator color="#FFFFFF" />
+          ) : (
+            <View style={styles.extractButtonArrow}>
+              <Text style={styles.extractButtonArrowText}>→</Text>
+            </View>
+          )}
+        </Pressable>
+
+        {errorMessage ? (
+          <View style={[styles.messageCard, styles.errorCard]}>
+            <Text style={styles.messageEyebrow}>Issue</Text>
+            <Text style={styles.errorText}>{errorMessage}</Text>
+          </View>
+        ) : null}
+
+        {result?.warnings.length ? (
+          <View style={[styles.messageCard, styles.warningCard]}>
+            <Text style={styles.messageEyebrow}>Warnings</Text>
+            {result.warnings.map(warning => (
+              <Text key={warning} style={styles.warningText}>
+                {warning}
+              </Text>
+            ))}
+          </View>
+        ) : null}
+      </View>
+
+      <View style={styles.resultsPanel}>
+        <View style={styles.resultsHeader}>
+          <View style={styles.resultsCopy}>
+            <Text style={styles.sectionEyebrow}>Results</Text>
+            <Text style={styles.sectionTitle}>Extracted emails</Text>
+            <Text style={styles.sectionSubtitle}>
+              {emails.length > 0
+                ? 'Tap any result to copy it instantly, or use the quick actions.'
+                : 'Your extracted addresses will appear here once you run a scan.'}
+            </Text>
+          </View>
+          <View
+            style={[
+              styles.resultCountBadge,
+              emails.length === 0 && styles.resultCountBadgeEmpty,
+            ]}>
+            <Text style={styles.resultCountValue}>{emails.length}</Text>
+            <Text style={styles.resultCountLabel}>found</Text>
+          </View>
+        </View>
+
+        {emails.length > 0 ? (
+          <View style={styles.actionsRow}>
+            <Pressable onPress={handleCopy} style={({pressed}) => [styles.actionButton, pressed && styles.actionButtonPressed]}>
+              <Text style={styles.actionButtonText}>Copy</Text>
+            </Pressable>
+            <Pressable
+              onPress={() => {
+                handleShare().catch(() => {
+                  setErrorMessage('Unable to share extracted emails.');
+                });
+              }}
+              style={({pressed}) => [styles.actionButton, pressed && styles.actionButtonPressed]}>
+              <Text style={styles.actionButtonText}>Share</Text>
+            </Pressable>
+            <Pressable
+              onPress={() => {
+                handleExport('txt').catch(() => {
+                  setErrorMessage('Unable to export TXT file.');
+                });
+              }}
+              style={({pressed}) => [styles.actionButton, pressed && styles.actionButtonPressed]}>
+              <Text style={styles.actionButtonText}>Export TXT</Text>
+            </Pressable>
+            <Pressable
+              onPress={() => {
+                handleExport('csv').catch(() => {
+                  setErrorMessage('Unable to export CSV file.');
+                });
+              }}
+              style={({pressed}) => [styles.actionButton, pressed && styles.actionButtonPressed]}>
+              <Text style={styles.actionButtonText}>Export CSV</Text>
+            </Pressable>
+          </View>
+        ) : null}
+      </View>
     </>
   );
 
@@ -397,8 +599,12 @@ export function ExtractorScreen() {
           contentContainerStyle={screenContentStyle}
           ListHeaderComponent={screenHeader}
           ListEmptyComponent={
-            <View style={styles.emptyContainer}>
+            <View style={styles.emptyStateCard}>
+              <Text style={styles.emptyEyebrow}>Ready when you are</Text>
               <Text style={styles.emptyText}>No emails found</Text>
+              <Text style={styles.emptySubtext}>
+                Paste text or import a source, then run extraction to populate this list.
+              </Text>
             </View>
           }
           renderItem={renderEmailItem}
@@ -412,9 +618,16 @@ export function ExtractorScreen() {
         onRequestClose={() => setHistoryVisible(false)}>
         <Pressable style={styles.modalBackdrop} onPress={() => setHistoryVisible(false)}>
           <Pressable style={styles.historySheet} onPress={() => {}}>
+            <View style={styles.sheetHandle} />
+
             <View style={styles.historyHeader}>
-              <Text style={styles.historyTitle}>Recent Sessions</Text>
-              <Pressable onPress={() => setHistoryVisible(false)}>
+              <View>
+                <Text style={styles.historyEyebrow}>Recent sessions</Text>
+                <Text style={styles.historyTitle}>Scan history</Text>
+              </View>
+              <Pressable
+                onPress={() => setHistoryVisible(false)}
+                style={({pressed}) => [styles.historyCloseButton, pressed && styles.historyCloseButtonPressed]}>
                 <Text style={styles.historyClose}>Close</Text>
               </Pressable>
             </View>
@@ -426,24 +639,44 @@ export function ExtractorScreen() {
                 });
               }}
               testID="clear-history-button"
-              style={styles.clearHistoryButton}>
+              style={({pressed}) => [
+                styles.clearHistoryButton,
+                pressed && styles.clearHistoryButtonPressed,
+              ]}>
               <Text style={styles.clearHistoryText}>Clear history</Text>
             </Pressable>
 
             <FlatList
               data={history}
               keyExtractor={item => item.id}
-              ListEmptyComponent={<Text style={styles.emptyHistory}>No recent sessions yet.</Text>}
-              renderItem={({item}) => (
-                <Pressable
-                  onPress={() => handleHistoryPick(item)}
-                  style={styles.historyRow}>
-                  <Text style={styles.historyRowTitle}>{item.inputLabel}</Text>
-                  <Text style={styles.historyRowSubtitle}>
-                    {item.emails.length} emails • {item.source}
-                  </Text>
-                </Pressable>
-              )}
+              contentContainerStyle={history.length === 0 ? styles.historyListEmpty : undefined}
+              ListEmptyComponent={
+                <View style={styles.emptyHistoryCard}>
+                  <Text style={styles.emptyHistory}>No recent sessions yet.</Text>
+                </View>
+              }
+              renderItem={({item}) => {
+                const itemSource = findSourceItem(item.source);
+
+                return (
+                  <Pressable
+                    onPress={() => handleHistoryPick(item)}
+                    style={({pressed}) => [
+                      styles.historyRow,
+                      pressed && styles.historyRowPressed,
+                    ]}>
+                    <View style={styles.historyRowTop}>
+                      <Text style={styles.historyRowTitle}>{item.inputLabel}</Text>
+                      <View style={styles.historySourceBadge}>
+                        <Text style={styles.historySourceBadgeText}>{itemSource.label}</Text>
+                      </View>
+                    </View>
+                    <Text style={styles.historyRowSubtitle}>
+                      {item.emails.length} emails extracted
+                    </Text>
+                  </Pressable>
+                );
+              }}
             />
           </Pressable>
         </Pressable>
@@ -455,7 +688,7 @@ export function ExtractorScreen() {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#F2F5F9',
   },
   flex: {
     flex: 1,
@@ -464,214 +697,651 @@ const styles = StyleSheet.create({
     flexGrow: 1,
   },
   screen: {
-    flex: 1,
+    flexGrow: 1,
     paddingHorizontal: 18,
     paddingTop: 8,
-    paddingBottom: 24,
+    paddingBottom: 28,
   },
   screenTablet: {
     width: '100%',
-    maxWidth: 760,
+    maxWidth: 860,
     alignSelf: 'center',
     paddingHorizontal: 28,
   },
-  headerRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+  heroCard: {
+    backgroundColor: '#0F2741',
+    borderRadius: 30,
+    paddingHorizontal: 22,
+    paddingTop: 22,
+    paddingBottom: 20,
+    overflow: 'hidden',
+    marginBottom: 18,
+    ...CARD_SHADOW,
+  },
+  heroGlowPrimary: {
+    position: 'absolute',
+    top: -40,
+    right: -10,
+    width: 170,
+    height: 170,
+    borderRadius: 85,
+    backgroundColor: 'rgba(69, 147, 255, 0.28)',
+  },
+  heroGlowSecondary: {
+    position: 'absolute',
+    bottom: -58,
+    left: -24,
+    width: 150,
+    height: 150,
+    borderRadius: 75,
+    backgroundColor: 'rgba(120, 205, 255, 0.16)',
+  },
+  heroEyebrow: {
+    fontSize: 12,
+    fontWeight: '700',
+    letterSpacing: 1.2,
+    textTransform: 'uppercase',
+    color: 'rgba(225, 237, 252, 0.72)',
     marginBottom: 12,
   },
   title: {
-    fontSize: 42,
+    fontSize: 40,
     fontWeight: '800',
-    letterSpacing: -0.8,
-    color: '#101010',
+    letterSpacing: -1.4,
+    color: '#F8FBFF',
+    marginBottom: 10,
+  },
+  subtitle: {
+    fontSize: 15,
+    lineHeight: 22,
+    color: 'rgba(233, 242, 255, 0.82)',
+    marginBottom: 18,
+    maxWidth: 580,
   },
   headerActions: {
     flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
+    flexWrap: 'wrap',
+    gap: 10,
+    marginBottom: 20,
   },
-  iconButton: {
-    width: 30,
-    height: 30,
-    borderRadius: 8,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  iconButtonText: {
-    fontSize: 18,
-  },
-  sourceRow: {
-    flexDirection: 'row',
-    marginBottom: 12,
-    gap: 8,
-  },
-  sourceButton: {
-    flex: 1,
-    backgroundColor: '#EFF2F5',
-    borderRadius: 10,
+  headerActionButton: {
+    minWidth: 128,
+    borderRadius: 18,
+    paddingHorizontal: 14,
     paddingVertical: 12,
-    alignItems: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
     borderWidth: 1,
-    borderColor: '#EFF2F5',
+    borderColor: 'rgba(255, 255, 255, 0.12)',
   },
-  sourceButtonActive: {
-    borderColor: '#5EA3E3',
-    backgroundColor: '#F5FAFF',
+  headerActionPressed: {
+    backgroundColor: 'rgba(255, 255, 255, 0.18)',
   },
-  sourceButtonText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#4A4A4A',
+  headerActionLabel: {
+    fontSize: 12,
+    fontWeight: '700',
+    letterSpacing: 0.6,
+    textTransform: 'uppercase',
+    color: 'rgba(226, 236, 248, 0.78)',
+    marginBottom: 6,
   },
-  sourceButtonTextActive: {
-    color: '#3C86CB',
-  },
-  inputBox: {
-    borderWidth: 1,
-    borderColor: '#D9D9D9',
-    borderRadius: 12,
-    minHeight: 180,
-    padding: 12,
-    justifyContent: 'center',
-    marginBottom: 12,
-  },
-  textInput: {
-    minHeight: 156,
-    fontSize: 16,
-    color: '#111111',
-    textAlignVertical: 'top',
-  },
-  assetLabel: {
-    fontSize: 14,
-    color: '#525252',
-  },
-  extractButton: {
-    height: 44,
-    borderRadius: 10,
-    backgroundColor: '#4FA0EA',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 12,
-  },
-  extractButtonDisabled: {
-    backgroundColor: '#E6E8EB',
-  },
-  extractButtonText: {
-    fontSize: 16,
+  headerActionValue: {
+    fontSize: 18,
     fontWeight: '700',
     color: '#FFFFFF',
   },
-  errorText: {
-    color: '#B23A3A',
-    fontSize: 13,
-    marginBottom: 8,
+  heroFooter: {
+    flexDirection: 'row',
+    alignItems: 'stretch',
+    gap: 16,
   },
-  warningBox: {
-    backgroundColor: '#FFF6E5',
-    borderRadius: 10,
+  heroMetric: {
+    width: 90,
+    justifyContent: 'center',
+  },
+  heroMetricValue: {
+    fontSize: 28,
+    fontWeight: '800',
+    color: '#FFFFFF',
+    marginBottom: 4,
+  },
+  heroMetricLabel: {
+    fontSize: 12,
+    lineHeight: 18,
+    color: 'rgba(226, 236, 248, 0.72)',
+  },
+  heroDivider: {
+    width: 1,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+  },
+  heroContext: {
+    flex: 1,
+    justifyContent: 'center',
+  },
+  heroContextTitle: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: '#FFFFFF',
+    marginBottom: 6,
+  },
+  heroContextText: {
+    fontSize: 14,
+    lineHeight: 20,
+    color: 'rgba(226, 236, 248, 0.8)',
+  },
+  sectionCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 28,
+    paddingHorizontal: 18,
+    paddingTop: 18,
+    paddingBottom: 18,
+    marginBottom: 18,
+    ...CARD_SHADOW,
+  },
+  sectionEyebrow: {
+    fontSize: 12,
+    fontWeight: '700',
+    letterSpacing: 1,
+    textTransform: 'uppercase',
+    color: '#5F7896',
+    marginBottom: 6,
+  },
+  sectionTitle: {
+    fontSize: 24,
+    fontWeight: '800',
+    letterSpacing: -0.7,
+    color: '#132238',
+    marginBottom: 6,
+  },
+  sectionSubtitle: {
+    fontSize: 14,
+    lineHeight: 21,
+    color: '#617388',
+  },
+  sourceGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+    gap: 10,
+    marginTop: 18,
+    marginBottom: 18,
+  },
+  sourceButton: {
+    borderRadius: 22,
+    backgroundColor: '#F4F7FB',
+    paddingHorizontal: 14,
+    paddingVertical: 16,
+    borderWidth: 1,
+    borderColor: '#E5EDF6',
+    ...SOFT_SHADOW,
+  },
+  sourceButtonActive: {
+    backgroundColor: '#EAF4FF',
+    borderColor: '#69A5E6',
+  },
+  sourceButtonPressed: {
+    transform: [{scale: 0.99}],
+  },
+  sourceBadge: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: '#DCE7F4',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 14,
+  },
+  sourceBadgeActive: {
+    backgroundColor: '#2C78D7',
+  },
+  sourceBadgeText: {
+    fontSize: 13,
+    fontWeight: '800',
+    color: '#35506E',
+  },
+  sourceBadgeTextActive: {
+    color: '#FFFFFF',
+  },
+  sourceButtonText: {
+    fontSize: 17,
+    fontWeight: '700',
+    color: '#132238',
+    marginBottom: 6,
+  },
+  sourceButtonTextActive: {
+    color: '#0F5EAF',
+  },
+  sourceButtonDescription: {
+    fontSize: 13,
+    lineHeight: 19,
+    color: '#617388',
+  },
+  inputCard: {
+    backgroundColor: '#F6F9FD',
+    borderRadius: 24,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: '#E5EDF6',
+    marginBottom: 16,
+  },
+  inputCardHeader: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    justifyContent: 'space-between',
+    gap: 12,
+    marginBottom: 14,
+  },
+  inputCardCopy: {
+    flex: 1,
+  },
+  inputCardTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#132238',
+    marginBottom: 4,
+  },
+  inputCardSubtitle: {
+    fontSize: 13,
+    lineHeight: 19,
+    color: '#617388',
+  },
+  statusPill: {
+    borderRadius: 999,
+    backgroundColor: '#E3EEF9',
     paddingHorizontal: 12,
-    paddingVertical: 10,
+    paddingVertical: 8,
+  },
+  statusPillText: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#245F99',
+  },
+  textInput: {
+    minHeight: 180,
+    fontSize: 16,
+    lineHeight: 24,
+    color: '#132238',
+    textAlignVertical: 'top',
+  },
+  assetCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 14,
+    minHeight: 108,
+    borderRadius: 20,
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: '#E5EDF6',
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+  },
+  assetBadge: {
+    width: 46,
+    height: 46,
+    borderRadius: 23,
+    backgroundColor: '#EAF4FF',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  assetBadgeText: {
+    fontSize: 16,
+    fontWeight: '800',
+    color: '#1D73CC',
+  },
+  assetCopy: {
+    flex: 1,
+  },
+  assetLabel: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: '#132238',
+    marginBottom: 6,
+  },
+  assetHint: {
+    fontSize: 13,
+    lineHeight: 19,
+    color: '#617388',
+  },
+  extractButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    borderRadius: 24,
+    backgroundColor: '#1D73CC',
+    paddingHorizontal: 18,
+    paddingVertical: 16,
     marginBottom: 12,
+    ...CARD_SHADOW,
+  },
+  extractButtonDisabled: {
+    backgroundColor: '#B7C6D8',
+  },
+  extractButtonPressed: {
+    backgroundColor: '#165FA9',
+  },
+  extractButtonCopy: {
+    flex: 1,
+    paddingRight: 12,
+  },
+  extractButtonText: {
+    fontSize: 18,
+    fontWeight: '800',
+    color: '#FFFFFF',
+    marginBottom: 4,
+  },
+  extractButtonCaption: {
+    fontSize: 13,
+    lineHeight: 19,
+    color: 'rgba(255, 255, 255, 0.82)',
+  },
+  extractButtonArrow: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: 'rgba(255, 255, 255, 0.16)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  extractButtonArrowText: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: '#FFFFFF',
+  },
+  messageCard: {
+    borderRadius: 20,
+    paddingHorizontal: 14,
+    paddingVertical: 14,
+    marginTop: 8,
+  },
+  errorCard: {
+    backgroundColor: '#FFF1F1',
+    borderWidth: 1,
+    borderColor: '#F5CACA',
+  },
+  warningCard: {
+    backgroundColor: '#FFF7E8',
+    borderWidth: 1,
+    borderColor: '#F2DEB2',
+  },
+  messageEyebrow: {
+    fontSize: 11,
+    fontWeight: '700',
+    letterSpacing: 0.8,
+    textTransform: 'uppercase',
+    color: '#8A5E2C',
+    marginBottom: 6,
+  },
+  errorText: {
+    color: '#9A3F3F',
+    fontSize: 13,
+    lineHeight: 19,
   },
   warningText: {
-    color: '#885C00',
+    color: '#8A5E2C',
     fontSize: 13,
-    lineHeight: 18,
+    lineHeight: 19,
+  },
+  resultsPanel: {
+    marginBottom: 14,
+  },
+  resultsHeader: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    justifyContent: 'space-between',
+    gap: 14,
+    marginBottom: 14,
+  },
+  resultsCopy: {
+    flex: 1,
+  },
+  resultCountBadge: {
+    width: 70,
+    borderRadius: 24,
+    backgroundColor: '#1D73CC',
+    paddingVertical: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+    ...SOFT_SHADOW,
+  },
+  resultCountBadgeEmpty: {
+    backgroundColor: '#DCE7F4',
+  },
+  resultCountValue: {
+    fontSize: 24,
+    fontWeight: '800',
+    color: '#FFFFFF',
+    marginBottom: 2,
+  },
+  resultCountLabel: {
+    fontSize: 11,
+    fontWeight: '700',
+    letterSpacing: 0.8,
+    textTransform: 'uppercase',
+    color: 'rgba(255, 255, 255, 0.78)',
   },
   actionsRow: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 8,
-    marginBottom: 10,
+    gap: 10,
   },
   actionButton: {
-    backgroundColor: '#EEF4FC',
-    borderRadius: 8,
-    paddingHorizontal: 10,
-    paddingVertical: 8,
+    flexGrow: 1,
+    minWidth: 138,
+    borderRadius: 18,
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: '#D7E3F0',
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+    alignItems: 'center',
+    ...SOFT_SHADOW,
+  },
+  actionButtonPressed: {
+    backgroundColor: '#F0F5FB',
   },
   actionButtonText: {
-    color: '#2B6FB3',
-    fontSize: 12,
+    color: '#1D5F9D',
+    fontSize: 13,
     fontWeight: '700',
   },
-  resultItem: {
-    fontSize: 14,
-    color: '#1E1E1E',
-    paddingVertical: 8,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: '#DFDFDF',
+  resultCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 24,
+    borderWidth: 1,
+    borderColor: '#E1EAF4',
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    marginBottom: 10,
+    ...CARD_SHADOW,
   },
-  emptyContainer: {
-    minHeight: 200,
-    justifyContent: 'center',
+  resultCardPressed: {
+    backgroundColor: '#F7FAFE',
+  },
+  resultCardHeader: {
+    flexDirection: 'row',
     alignItems: 'center',
+    marginBottom: 10,
+  },
+  resultDot: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    backgroundColor: '#2C78D7',
+    marginRight: 8,
+  },
+  resultMeta: {
+    fontSize: 11,
+    fontWeight: '700',
+    letterSpacing: 0.8,
+    textTransform: 'uppercase',
+    color: '#5F7896',
+  },
+  resultItem: {
+    fontSize: 18,
+    lineHeight: 26,
+    color: '#132238',
+  },
+  emptyStateCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 28,
+    borderWidth: 1,
+    borderColor: '#E1EAF4',
+    paddingHorizontal: 22,
+    paddingVertical: 24,
+    alignItems: 'center',
+    ...CARD_SHADOW,
+  },
+  emptyEyebrow: {
+    fontSize: 11,
+    fontWeight: '700',
+    letterSpacing: 0.9,
+    textTransform: 'uppercase',
+    color: '#5F7896',
+    marginBottom: 8,
   },
   emptyText: {
-    fontSize: 22,
-    color: '#8A8A8A',
+    fontSize: 24,
+    fontWeight: '800',
     textAlign: 'center',
+    color: '#132238',
+    marginBottom: 8,
+  },
+  emptySubtext: {
+    fontSize: 14,
+    lineHeight: 21,
+    textAlign: 'center',
+    color: '#617388',
+    maxWidth: 320,
   },
   modalBackdrop: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.4)',
+    backgroundColor: 'rgba(10, 20, 34, 0.34)',
     justifyContent: 'flex-end',
   },
   historySheet: {
-    backgroundColor: '#FFFFFF',
-    borderTopLeftRadius: 18,
-    borderTopRightRadius: 18,
-    maxHeight: '70%',
-    paddingHorizontal: 16,
-    paddingTop: 14,
-    paddingBottom: 18,
+    backgroundColor: '#F8FBFF',
+    borderTopLeftRadius: 30,
+    borderTopRightRadius: 30,
+    maxHeight: '76%',
+    paddingHorizontal: 18,
+    paddingTop: 12,
+    paddingBottom: 20,
+  },
+  sheetHandle: {
+    alignSelf: 'center',
+    width: 46,
+    height: 5,
+    borderRadius: 999,
+    backgroundColor: '#CFD9E4',
+    marginBottom: 16,
   },
   historyHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 8,
+    marginBottom: 14,
+  },
+  historyEyebrow: {
+    fontSize: 11,
+    fontWeight: '700',
+    letterSpacing: 0.9,
+    textTransform: 'uppercase',
+    color: '#5F7896',
+    marginBottom: 4,
   },
   historyTitle: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: '#111111',
+    fontSize: 28,
+    fontWeight: '800',
+    letterSpacing: -0.8,
+    color: '#132238',
+  },
+  historyCloseButton: {
+    borderRadius: 999,
+    backgroundColor: '#E7F0FA',
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+  },
+  historyCloseButtonPressed: {
+    backgroundColor: '#DCE8F6',
   },
   historyClose: {
-    fontSize: 14,
-    color: '#2F80D1',
-    fontWeight: '600',
+    fontSize: 13,
+    fontWeight: '700',
+    color: '#1D5F9D',
   },
   clearHistoryButton: {
     alignSelf: 'flex-start',
-    marginBottom: 10,
+    borderRadius: 999,
+    backgroundColor: '#FFF1F1',
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    marginBottom: 14,
+  },
+  clearHistoryButtonPressed: {
+    backgroundColor: '#F9E2E2',
   },
   clearHistoryText: {
-    color: '#B23A3A',
+    color: '#B04B4B',
     fontSize: 13,
-    fontWeight: '600',
+    fontWeight: '700',
+  },
+  historyListEmpty: {
+    flexGrow: 1,
+    justifyContent: 'center',
   },
   historyRow: {
-    paddingVertical: 10,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: '#DCDCDC',
+    backgroundColor: '#FFFFFF',
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: '#E1EAF4',
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    marginBottom: 10,
+    ...SOFT_SHADOW,
+  },
+  historyRowPressed: {
+    backgroundColor: '#F4F8FD',
+  },
+  historyRowTop: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 10,
+    marginBottom: 6,
   },
   historyRowTitle: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#1A1A1A',
-    marginBottom: 2,
+    flex: 1,
+    fontSize: 15,
+    fontWeight: '700',
+    color: '#132238',
+  },
+  historySourceBadge: {
+    borderRadius: 999,
+    backgroundColor: '#E7F0FA',
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+  },
+  historySourceBadgeText: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: '#1D5F9D',
+    textTransform: 'uppercase',
   },
   historyRowSubtitle: {
-    fontSize: 12,
-    color: '#6A6A6A',
+    fontSize: 13,
+    color: '#617388',
+  },
+  emptyHistoryCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 22,
+    borderWidth: 1,
+    borderColor: '#E1EAF4',
+    paddingVertical: 28,
+    paddingHorizontal: 18,
+    alignItems: 'center',
   },
   emptyHistory: {
     fontSize: 14,
-    color: '#6A6A6A',
+    color: '#617388',
     textAlign: 'center',
-    paddingVertical: 24,
   },
 });
