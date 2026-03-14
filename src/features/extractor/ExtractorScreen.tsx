@@ -33,6 +33,7 @@ import {exportEmails} from '../../native/emailExtractionBridge';
 import {extractEmails} from './extractionEngine';
 import {pickFromCamera, pickFromFiles, pickFromPhotoLibrary} from './sourcePickers';
 import {SelectedAsset} from './types';
+import {AppTheme, createShadow, themes} from '../../theme/themes';
 
 const SOURCE_ITEMS = [
   {
@@ -67,40 +68,13 @@ type SourceId = (typeof SOURCE_ITEMS)[number]['id'];
 
 type ExtractorScreenProps = {
   onHistoryChanged?: (count: number) => void;
+  theme?: AppTheme;
 };
 
 export type ExtractorScreenHandle = {
   loadSession: (session: HistorySession) => void;
   resetAll: () => void;
 };
-
-const CARD_SHADOW =
-  Platform.select({
-    ios: {
-      shadowColor: '#0C2340',
-      shadowOpacity: 0.08,
-      shadowRadius: 18,
-      shadowOffset: {width: 0, height: 10},
-    },
-    android: {
-      elevation: 4,
-    },
-    default: {},
-  }) ?? {};
-
-const SOFT_SHADOW =
-  Platform.select({
-    ios: {
-      shadowColor: '#0C2340',
-      shadowOpacity: 0.05,
-      shadowRadius: 12,
-      shadowOffset: {width: 0, height: 6},
-    },
-    android: {
-      elevation: 2,
-    },
-    default: {},
-  }) ?? {};
 
 function buildInputLabel(source: SourceId, text: string, asset: SelectedAsset | null): string {
   if (source === 'text') {
@@ -155,7 +129,7 @@ export const ExtractorScreen = forwardRef<
   ExtractorScreenHandle,
   ExtractorScreenProps
 >(function ExtractorScreen(
-  {onHistoryChanged},
+  {onHistoryChanged, theme = themes.light},
   ref,
 ) {
   const {width} = useWindowDimensions();
@@ -168,6 +142,7 @@ export const ExtractorScreen = forwardRef<
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isExtracting, setIsExtracting] = useState(false);
   const textInputRef = useRef<TextInput>(null);
+  const styles = useMemo(() => createStyles(theme), [theme]);
 
   const canExtract = useMemo(() => {
     if (source === 'text') {
@@ -479,7 +454,7 @@ export const ExtractorScreen = forwardRef<
                 source === 'text' && pressed && styles.statusPillPressed,
               ]}>
               <MaterialCommunityIcons
-                color="#245F99"
+                color={theme.colors.statusIcon}
                 name={statusIconName}
                 size={20}
                 style={styles.statusPillIcon}
@@ -492,7 +467,7 @@ export const ExtractorScreen = forwardRef<
               ref={textInputRef}
               multiline
               placeholder="Paste text to scan for email addresses"
-              placeholderTextColor="#8A97A8"
+              placeholderTextColor={theme.colors.textMuted}
               style={styles.textInput}
               value={text}
               onChangeText={setText}
@@ -535,7 +510,7 @@ export const ExtractorScreen = forwardRef<
             <Text style={styles.extractButtonCaption}>{extractButtonHint}</Text>
           </View>
           {isExtracting ? (
-            <ActivityIndicator color="#FFFFFF" />
+            <ActivityIndicator color={theme.colors.primaryOn} />
           ) : (
             <View style={styles.extractButtonArrow}>
               <Text style={styles.extractButtonArrowText}>→</Text>
@@ -650,581 +625,494 @@ export const ExtractorScreen = forwardRef<
   );
 });
 
-const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: '#F2F5F9',
-  },
-  flex: {
-    flex: 1,
-  },
-  scrollContent: {
-    flexGrow: 1,
-  },
-  screen: {
-    flexGrow: 1,
-    paddingHorizontal: 18,
-    paddingTop: 8,
-    paddingBottom: 28,
-  },
-  screenTablet: {
-    width: '100%',
-    maxWidth: 860,
-    alignSelf: 'center',
-    paddingHorizontal: 28,
-  },
-  heroCard: {
-    backgroundColor: '#0F2741',
-    borderRadius: 30,
-    paddingHorizontal: 22,
-    paddingTop: 22,
-    paddingBottom: 20,
-    overflow: 'hidden',
-    marginBottom: 18,
-    ...CARD_SHADOW,
-  },
-  heroSourceGrid: {
-    gap: 10,
-  },
-  heroSourceRow: {
-    flexDirection: 'row',
-    gap: 10,
-  },
-  heroSourceRowItem: {
-    flex: 1,
-  },
-  heroGlowPrimary: {
-    position: 'absolute',
-    top: -40,
-    right: -10,
-    width: 170,
-    height: 170,
-    borderRadius: 85,
-    backgroundColor: 'rgba(69, 147, 255, 0.28)',
-  },
-  heroGlowSecondary: {
-    position: 'absolute',
-    bottom: -58,
-    left: -24,
-    width: 150,
-    height: 150,
-    borderRadius: 75,
-    backgroundColor: 'rgba(120, 205, 255, 0.16)',
-  },
-  heroEyebrow: {
-    fontSize: 12,
-    fontWeight: '700',
-    letterSpacing: 1.2,
-    textTransform: 'uppercase',
-    color: 'rgba(225, 237, 252, 0.72)',
-    marginBottom: 12,
-  },
-  title: {
-    fontSize: 40,
-    fontWeight: '800',
-    letterSpacing: -1.4,
-    color: '#F8FBFF',
-    marginBottom: 10,
-  },
-  subtitle: {
-    fontSize: 15,
-    lineHeight: 22,
-    color: 'rgba(233, 242, 255, 0.82)',
-    marginBottom: 18,
-    maxWidth: 580,
-  },
-  headerActions: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 10,
-    marginBottom: 20,
-  },
-  headerActionButton: {
-    minWidth: 128,
-    borderRadius: 18,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.12)',
-  },
-  headerActionPressed: {
-    backgroundColor: 'rgba(255, 255, 255, 0.18)',
-  },
-  headerActionLabel: {
-    fontSize: 12,
-    fontWeight: '700',
-    letterSpacing: 0.6,
-    textTransform: 'uppercase',
-    color: 'rgba(226, 236, 248, 0.78)',
-    marginBottom: 6,
-  },
-  headerActionValue: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: '#FFFFFF',
-  },
-  heroFooter: {
-    flexDirection: 'row',
-    alignItems: 'stretch',
-    gap: 16,
-  },
-  heroMetric: {
-    width: 90,
-    justifyContent: 'center',
-  },
-  heroMetricValue: {
-    fontSize: 28,
-    fontWeight: '800',
-    color: '#FFFFFF',
-    marginBottom: 4,
-  },
-  heroMetricLabel: {
-    fontSize: 12,
-    lineHeight: 18,
-    color: 'rgba(226, 236, 248, 0.72)',
-  },
-  heroDivider: {
-    width: 1,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-  },
-  heroContext: {
-    flex: 1,
-    justifyContent: 'center',
-  },
-  heroContextTitle: {
-    fontSize: 15,
-    fontWeight: '700',
-    color: '#FFFFFF',
-    marginBottom: 6,
-  },
-  heroContextText: {
-    fontSize: 14,
-    lineHeight: 20,
-    color: 'rgba(226, 236, 248, 0.8)',
-  },
-  sectionCard: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 28,
-    paddingHorizontal: 18,
-    paddingTop: 18,
-    paddingBottom: 18,
-    marginBottom: 18,
-    ...CARD_SHADOW,
-  },
-  sectionHeaderRow: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    justifyContent: 'space-between',
-    gap: 12,
-    marginBottom: 6,
-  },
-  sectionHeaderCopy: {
-    flex: 1,
-  },
-  sectionEyebrow: {
-    fontSize: 12,
-    fontWeight: '700',
-    letterSpacing: 1,
-    textTransform: 'uppercase',
-    color: '#5F7896',
-    marginBottom: 6,
-  },
-  sectionTitle: {
-    fontSize: 24,
-    fontWeight: '800',
-    letterSpacing: -0.7,
-    color: '#132238',
-    marginBottom: 6,
-  },
-  sectionSubtitle: {
-    fontSize: 14,
-    lineHeight: 21,
-    color: '#617388',
-  },
-  sourceGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between',
-    gap: 10,
-    marginTop: 18,
-    marginBottom: 18,
-  },
-  sourceButton: {
-    borderRadius: 22,
-    backgroundColor: '#F4F7FB',
-    paddingHorizontal: 14,
-    paddingVertical: 16,
-    borderWidth: 1,
-    borderColor: '#E5EDF6',
-    ...SOFT_SHADOW,
-  },
-  heroSourceButton: {
-    minHeight: 144,
-    backgroundColor: 'rgba(255, 255, 255, 0.96)',
-    borderColor: 'rgba(255, 255, 255, 0.22)',
-  },
-  sourceButtonActive: {
-    backgroundColor: '#EAF4FF',
-    borderColor: '#69A5E6',
-  },
-  sourceButtonPressed: {
-    transform: [{scale: 0.99}],
-  },
-  sourceBadge: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: '#DCE7F4',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 14,
-  },
-  sourceBadgeActive: {
-    backgroundColor: '#2C78D7',
-  },
-  sourceBadgeText: {
-    fontSize: 13,
-    fontWeight: '800',
-    color: '#35506E',
-  },
-  sourceBadgeTextActive: {
-    color: '#FFFFFF',
-  },
-  sourceButtonText: {
-    fontSize: 17,
-    fontWeight: '700',
-    color: '#132238',
-    marginBottom: 6,
-  },
-  sourceButtonTextActive: {
-    color: '#0F5EAF',
-  },
-  sourceButtonDescription: {
-    fontSize: 13,
-    lineHeight: 19,
-    color: '#617388',
-  },
-  resetButton: {
-    borderRadius: 999,
-    backgroundColor: '#E7F0FA',
-    paddingHorizontal: 14,
-    paddingVertical: 10,
-  },
-  resetButtonPressed: {
-    backgroundColor: '#DCE8F6',
-  },
-  resetButtonText: {
-    fontSize: 13,
-    fontWeight: '700',
-    color: '#1D5F9D',
-  },
-  inputCard: {
-    backgroundColor: '#F6F9FD',
-    borderRadius: 24,
-    padding: 16,
-    borderWidth: 1,
-    borderColor: '#E5EDF6',
-    marginBottom: 16,
-  },
-  inputCardHeader: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    justifyContent: 'space-between',
-    gap: 12,
-    marginBottom: 14,
-  },
-  inputCardCopy: {
-    flex: 1,
-  },
-  inputCardTitle: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: '#132238',
-    marginBottom: 4,
-  },
-  inputCardSubtitle: {
-    fontSize: 13,
-    lineHeight: 19,
-    color: '#617388',
-  },
-  statusPill: {
-    borderRadius: 999,
-    backgroundColor: '#E3EEF9',
-    minWidth: 44,
-    minHeight: 44,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-  },
-  statusPillIcon: {
-    textAlign: 'center',
-  },
-  statusPillPressed: {
-    backgroundColor: '#D7E7F8',
-    transform: [{scale: 0.97}],
-  },
-  statusPillText: {
-    fontSize: 12,
-    fontWeight: '700',
-    color: '#245F99',
-  },
-  textInput: {
-    minHeight: 180,
-    fontSize: 16,
-    lineHeight: 24,
-    color: '#132238',
-    textAlignVertical: 'top',
-  },
-  assetCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 14,
-    minHeight: 108,
-    borderRadius: 20,
-    backgroundColor: '#FFFFFF',
-    borderWidth: 1,
-    borderColor: '#E5EDF6',
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-  },
-  assetBadge: {
-    width: 46,
-    height: 46,
-    borderRadius: 23,
-    backgroundColor: '#EAF4FF',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  assetBadgeText: {
-    fontSize: 16,
-    fontWeight: '800',
-    color: '#1D73CC',
-  },
-  assetCopy: {
-    flex: 1,
-  },
-  assetLabel: {
-    fontSize: 15,
-    fontWeight: '600',
-    color: '#132238',
-    marginBottom: 6,
-  },
-  assetHint: {
-    fontSize: 13,
-    lineHeight: 19,
-    color: '#617388',
-  },
-  extractButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    borderRadius: 24,
-    backgroundColor: '#1D73CC',
-    paddingHorizontal: 18,
-    paddingVertical: 16,
-    marginBottom: 12,
-    ...CARD_SHADOW,
-  },
-  extractButtonDisabled: {
-    backgroundColor: '#B7C6D8',
-  },
-  extractButtonPressed: {
-    backgroundColor: '#165FA9',
-  },
-  extractButtonCopy: {
-    flex: 1,
-    paddingRight: 12,
-  },
-  extractButtonText: {
-    fontSize: 18,
-    fontWeight: '800',
-    color: '#FFFFFF',
-    marginBottom: 4,
-  },
-  extractButtonCaption: {
-    fontSize: 13,
-    lineHeight: 19,
-    color: 'rgba(255, 255, 255, 0.82)',
-  },
-  extractButtonArrow: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: 'rgba(255, 255, 255, 0.16)',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  extractButtonArrowText: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: '#FFFFFF',
-  },
-  messageCard: {
-    borderRadius: 20,
-    paddingHorizontal: 14,
-    paddingVertical: 14,
-    marginTop: 8,
-  },
-  errorCard: {
-    backgroundColor: '#FFF1F1',
-    borderWidth: 1,
-    borderColor: '#F5CACA',
-  },
-  warningCard: {
-    backgroundColor: '#FFF7E8',
-    borderWidth: 1,
-    borderColor: '#F2DEB2',
-  },
-  messageEyebrow: {
-    fontSize: 11,
-    fontWeight: '700',
-    letterSpacing: 0.8,
-    textTransform: 'uppercase',
-    color: '#8A5E2C',
-    marginBottom: 6,
-  },
-  errorText: {
-    color: '#9A3F3F',
-    fontSize: 13,
-    lineHeight: 19,
-  },
-  warningText: {
-    color: '#8A5E2C',
-    fontSize: 13,
-    lineHeight: 19,
-  },
-  resultsPanel: {
-    marginBottom: 14,
-  },
-  resultsHeader: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    justifyContent: 'space-between',
-    gap: 14,
-    marginBottom: 14,
-  },
-  resultsCopy: {
-    flex: 1,
-  },
-  resultCountBadge: {
-    width: 70,
-    borderRadius: 24,
-    backgroundColor: '#1D73CC',
-    paddingVertical: 12,
-    alignItems: 'center',
-    justifyContent: 'center',
-    ...SOFT_SHADOW,
-  },
-  resultCountBadgeEmpty: {
-    backgroundColor: '#DCE7F4',
-  },
-  resultCountValue: {
-    fontSize: 24,
-    fontWeight: '800',
-    color: '#FFFFFF',
-    marginBottom: 2,
-  },
-  resultCountLabel: {
-    fontSize: 11,
-    fontWeight: '700',
-    letterSpacing: 0.8,
-    textTransform: 'uppercase',
-    color: 'rgba(255, 255, 255, 0.78)',
-  },
-  actionsRow: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 10,
-  },
-  actionButton: {
-    flexGrow: 1,
-    minWidth: 138,
-    borderRadius: 18,
-    backgroundColor: '#FFFFFF',
-    borderWidth: 1,
-    borderColor: '#D7E3F0',
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-    alignItems: 'center',
-    ...SOFT_SHADOW,
-  },
-  actionButtonPressed: {
-    backgroundColor: '#F0F5FB',
-  },
-  actionButtonText: {
-    color: '#1D5F9D',
-    fontSize: 13,
-    fontWeight: '700',
-  },
-  resultCard: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 24,
-    borderWidth: 1,
-    borderColor: '#E1EAF4',
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    marginBottom: 10,
-    ...CARD_SHADOW,
-  },
-  resultCardPressed: {
-    backgroundColor: '#F7FAFE',
-  },
-  resultCardHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 10,
-  },
-  resultDot: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
-    backgroundColor: '#2C78D7',
-    marginRight: 8,
-  },
-  resultMeta: {
-    fontSize: 11,
-    fontWeight: '700',
-    letterSpacing: 0.8,
-    textTransform: 'uppercase',
-    color: '#5F7896',
-  },
-  resultItem: {
-    fontSize: 18,
-    lineHeight: 26,
-    color: '#132238',
-  },
-  emptyStateCard: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 28,
-    borderWidth: 1,
-    borderColor: '#E1EAF4',
-    paddingHorizontal: 22,
-    paddingVertical: 24,
-    alignItems: 'center',
-    ...CARD_SHADOW,
-  },
-  emptyEyebrow: {
-    fontSize: 11,
-    fontWeight: '700',
-    letterSpacing: 0.9,
-    textTransform: 'uppercase',
-    color: '#5F7896',
-    marginBottom: 8,
-  },
-  emptyText: {
-    fontSize: 24,
-    fontWeight: '800',
-    textAlign: 'center',
-    color: '#132238',
-    marginBottom: 8,
-  },
-  emptySubtext: {
-    fontSize: 14,
-    lineHeight: 21,
-    textAlign: 'center',
-    color: '#617388',
-    maxWidth: 320,
-  },
-});
+function createStyles(theme: AppTheme) {
+  return StyleSheet.create({
+    safeArea: {
+      flex: 1,
+      backgroundColor: theme.colors.appBackground,
+    },
+    flex: {
+      flex: 1,
+    },
+    scrollContent: {
+      flexGrow: 1,
+    },
+    screen: {
+      flexGrow: 1,
+      paddingHorizontal: 18,
+      paddingTop: 8,
+      paddingBottom: 28,
+    },
+    screenTablet: {
+      width: '100%',
+      maxWidth: 860,
+      alignSelf: 'center',
+      paddingHorizontal: 28,
+    },
+    heroCard: {
+      backgroundColor: theme.colors.heroBackground,
+      borderRadius: 30,
+      paddingHorizontal: 22,
+      paddingTop: 22,
+      paddingBottom: 20,
+      overflow: 'hidden',
+      marginBottom: 18,
+      ...createShadow(theme.colors.shadow, 0.08, 18, 10, 4),
+    },
+    heroSourceGrid: {
+      gap: 10,
+    },
+    heroSourceRow: {
+      flexDirection: 'row',
+      gap: 10,
+    },
+    heroSourceRowItem: {
+      flex: 1,
+    },
+    heroGlowPrimary: {
+      position: 'absolute',
+      top: -40,
+      right: -10,
+      width: 170,
+      height: 170,
+      borderRadius: 85,
+      backgroundColor: theme.colors.heroGlowPrimary,
+    },
+    heroGlowSecondary: {
+      position: 'absolute',
+      bottom: -58,
+      left: -24,
+      width: 150,
+      height: 150,
+      borderRadius: 75,
+      backgroundColor: theme.colors.heroGlowSecondary,
+    },
+    sectionCard: {
+      backgroundColor: theme.colors.surface,
+      borderRadius: 28,
+      paddingHorizontal: 18,
+      paddingTop: 18,
+      paddingBottom: 18,
+      marginBottom: 18,
+      ...createShadow(theme.colors.shadow, 0.08, 18, 10, 4),
+    },
+    sectionHeaderRow: {
+      flexDirection: 'row',
+      alignItems: 'flex-start',
+      justifyContent: 'space-between',
+      gap: 12,
+      marginBottom: 6,
+    },
+    sectionHeaderCopy: {
+      flex: 1,
+    },
+    sectionEyebrow: {
+      fontSize: 12,
+      fontWeight: '700',
+      letterSpacing: 1,
+      textTransform: 'uppercase',
+      color: theme.colors.textMuted,
+      marginBottom: 6,
+    },
+    sectionTitle: {
+      fontSize: 24,
+      fontWeight: '800',
+      letterSpacing: -0.7,
+      color: theme.colors.textPrimary,
+      marginBottom: 6,
+    },
+    sectionSubtitle: {
+      fontSize: 14,
+      lineHeight: 21,
+      color: theme.colors.textSecondary,
+    },
+    sourceButton: {
+      borderRadius: 22,
+      backgroundColor: theme.colors.surfaceMuted,
+      paddingHorizontal: 14,
+      paddingVertical: 16,
+      borderWidth: 1,
+      borderColor: theme.colors.border,
+      ...createShadow(theme.colors.shadow, 0.05, 12, 6, 2),
+    },
+    heroSourceButton: {
+      minHeight: 144,
+      backgroundColor: theme.colors.heroSurface,
+      borderColor: theme.colors.heroSurfaceBorder,
+    },
+    sourceButtonActive: {
+      backgroundColor: theme.colors.primarySoft,
+      borderColor: theme.colors.pickerRing,
+    },
+    sourceButtonPressed: {
+      transform: [{scale: 0.99}],
+    },
+    sourceBadge: {
+      width: 36,
+      height: 36,
+      borderRadius: 18,
+      backgroundColor: theme.colors.badgeBackground,
+      alignItems: 'center',
+      justifyContent: 'center',
+      marginBottom: 14,
+    },
+    sourceBadgeActive: {
+      backgroundColor: theme.colors.badgeActiveBackground,
+    },
+    sourceBadgeText: {
+      fontSize: 13,
+      fontWeight: '800',
+      color: theme.colors.badgeText,
+    },
+    sourceBadgeTextActive: {
+      color: theme.colors.badgeActiveText,
+    },
+    sourceButtonText: {
+      fontSize: 17,
+      fontWeight: '700',
+      color: theme.colors.textPrimary,
+      marginBottom: 6,
+    },
+    sourceButtonTextActive: {
+      color: theme.colors.primarySoftText,
+    },
+    sourceButtonDescription: {
+      fontSize: 13,
+      lineHeight: 19,
+      color: theme.colors.textSecondary,
+    },
+    resetButton: {
+      borderRadius: 999,
+      backgroundColor: theme.colors.primarySoft,
+      paddingHorizontal: 14,
+      paddingVertical: 10,
+    },
+    resetButtonPressed: {
+      backgroundColor: theme.colors.primarySoftPressed,
+    },
+    resetButtonText: {
+      fontSize: 13,
+      fontWeight: '700',
+      color: theme.colors.primarySoftText,
+    },
+    inputCard: {
+      backgroundColor: theme.colors.inputBackground,
+      borderRadius: 24,
+      padding: 16,
+      borderWidth: 1,
+      borderColor: theme.colors.border,
+      marginBottom: 16,
+    },
+    inputCardHeader: {
+      flexDirection: 'row',
+      alignItems: 'flex-start',
+      justifyContent: 'space-between',
+      gap: 12,
+      marginBottom: 14,
+    },
+    inputCardCopy: {
+      flex: 1,
+    },
+    inputCardTitle: {
+      fontSize: 18,
+      fontWeight: '700',
+      color: theme.colors.textPrimary,
+      marginBottom: 4,
+    },
+    inputCardSubtitle: {
+      fontSize: 13,
+      lineHeight: 19,
+      color: theme.colors.textSecondary,
+    },
+    statusPill: {
+      borderRadius: 999,
+      backgroundColor: theme.colors.statusPillBackground,
+      minWidth: 44,
+      minHeight: 44,
+      alignItems: 'center',
+      justifyContent: 'center',
+      paddingHorizontal: 12,
+      paddingVertical: 8,
+    },
+    statusPillIcon: {
+      textAlign: 'center',
+    },
+    statusPillPressed: {
+      backgroundColor: theme.colors.statusPillPressed,
+      transform: [{scale: 0.97}],
+    },
+    statusPillText: {
+      fontSize: 12,
+      fontWeight: '700',
+      color: theme.colors.statusIcon,
+    },
+    textInput: {
+      minHeight: 180,
+      fontSize: 16,
+      lineHeight: 24,
+      color: theme.colors.textPrimary,
+      textAlignVertical: 'top',
+    },
+    assetCard: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 14,
+      minHeight: 108,
+      borderRadius: 20,
+      backgroundColor: theme.colors.assetBackground,
+      borderWidth: 1,
+      borderColor: theme.colors.border,
+      paddingHorizontal: 16,
+      paddingVertical: 14,
+    },
+    assetBadge: {
+      width: 46,
+      height: 46,
+      borderRadius: 23,
+      backgroundColor: theme.colors.primarySoft,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    assetBadgeText: {
+      fontSize: 16,
+      fontWeight: '800',
+      color: theme.colors.primary,
+    },
+    assetCopy: {
+      flex: 1,
+    },
+    assetLabel: {
+      fontSize: 15,
+      fontWeight: '600',
+      color: theme.colors.textPrimary,
+      marginBottom: 6,
+    },
+    assetHint: {
+      fontSize: 13,
+      lineHeight: 19,
+      color: theme.colors.textSecondary,
+    },
+    extractButton: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      borderRadius: 24,
+      backgroundColor: theme.colors.primary,
+      paddingHorizontal: 18,
+      paddingVertical: 16,
+      marginBottom: 12,
+      ...createShadow(theme.colors.shadow, 0.08, 18, 10, 4),
+    },
+    extractButtonDisabled: {
+      backgroundColor: theme.colors.borderSoft,
+    },
+    extractButtonPressed: {
+      backgroundColor: theme.colors.primaryPressed,
+    },
+    extractButtonCopy: {
+      flex: 1,
+      paddingRight: 12,
+    },
+    extractButtonText: {
+      fontSize: 18,
+      fontWeight: '800',
+      color: theme.colors.primaryOn,
+      marginBottom: 4,
+    },
+    extractButtonCaption: {
+      fontSize: 13,
+      lineHeight: 19,
+      color:
+        theme.id === 'dark'
+          ? 'rgba(8, 17, 26, 0.72)'
+          : theme.id === 'mono'
+            ? 'rgba(255, 255, 255, 0.84)'
+            : 'rgba(255, 255, 255, 0.82)',
+    },
+    extractButtonArrow: {
+      width: 40,
+      height: 40,
+      borderRadius: 20,
+      backgroundColor:
+        theme.id === 'dark'
+          ? 'rgba(8, 17, 26, 0.12)'
+          : 'rgba(255, 255, 255, 0.16)',
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    extractButtonArrowText: {
+      fontSize: 20,
+      fontWeight: '700',
+      color: theme.colors.primaryOn,
+    },
+    messageCard: {
+      borderRadius: 20,
+      paddingHorizontal: 14,
+      paddingVertical: 14,
+      marginTop: 8,
+    },
+    errorCard: {
+      backgroundColor: theme.colors.dangerBackground,
+      borderWidth: 1,
+      borderColor: theme.colors.dangerBorder,
+    },
+    warningCard: {
+      backgroundColor: theme.colors.warningBackground,
+      borderWidth: 1,
+      borderColor: theme.colors.warningBorder,
+    },
+    messageEyebrow: {
+      fontSize: 11,
+      fontWeight: '700',
+      letterSpacing: 0.8,
+      textTransform: 'uppercase',
+      color: theme.colors.warningText,
+      marginBottom: 6,
+    },
+    errorText: {
+      color: theme.colors.dangerText,
+      fontSize: 13,
+      lineHeight: 19,
+    },
+    warningText: {
+      color: theme.colors.warningText,
+      fontSize: 13,
+      lineHeight: 19,
+    },
+    resultsPanel: {
+      marginBottom: 14,
+    },
+    resultsHeader: {
+      flexDirection: 'row',
+      alignItems: 'flex-start',
+      justifyContent: 'space-between',
+      gap: 14,
+      marginBottom: 14,
+    },
+    resultsCopy: {
+      flex: 1,
+    },
+    resultCountBadge: {
+      width: 70,
+      borderRadius: 24,
+      backgroundColor: theme.colors.primary,
+      paddingVertical: 12,
+      alignItems: 'center',
+      justifyContent: 'center',
+      ...createShadow(theme.colors.shadow, 0.05, 12, 6, 2),
+    },
+    resultCountBadgeEmpty: {
+      backgroundColor: theme.colors.badgeBackground,
+    },
+    resultCountValue: {
+      fontSize: 24,
+      fontWeight: '800',
+      color: theme.colors.primaryOn,
+      marginBottom: 2,
+    },
+    resultCountLabel: {
+      fontSize: 11,
+      fontWeight: '700',
+      letterSpacing: 0.8,
+      textTransform: 'uppercase',
+      color:
+        theme.id === 'dark'
+          ? 'rgba(8, 17, 26, 0.72)'
+          : 'rgba(255, 255, 255, 0.78)',
+    },
+    actionsRow: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      gap: 10,
+    },
+    actionButton: {
+      flexGrow: 1,
+      minWidth: 138,
+      borderRadius: 18,
+      backgroundColor: theme.colors.actionBackground,
+      borderWidth: 1,
+      borderColor: theme.colors.borderSoft,
+      paddingHorizontal: 14,
+      paddingVertical: 12,
+      alignItems: 'center',
+      ...createShadow(theme.colors.shadow, 0.05, 12, 6, 2),
+    },
+    actionButtonPressed: {
+      backgroundColor: theme.colors.actionPressed,
+    },
+    actionButtonText: {
+      color: theme.colors.primarySoftText,
+      fontSize: 13,
+      fontWeight: '700',
+    },
+    resultCard: {
+      backgroundColor: theme.colors.surface,
+      borderRadius: 24,
+      borderWidth: 1,
+      borderColor: theme.colors.border,
+      paddingHorizontal: 16,
+      paddingVertical: 14,
+      marginBottom: 10,
+      ...createShadow(theme.colors.shadow, 0.08, 18, 10, 4),
+    },
+    resultCardPressed: {
+      backgroundColor: theme.colors.surfacePressed,
+    },
+    resultCardHeader: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginBottom: 10,
+    },
+    resultDot: {
+      width: 10,
+      height: 10,
+      borderRadius: 5,
+      backgroundColor: theme.colors.resultDot,
+      marginRight: 8,
+    },
+    resultMeta: {
+      fontSize: 11,
+      fontWeight: '700',
+      letterSpacing: 0.8,
+      textTransform: 'uppercase',
+      color: theme.colors.textMuted,
+    },
+    resultItem: {
+      fontSize: 18,
+      lineHeight: 26,
+      color: theme.colors.textPrimary,
+    },
+    emptyStateCard: {
+      backgroundColor: theme.colors.surface,
+      borderRadius: 28,
+      borderWidth: 1,
+      borderColor: theme.colors.border,
+      paddingHorizontal: 22,
+      paddingVertical: 24,
+      alignItems: 'center',
+      ...createShadow(theme.colors.shadow, 0.08, 18, 10, 4),
+    },
+    emptyEyebrow: {
+      fontSize: 11,
+      fontWeight: '700',
+      letterSpacing: 0.9,
+      textTransform: 'uppercase',
+      color: theme.colors.textMuted,
+      marginBottom: 8,
+    },
+    emptyText: {
+      fontSize: 24,
+      fontWeight: '800',
+      textAlign: 'center',
+      color: theme.colors.textPrimary,
+      marginBottom: 8,
+    },
+    emptySubtext: {
+      fontSize: 14,
+      lineHeight: 21,
+      textAlign: 'center',
+      color: theme.colors.textSecondary,
+      maxWidth: 320,
+    },
+  });
+}

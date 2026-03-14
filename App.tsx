@@ -1,4 +1,4 @@
-import React, {useEffect, useRef, useState} from 'react';
+import React, {useEffect, useMemo, useRef, useState} from 'react';
 import {
   Animated,
   Pressable,
@@ -15,13 +15,12 @@ import {
 } from 'react-native-safe-area-context';
 
 import {clearPersistedHistory, readHistory} from './src/domain/history/historyStorage';
-import {
-  ExtractorScreen,
-  ExtractorScreenHandle,
-} from './src/features/extractor/ExtractorScreen';
+import {ExtractorScreen, ExtractorScreenHandle} from './src/features/extractor/ExtractorScreen';
 import {HistoryScreen} from './src/features/history/HistoryScreen';
 import {SettingsScreen} from './src/features/settings/SettingsScreen';
 import {HistorySession} from './src/shared/types';
+import {persistThemePreference, readThemePreference} from './src/theme/themeStorage';
+import {AppTheme, ThemeId, themes, createShadow} from './src/theme/themes';
 
 const TABS = [
   {
@@ -50,10 +49,13 @@ function AppShell() {
   const [activeTab, setActiveTab] = useState<TabId>('home');
   const [historyCount, setHistoryCount] = useState(0);
   const [tabBarWidth, setTabBarWidth] = useState(0);
+  const [themeId, setThemeId] = useState<ThemeId>('light');
   const animatedTabIndex = useRef(new Animated.Value(0)).current;
   const animatedPillScale = useRef(new Animated.Value(1)).current;
   const previousTabIndexRef = useRef(0);
 
+  const theme = themes[themeId];
+  const styles = useMemo(() => createStyles(theme), [theme]);
   const fallbackTabBarWidth = Math.max(width - 32, 0);
   const resolvedTabBarWidth = tabBarWidth || fallbackTabBarWidth;
   const tabTrackWidth = Math.max(resolvedTabBarWidth - 20, 0);
@@ -66,6 +68,12 @@ function AppShell() {
       })
       .catch(() => {
         setHistoryCount(0);
+      });
+
+    readThemePreference()
+      .then(setThemeId)
+      .catch(() => {
+        setThemeId('light');
       });
   }, []);
 
@@ -111,22 +119,32 @@ function AppShell() {
     setHistoryCount(0);
   };
 
+  const handleThemeChange = (nextThemeId: ThemeId) => {
+    setThemeId(nextThemeId);
+    persistThemePreference(nextThemeId).catch(() => {});
+  };
+
   const activePillTranslateX = Animated.multiply(animatedTabIndex, tabSegmentWidth);
 
   return (
     <>
-      <StatusBar barStyle="dark-content" />
+      <StatusBar barStyle={theme.statusBarStyle} />
 
-      <View style={styles.app}>
+      <View style={styles.app} testID="app-root">
         <View style={styles.screenHost}>
           <View style={[styles.screenLayer, activeTab !== 'home' && styles.hiddenScreen]}>
-            <ExtractorScreen ref={extractorRef} onHistoryChanged={setHistoryCount} />
+            <ExtractorScreen
+              ref={extractorRef}
+              onHistoryChanged={setHistoryCount}
+              theme={theme}
+            />
           </View>
 
           <View style={[styles.screenLayer, activeTab !== 'history' && styles.hiddenScreen]}>
             <HistoryScreen
               isActive={activeTab === 'history'}
               onSelectSession={handleSelectSession}
+              theme={theme}
             />
           </View>
 
@@ -135,6 +153,9 @@ function AppShell() {
               historyCount={historyCount}
               onClearHistory={handleClearHistory}
               onResetHome={() => extractorRef.current?.resetAll()}
+              onThemeChange={handleThemeChange}
+              selectedThemeId={themeId}
+              theme={theme}
             />
           </View>
         </View>
@@ -213,7 +234,11 @@ function AppShell() {
                         {transform: [{scale: badgeScale}]},
                       ]}>
                       <MaterialCommunityIcons
-                        color={isActive ? '#FFFFFF' : '#1D5F9D'}
+                        color={
+                          isActive
+                            ? theme.colors.tabLabelActive
+                            : theme.colors.tabInactiveIcon
+                        }
                         name={isActive ? tab.icon.active : tab.icon.inactive}
                         size={18}
                       />
@@ -244,96 +269,87 @@ function App() {
   );
 }
 
-const styles = StyleSheet.create({
-  app: {
-    flex: 1,
-    backgroundColor: '#EAF0F7',
-  },
-  screenHost: {
-    flex: 1,
-  },
-  screenLayer: {
-    flex: 1,
-  },
-  hiddenScreen: {
-    display: 'none',
-  },
-  tabBarWrap: {
-    paddingHorizontal: 16,
-    paddingTop: 10,
-    backgroundColor: '#EAF0F7',
-  },
-  tabBar: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    backgroundColor: '#FFFFFF',
-    borderRadius: 28,
-    paddingHorizontal: 10,
-    paddingVertical: 10,
-    overflow: 'hidden',
-    shadowColor: '#0C2340',
-    shadowOpacity: 0.08,
-    shadowRadius: 18,
-    shadowOffset: {width: 0, height: 10},
-    elevation: 6,
-  },
-  tabActivePill: {
-    position: 'absolute',
-    left: 10,
-    top: 10,
-    bottom: 10,
-    borderRadius: 22,
-    backgroundColor: '#0F2741',
-    shadowColor: '#0C2340',
-    shadowOpacity: 0.16,
-    shadowRadius: 14,
-    shadowOffset: {width: 0, height: 10},
-    elevation: 4,
-  },
-  tabButton: {
-    flex: 1,
-    zIndex: 1,
-    borderRadius: 22,
-    paddingVertical: 10,
-    paddingHorizontal: 6,
-  },
-  tabButtonContent: {
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  tabButtonPressed: {
-    opacity: 0.94,
-    transform: [{scale: 0.985}],
-  },
-  tabBadge: {
-    width: 30,
-    height: 30,
-    borderRadius: 15,
-    backgroundColor: '#E7F0FA',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 6,
-  },
-  tabBadgeActive: {
-    backgroundColor: 'rgba(255, 255, 255, 0.14)',
-  },
-  tabBadgeText: {
-    fontSize: 13,
-    fontWeight: '800',
-    color: '#1D5F9D',
-  },
-  tabBadgeTextActive: {
-    color: '#FFFFFF',
-  },
-  tabLabel: {
-    fontSize: 12,
-    fontWeight: '700',
-    color: '#5F7896',
-  },
-  tabLabelActive: {
-    color: '#FFFFFF',
-  },
-});
+function createStyles(theme: AppTheme) {
+  return StyleSheet.create({
+    app: {
+      flex: 1,
+      backgroundColor: theme.colors.appBackground,
+    },
+    screenHost: {
+      flex: 1,
+    },
+    screenLayer: {
+      flex: 1,
+    },
+    hiddenScreen: {
+      display: 'none',
+    },
+    tabBarWrap: {
+      paddingHorizontal: 16,
+      paddingTop: 10,
+      backgroundColor: theme.colors.appBackground,
+    },
+    tabBar: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      backgroundColor: theme.colors.tabBarBackground,
+      borderRadius: 28,
+      paddingHorizontal: 10,
+      paddingVertical: 10,
+      overflow: 'hidden',
+      ...createShadow(theme.colors.shadow, 0.08, 18, 10, 6),
+    },
+    tabActivePill: {
+      position: 'absolute',
+      left: 10,
+      top: 10,
+      bottom: 10,
+      borderRadius: 22,
+      backgroundColor: theme.colors.tabActiveBackground,
+      ...createShadow(theme.colors.tabActiveShadow, 0.16, 14, 10, 4),
+    },
+    tabButton: {
+      flex: 1,
+      zIndex: 1,
+      borderRadius: 22,
+      paddingVertical: 10,
+      paddingHorizontal: 6,
+    },
+    tabButtonContent: {
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    tabButtonPressed: {
+      opacity: 0.94,
+      transform: [{scale: 0.985}],
+    },
+    tabBadge: {
+      width: 30,
+      height: 30,
+      borderRadius: 15,
+      backgroundColor: theme.colors.tabInactiveBadgeBackground,
+      alignItems: 'center',
+      justifyContent: 'center',
+      marginBottom: 6,
+    },
+    tabBadgeActive: {
+      backgroundColor:
+        theme.id === 'dark'
+          ? 'rgba(8, 17, 26, 0.14)'
+          : theme.id === 'solar'
+            ? 'rgba(255, 248, 232, 0.18)'
+            : 'rgba(255, 255, 255, 0.14)',
+    },
+    tabLabel: {
+      fontSize: 12,
+      fontWeight: '700',
+      color: theme.colors.tabLabel,
+    },
+    tabLabelActive: {
+      color: theme.colors.tabLabelActive,
+    },
+  });
+}
 
 export default App;

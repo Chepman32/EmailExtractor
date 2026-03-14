@@ -48,4 +48,20 @@ describe('App navigation', () => {
       expect(getByText('Files source')).toBeTruthy();
     });
   });
+
+  it('switches theme from the settings screen', async () => {
+    const {getByTestId, getByText} = render(<App />);
+
+    fireEvent.press(getByTestId('tab-settings'));
+
+    await waitFor(() => {
+      expect(getByText('Choose a look')).toBeTruthy();
+    });
+
+    fireEvent.press(getByTestId('theme-dark'));
+
+    await waitFor(() => {
+      expect(getByText('Dark theme applied.')).toBeTruthy();
+    });
+  });
 });
