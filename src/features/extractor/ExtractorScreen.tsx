@@ -6,7 +6,6 @@ import {
   Modal,
   Platform,
   Pressable,
-  ScrollView,
   Share,
   StyleSheet,
   Text,
@@ -244,158 +243,166 @@ export function ExtractorScreen() {
   };
 
   const emails = result?.emails ?? [];
+  const screenContentStyle = [
+    styles.scrollContent,
+    styles.screen,
+    isTablet && styles.screenTablet,
+  ];
+
+  const renderEmailItem = ({item}: {item: string}) => (
+    <Text style={styles.resultItem} testID="result-email">
+      {item}
+    </Text>
+  );
+
+  const screenHeader = (
+    <>
+      <View style={styles.headerRow}>
+        <Text style={styles.title} testID="screen-title">
+          Email Extractor
+        </Text>
+        <View style={styles.headerActions}>
+          <Pressable
+            accessibilityRole="button"
+            onPress={() => setHistoryVisible(true)}
+            testID="history-button"
+            style={styles.iconButton}>
+            <Text style={styles.iconButtonText}>🕘</Text>
+          </Pressable>
+          <Pressable
+            accessibilityRole="button"
+            onPress={handleClearAll}
+            testID="clear-button"
+            style={styles.iconButton}>
+            <Text style={styles.iconButtonText}>🗑</Text>
+          </Pressable>
+        </View>
+      </View>
+
+      <View style={styles.sourceRow}>
+        {SOURCE_ITEMS.map(item => (
+          <Pressable
+            key={item.id}
+            onPress={() => {
+              handleSourcePress(item.id).catch(() => {
+                setErrorMessage('Unable to import source. Please try again.');
+              });
+            }}
+            testID={`source-${item.id}`}
+            style={[
+              styles.sourceButton,
+              source === item.id && styles.sourceButtonActive,
+            ]}>
+            <Text
+              style={[
+                styles.sourceButtonText,
+                source === item.id && styles.sourceButtonTextActive,
+              ]}>
+              {item.label}
+            </Text>
+          </Pressable>
+        ))}
+      </View>
+
+      <View style={styles.inputBox}>
+        {source === 'text' ? (
+          <TextInput
+            multiline
+            placeholder="Paste text to scan for email addresses"
+            placeholderTextColor="#A5A5A5"
+            style={styles.textInput}
+            value={text}
+            onChangeText={setText}
+          />
+        ) : (
+          <Text style={styles.assetLabel}>
+            {selectedAsset?.name || selectedAsset?.uri || 'No source selected'}
+          </Text>
+        )}
+      </View>
+
+      <Pressable
+        testID="extract-button"
+        disabled={!canExtract || isExtracting}
+        onPress={() => {
+          handleExtract().catch((err: unknown) => {
+            const msg = err instanceof Error ? err.message : 'Unknown error';
+            setErrorMessage(`Extraction failed: ${msg}`);
+          });
+        }}
+        style={[
+          styles.extractButton,
+          (!canExtract || isExtracting) && styles.extractButtonDisabled,
+        ]}>
+        <Text style={styles.extractButtonText}>{extractButtonTitle}</Text>
+      </Pressable>
+
+      {errorMessage ? <Text style={styles.errorText}>{errorMessage}</Text> : null}
+      {result?.warnings.length ? (
+        <View style={styles.warningBox}>
+          {result.warnings.map(warning => (
+            <Text key={warning} style={styles.warningText}>
+              {warning}
+            </Text>
+          ))}
+        </View>
+      ) : null}
+
+      {emails.length > 0 ? (
+        <View style={styles.actionsRow}>
+          <Pressable onPress={handleCopy} style={styles.actionButton}>
+            <Text style={styles.actionButtonText}>Copy</Text>
+          </Pressable>
+          <Pressable
+            onPress={() => {
+              handleShare().catch(() => {
+                setErrorMessage('Unable to share extracted emails.');
+              });
+            }}
+            style={styles.actionButton}>
+            <Text style={styles.actionButtonText}>Share</Text>
+          </Pressable>
+          <Pressable
+            onPress={() => {
+              handleExport('txt').catch(() => {
+                setErrorMessage('Unable to export TXT file.');
+              });
+            }}
+            style={styles.actionButton}>
+            <Text style={styles.actionButtonText}>Export TXT</Text>
+          </Pressable>
+          <Pressable
+            onPress={() => {
+              handleExport('csv').catch(() => {
+                setErrorMessage('Unable to export CSV file.');
+              });
+            }}
+            style={styles.actionButton}>
+            <Text style={styles.actionButtonText}>Export CSV</Text>
+          </Pressable>
+        </View>
+      ) : null}
+    </>
+  );
 
   return (
     <SafeAreaView style={styles.safeArea}>
       <KeyboardAvoidingView
         behavior={Platform.select({ios: 'padding', default: undefined})}
         style={styles.flex}>
-        <ScrollView contentContainerStyle={styles.scrollContent}>
-          <View style={[styles.screen, isTablet && styles.screenTablet]}>
-            <View style={styles.headerRow}>
-              <Text style={styles.title} testID="screen-title">
-                Email Extractor
-              </Text>
-              <View style={styles.headerActions}>
-                <Pressable
-                  accessibilityRole="button"
-                  onPress={() => setHistoryVisible(true)}
-                  testID="history-button"
-                  style={styles.iconButton}>
-                  <Text style={styles.iconButtonText}>🕘</Text>
-                </Pressable>
-                <Pressable
-                  accessibilityRole="button"
-                  onPress={handleClearAll}
-                  testID="clear-button"
-                  style={styles.iconButton}>
-                  <Text style={styles.iconButtonText}>🗑</Text>
-                </Pressable>
-              </View>
+        <FlatList
+          data={emails}
+          keyExtractor={(item, index) => `${item}-${index}`}
+          keyboardShouldPersistTaps="handled"
+          contentContainerStyle={screenContentStyle}
+          ListHeaderComponent={screenHeader}
+          ListEmptyComponent={
+            <View style={styles.emptyContainer}>
+              <Text style={styles.emptyText}>No emails found</Text>
             </View>
-
-            <View style={styles.sourceRow}>
-              {SOURCE_ITEMS.map(item => (
-                <Pressable
-                  key={item.id}
-                  onPress={() => {
-                    handleSourcePress(item.id).catch(() => {
-                      setErrorMessage('Unable to import source. Please try again.');
-                    });
-                  }}
-                  testID={`source-${item.id}`}
-                  style={[
-                    styles.sourceButton,
-                    source === item.id && styles.sourceButtonActive,
-                  ]}>
-                  <Text
-                    style={[
-                      styles.sourceButtonText,
-                      source === item.id && styles.sourceButtonTextActive,
-                    ]}>
-                    {item.label}
-                  </Text>
-                </Pressable>
-              ))}
-            </View>
-
-            <View style={styles.inputBox}>
-              {source === 'text' ? (
-                <TextInput
-                  multiline
-                  placeholder="Paste text to scan for email addresses"
-                  placeholderTextColor="#A5A5A5"
-                  style={styles.textInput}
-                  value={text}
-                  onChangeText={setText}
-                />
-              ) : (
-                <Text style={styles.assetLabel}>
-                  {selectedAsset?.name || selectedAsset?.uri || 'No source selected'}
-                </Text>
-              )}
-            </View>
-
-            <Pressable
-              testID="extract-button"
-              disabled={!canExtract || isExtracting}
-              onPress={() => {
-                handleExtract().catch((err: unknown) => {
-                  const msg = err instanceof Error ? err.message : 'Unknown error';
-                  setErrorMessage(`Extraction failed: ${msg}`);
-                });
-              }}
-              style={[
-                styles.extractButton,
-                (!canExtract || isExtracting) && styles.extractButtonDisabled,
-              ]}>
-              <Text style={styles.extractButtonText}>{extractButtonTitle}</Text>
-            </Pressable>
-
-            {errorMessage ? <Text style={styles.errorText}>{errorMessage}</Text> : null}
-            {result?.warnings.length ? (
-              <View style={styles.warningBox}>
-                {result.warnings.map(warning => (
-                  <Text key={warning} style={styles.warningText}>
-                    {warning}
-                  </Text>
-                ))}
-              </View>
-            ) : null}
-
-            {emails.length > 0 ? (
-              <>
-                <View style={styles.actionsRow}>
-                  <Pressable onPress={handleCopy} style={styles.actionButton}>
-                    <Text style={styles.actionButtonText}>Copy</Text>
-                  </Pressable>
-                  <Pressable
-                    onPress={() => {
-                      handleShare().catch(() => {
-                        setErrorMessage('Unable to share extracted emails.');
-                      });
-                    }}
-                    style={styles.actionButton}>
-                    <Text style={styles.actionButtonText}>Share</Text>
-                  </Pressable>
-                  <Pressable
-                    onPress={() => {
-                      handleExport('txt').catch(() => {
-                        setErrorMessage('Unable to export TXT file.');
-                      });
-                    }}
-                    style={styles.actionButton}>
-                    <Text style={styles.actionButtonText}>Export TXT</Text>
-                  </Pressable>
-                  <Pressable
-                    onPress={() => {
-                      handleExport('csv').catch(() => {
-                        setErrorMessage('Unable to export CSV file.');
-                      });
-                    }}
-                    style={styles.actionButton}>
-                    <Text style={styles.actionButtonText}>Export CSV</Text>
-                  </Pressable>
-                </View>
-
-                <FlatList
-                  data={emails}
-                  keyExtractor={item => item}
-                  contentContainerStyle={styles.resultList}
-                  renderItem={({item}) => (
-                    <Text style={styles.resultItem} testID="result-email">
-                      {item}
-                    </Text>
-                  )}
-                />
-              </>
-            ) : (
-              <View style={styles.emptyContainer}>
-                <Text style={styles.emptyText}>No emails found</Text>
-              </View>
-            )}
-          </View>
-        </ScrollView>
+          }
+          renderItem={renderEmailItem}
+        />
       </KeyboardAvoidingView>
 
       <Modal
@@ -589,9 +596,6 @@ const styles = StyleSheet.create({
     color: '#2B6FB3',
     fontSize: 12,
     fontWeight: '700',
-  },
-  resultList: {
-    paddingBottom: 18,
   },
   resultItem: {
     fontSize: 14,
