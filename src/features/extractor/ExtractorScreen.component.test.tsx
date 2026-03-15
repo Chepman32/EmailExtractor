@@ -15,7 +15,7 @@ describe('ExtractorScreen', () => {
   });
 
   it('shows initial empty-state UI', async () => {
-    const {getByText, getByTestId} = render(
+    const {getByText, getByTestId, queryByText} = render(
       <ExtractorScreen dataTypeSelection={defaultDataTypeSelection} />,
     );
 
@@ -25,8 +25,34 @@ describe('ExtractorScreen', () => {
       expect(getByText('Camera')).toBeTruthy();
       expect(getByText('Photos')).toBeTruthy();
       expect(getByText('Files')).toBeTruthy();
-      expect(getByText('No results found')).toBeTruthy();
+      expect(queryByText('No results found')).toBeNull();
       expect(getByTestId('extract-button')).toBeDisabled();
+    });
+  });
+
+  it('shows the empty-state card only after extraction returns no matches', async () => {
+    jest.spyOn(extractionEngine, 'extractData').mockResolvedValue({
+      matches: createEmptyMatches(),
+      source: 'text',
+      rawTextLength: 14,
+      extractedAt: '2026-03-15T00:00:00.000Z',
+      warnings: [],
+    });
+
+    const {getByPlaceholderText, getByTestId, getByText, queryByText} = render(
+      <ExtractorScreen dataTypeSelection={defaultDataTypeSelection} />,
+    );
+
+    expect(queryByText('No results found')).toBeNull();
+
+    fireEvent.changeText(
+      getByPlaceholderText('Paste text to scan for the selected data types'),
+      'nothing useful',
+    );
+    fireEvent.press(getByTestId('extract-button'));
+
+    await waitFor(() => {
+      expect(getByText('No results found')).toBeTruthy();
     });
   });
 

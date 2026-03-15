@@ -210,6 +210,7 @@ export const ExtractorScreen = forwardRef<
     [result],
   );
   const totalMatchCount = result ? countExtractedMatches(result.matches) : 0;
+  const shouldShowEmptyState = Boolean(result) && resultSections.length === 0;
   const screenContentStyle = [
     styles.scrollContent,
     styles.screen,
@@ -685,13 +686,15 @@ export const ExtractorScreen = forwardRef<
           contentContainerStyle={screenContentStyle}
           ListHeaderComponent={screenHeader}
           ListEmptyComponent={
-            <View style={styles.emptyStateCard}>
-              <Text style={styles.emptyEyebrow}>Ready when you are</Text>
-              <Text style={styles.emptyText}>No results found</Text>
-              <Text style={styles.emptySubtext}>
-                Paste text or import a source, then run extraction to populate the selected result types.
-              </Text>
-            </View>
+            shouldShowEmptyState ? (
+              <View style={styles.emptyStateCard}>
+                <Text style={styles.emptyEyebrow}>Ready when you are</Text>
+                <Text style={styles.emptyText}>No results found</Text>
+                <Text style={styles.emptySubtext}>
+                  Paste text or import a source, then run extraction to populate the selected result types.
+                </Text>
+              </View>
+            ) : null
           }
           renderItem={renderResultSection}
         />
