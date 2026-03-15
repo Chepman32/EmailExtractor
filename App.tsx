@@ -16,7 +16,15 @@ import {
 
 import {ExtractorScreen, ExtractorScreenHandle} from './src/features/extractor/ExtractorScreen';
 import {HistoryScreen} from './src/features/history/HistoryScreen';
+import {
+  persistDataTypeSelection,
+  readDataTypeSelection,
+} from './src/features/settings/dataTypeStorage';
 import {SettingsScreen} from './src/features/settings/SettingsScreen';
+import {
+  createDefaultDataTypeSelection,
+  DataTypeSelection,
+} from './src/shared/extractedData';
 import {HistorySession} from './src/shared/types';
 import {persistThemePreference, readThemePreference} from './src/theme/themeStorage';
 import {AppTheme, ThemeId, themes, createShadow} from './src/theme/themes';
@@ -47,6 +55,9 @@ function AppShell() {
   const extractorRef = useRef<ExtractorScreenHandle>(null);
   const [activeTab, setActiveTab] = useState<TabId>('home');
   const [tabBarWidth, setTabBarWidth] = useState(0);
+  const [dataTypeSelection, setDataTypeSelection] = useState<DataTypeSelection>(() =>
+    createDefaultDataTypeSelection(),
+  );
   const [themeId, setThemeId] = useState<ThemeId>('light');
   const animatedTabIndex = useRef(new Animated.Value(0)).current;
   const animatedPillScale = useRef(new Animated.Value(1)).current;
@@ -64,6 +75,12 @@ function AppShell() {
       .then(setThemeId)
       .catch(() => {
         setThemeId('light');
+      });
+
+    readDataTypeSelection()
+      .then(setDataTypeSelection)
+      .catch(() => {
+        setDataTypeSelection(createDefaultDataTypeSelection());
       });
   }, []);
 
@@ -109,6 +126,11 @@ function AppShell() {
     persistThemePreference(nextThemeId).catch(() => {});
   };
 
+  const handleDataTypeSelectionChange = (nextSelection: DataTypeSelection) => {
+    setDataTypeSelection(nextSelection);
+    persistDataTypeSelection(nextSelection).catch(() => {});
+  };
+
   const activePillTranslateX = Animated.multiply(animatedTabIndex, tabSegmentWidth);
 
   return (
@@ -120,6 +142,7 @@ function AppShell() {
           <View style={[styles.screenLayer, activeTab !== 'home' && styles.hiddenScreen]}>
             <ExtractorScreen
               ref={extractorRef}
+              dataTypeSelection={dataTypeSelection}
               theme={theme}
             />
           </View>
@@ -134,6 +157,8 @@ function AppShell() {
 
           <View style={[styles.screenLayer, activeTab !== 'settings' && styles.hiddenScreen]}>
             <SettingsScreen
+              dataTypeSelection={dataTypeSelection}
+              onDataTypeSelectionChange={handleDataTypeSelectionChange}
               onThemeChange={handleThemeChange}
               selectedThemeId={themeId}
               theme={theme}

@@ -1,8 +1,6 @@
 import RNFS from 'react-native-fs';
 import {unzip} from 'react-native-zip-archive';
 
-import {extractEmailsFromText} from '../../domain/email/parseEmails';
-
 export function extractTextFromDocumentXml(xml: string): string {
   const textSegments: string[] = [];
   const textRegex = /<w:t[^>]*>([\s\S]*?)<\/w:t>/g;
@@ -18,7 +16,7 @@ export function extractTextFromDocumentXml(xml: string): string {
   return textSegments.join(' ').replace(/\s+/g, ' ').trim();
 }
 
-export async function extractEmailsFromDocxFile(fileUri: string): Promise<string[]> {
+export async function extractTextFromDocxFile(fileUri: string): Promise<string> {
   const tmpDir = `${RNFS.CachesDirectoryPath}/docx-${Date.now()}-${Math.random()
     .toString(36)
     .slice(2, 10)}`;
@@ -29,9 +27,7 @@ export async function extractEmailsFromDocxFile(fileUri: string): Promise<string
     await unzip(decodeURIComponent(fileUri.replace('file://', '')), tmpDir);
     const xmlPath = `${tmpDir}/word/document.xml`;
     const xml = await RNFS.readFile(xmlPath, 'utf8');
-    const text = extractTextFromDocumentXml(xml);
-
-    return extractEmailsFromText(text);
+    return extractTextFromDocumentXml(xml);
   } finally {
     // Best-effort cleanup; stale cache directories are acceptable if deletion fails.
     await RNFS.unlink(tmpDir).catch(() => undefined);

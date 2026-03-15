@@ -1,10 +1,11 @@
 import {HistorySession, ExtractionSource} from '../../shared/types';
+import {ExtractedMatches} from '../../shared/extractedData';
 
 export const HISTORY_LIMIT = 100;
 
 export function createHistorySession(
   source: ExtractionSource,
-  emails: string[],
+  matches: ExtractedMatches,
   inputLabel: string,
 ): HistorySession {
   const id = `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
@@ -12,7 +13,7 @@ export function createHistorySession(
   return {
     id,
     source,
-    emails,
+    matches,
     createdAt: new Date().toISOString(),
     inputLabel,
   };

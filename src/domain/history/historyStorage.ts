@@ -1,23 +1,53 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {HistorySession} from '../../shared/types';
+import {HistorySession, isExtractionSource} from '../../shared/types';
+import {createEmptyMatches, isExtractedMatches} from '../../shared/extractedData';
 
 const STORAGE_KEY = 'emailExtractor.history.v1';
 
-function isHistorySession(value: unknown): value is HistorySession {
+function isStringArray(value: unknown): value is string[] {
+  return Array.isArray(value) && value.every(item => typeof item === 'string');
+}
+
+function normalizeHistorySession(value: unknown): HistorySession | null {
   if (!value || typeof value !== 'object') {
-    return false;
+    return null;
   }
 
   const candidate = value as Record<string, unknown>;
 
-  return (
-    typeof candidate.id === 'string' &&
-    typeof candidate.source === 'string' &&
-    Array.isArray(candidate.emails) &&
-    candidate.emails.every(item => typeof item === 'string') &&
-    typeof candidate.createdAt === 'string' &&
-    typeof candidate.inputLabel === 'string'
-  );
+  if (
+    typeof candidate.id !== 'string' ||
+    !isExtractionSource(candidate.source) ||
+    typeof candidate.createdAt !== 'string' ||
+    typeof candidate.inputLabel !== 'string'
+  ) {
+    return null;
+  }
+
+  if (isExtractedMatches(candidate.matches)) {
+    return {
+      id: candidate.id,
+      source: candidate.source,
+      matches: candidate.matches,
+      createdAt: candidate.createdAt,
+      inputLabel: candidate.inputLabel,
+    };
+  }
+
+  if (isStringArray(candidate.emails)) {
+    return {
+      id: candidate.id,
+      source: candidate.source,
+      matches: {
+        ...createEmptyMatches(),
+        email: candidate.emails,
+      },
+      createdAt: candidate.createdAt,
+      inputLabel: candidate.inputLabel,
+    };
+  }
+
+  return null;
 }
 
 export async function readHistory(): Promise<HistorySession[]> {
@@ -34,7 +64,10 @@ export async function readHistory(): Promise<HistorySession[]> {
       return [];
     }
 
-    return parsed.filter(isHistorySession);
+    return parsed.flatMap(value => {
+      const session = normalizeHistorySession(value);
+      return session ? [session] : [];
+    });
   } catch {
     return [];
   }

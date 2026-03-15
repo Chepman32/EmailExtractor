@@ -34,7 +34,7 @@
 		<true/>
 	</dict>
 	<key>NSCameraUsageDescription</key>
-	<string>Camera access is required to capture images and extract email addresses.</string>
+	<string>Camera access is required to capture images and extract selected data from them.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>Photo library access is required to import images for email extraction.</string>
 	<key>RCTNewArchEnabled</key>

@@ -1,3 +1,4 @@
+import {ExtractableDataType} from '../../shared/extractedData';
 import {ExtractionSource} from '../../shared/types';
 
 export type SelectedAsset = {
@@ -10,4 +11,5 @@ export type ExtractionInput = {
   source: ExtractionSource;
   text: string;
   selectedAsset: SelectedAsset | null;
+  enabledTypes: ExtractableDataType[];
 };

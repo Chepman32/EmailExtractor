@@ -28,9 +28,18 @@ import {
   createHistorySession,
 } from '../../domain/history/historyStore';
 import {persistHistory, readHistory} from '../../domain/history/historyStorage';
+import {
+  countExtractedMatches,
+  DATA_TYPE_LABELS,
+  DataTypeSelection,
+  EXTRACTABLE_DATA_TYPES,
+  ExtractableDataType,
+  formatDataTypeCount,
+  getEnabledDataTypes,
+} from '../../shared/extractedData';
 import {ExtractionResult, HistorySession} from '../../shared/types';
-import {exportEmails} from '../../native/emailExtractionBridge';
-import {extractEmails} from './extractionEngine';
+import {exportExtractedItems} from '../../native/emailExtractionBridge';
+import {extractData} from './extractionEngine';
 import {pickFromCamera, pickFromFiles, pickFromPhotoLibrary} from './sourcePickers';
 import {SelectedAsset} from './types';
 import {AppTheme, createShadow, themes} from '../../theme/themes';
@@ -67,6 +76,7 @@ const SOURCE_ROWS = [SOURCE_ITEMS.slice(0, 2), SOURCE_ITEMS.slice(2)] as const;
 type SourceId = (typeof SOURCE_ITEMS)[number]['id'];
 
 type ExtractorScreenProps = {
+  dataTypeSelection: DataTypeSelection;
   onHistoryChanged?: (count: number) => void;
   theme?: AppTheme;
 };
@@ -74,6 +84,11 @@ type ExtractorScreenProps = {
 export type ExtractorScreenHandle = {
   loadSession: (session: HistorySession) => void;
   resetAll: () => void;
+};
+
+type ResultSection = {
+  items: string[];
+  type: ExtractableDataType;
 };
 
 function buildInputLabel(source: SourceId, text: string, asset: SelectedAsset | null): string {
@@ -86,7 +101,7 @@ function buildInputLabel(source: SourceId, text: string, asset: SelectedAsset | 
 
 function mapSessionToResult(session: HistorySession): ExtractionResult {
   return {
-    emails: session.emails,
+    matches: session.matches,
     source: session.source,
     rawTextLength: 0,
     extractedAt: session.createdAt,
@@ -115,7 +130,7 @@ function getSourceHelperText(
   selectedAsset: SelectedAsset | null,
 ) {
   if (source === 'text') {
-    return 'Paste any copied thread, note, or document text and the app will pull out unique email addresses.';
+    return 'Paste any copied thread, note, or document text and the app will pull out the selected data types.';
   }
 
   if (selectedAsset?.uri) {
@@ -125,11 +140,25 @@ function getSourceHelperText(
   return `Choose a ${sourceLabel.toLowerCase()} source to continue.`;
 }
 
+function describeEnabledDataTypes(enabledTypes: ExtractableDataType[]): string {
+  const labels = enabledTypes.map(type => DATA_TYPE_LABELS[type].toLowerCase());
+
+  if (labels.length <= 1) {
+    return labels[0] ?? 'data';
+  }
+
+  if (labels.length === 2) {
+    return `${labels[0]} and ${labels[1]}`;
+  }
+
+  return `${labels.slice(0, -1).join(', ')}, and ${labels[labels.length - 1]}`;
+}
+
 export const ExtractorScreen = forwardRef<
   ExtractorScreenHandle,
   ExtractorScreenProps
 >(function ExtractorScreen(
-  {onHistoryChanged, theme = themes.light},
+  {dataTypeSelection, onHistoryChanged, theme = themes.light},
   ref,
 ) {
   const {width} = useWindowDimensions();
@@ -143,6 +172,10 @@ export const ExtractorScreen = forwardRef<
   const [isExtracting, setIsExtracting] = useState(false);
   const textInputRef = useRef<TextInput>(null);
   const styles = useMemo(() => createStyles(theme), [theme]);
+  const enabledTypes = useMemo(
+    () => getEnabledDataTypes(dataTypeSelection),
+    [dataTypeSelection],
+  );
 
   const canExtract = useMemo(() => {
     if (source === 'text') {
@@ -153,8 +186,8 @@ export const ExtractorScreen = forwardRef<
   }, [source, text, selectedAsset]);
 
   const activeSource = findSourceItem(source);
-  const emails = result?.emails ?? [];
-  const extractButtonTitle = isExtracting ? 'Extracting...' : 'Extract Emails';
+  const enabledTypesSummary = describeEnabledDataTypes(enabledTypes);
+  const extractButtonTitle = isExtracting ? 'Extracting...' : 'Extract Data';
   const readyStateLabel = canExtract
     ? 'Ready'
     : source === 'text'
@@ -162,11 +195,21 @@ export const ExtractorScreen = forwardRef<
       : 'Awaiting import';
   const statusIconName = source === 'text' ? 'content-paste' : 'tray-arrow-down';
   const extractButtonHint = canExtract
-    ? 'Extract unique addresses from the current input.'
+    ? `Extract ${enabledTypesSummary} from the current input.`
     : source === 'text'
       ? 'Paste some text to enable extraction.'
       : `Import a ${activeSource.label.toLowerCase()} source to enable extraction.`;
   const sourceHelperText = getSourceHelperText(source, activeSource.label, selectedAsset);
+  const resultSections = useMemo<ResultSection[]>(
+    () =>
+      EXTRACTABLE_DATA_TYPES.flatMap(type => {
+        const items = result?.matches[type] ?? [];
+
+        return items.length > 0 ? [{type, items}] : [];
+      }),
+    [result],
+  );
+  const totalMatchCount = result ? countExtractedMatches(result.matches) : 0;
   const screenContentStyle = [
     styles.scrollContent,
     styles.screen,
@@ -240,10 +283,11 @@ export const ExtractorScreen = forwardRef<
     let extraction: ExtractionResult | null = null;
 
     try {
-      extraction = await extractEmails({
+      extraction = await extractData({
         source,
         text,
         selectedAsset,
+        enabledTypes,
       });
 
       setResult(extraction);
@@ -264,7 +308,7 @@ export const ExtractorScreen = forwardRef<
       const existingHistory = await readHistory();
       const session = createHistorySession(
         source,
-        extraction.emails,
+        extraction.matches,
         buildInputLabel(source, text, selectedAsset),
       );
       const nextHistory = addSessionToHistory(existingHistory, session);
@@ -272,7 +316,7 @@ export const ExtractorScreen = forwardRef<
       await persistHistory(nextHistory);
       onHistoryChanged?.(nextHistory.length);
     } catch {
-      setErrorMessage('Emails were extracted, but history could not be saved.');
+      setErrorMessage('Results were extracted, but history could not be saved.');
     } finally {
       setIsExtracting(false);
     }
@@ -300,57 +344,125 @@ export const ExtractorScreen = forwardRef<
     }
   };
 
-  const handleCopy = () => {
-    if (emails.length === 0) {
+  const handleCopySection = (
+    itemType: ExtractableDataType,
+    items: string[],
+  ) => {
+    if (items.length === 0) {
       return;
     }
 
-    Clipboard.setString(emails.join('\n'));
-    Alert.alert('Copied', 'Emails copied to clipboard.');
+    Clipboard.setString(items.join('\n'));
+    Alert.alert('Copied', `${formatDataTypeCount(itemType, items.length)} copied.`);
   };
 
-  const handleCopyEmail = (email: string) => {
-    Clipboard.setString(email);
-    Alert.alert('Copied', `${email} copied to clipboard.`);
+  const handleCopyItem = (
+    itemType: ExtractableDataType,
+    value: string,
+  ) => {
+    Clipboard.setString(value);
+    Alert.alert('Copied', `${DATA_TYPE_LABELS[itemType]} copied to clipboard.`);
   };
 
-  const handleShare = async () => {
-    if (emails.length === 0) {
+  const handleShareSection = async (
+    itemType: ExtractableDataType,
+    items: string[],
+  ) => {
+    if (items.length === 0) {
       return;
     }
 
-    await Share.share({message: emails.join('\n')});
+    await Share.share({
+      message: items.join('\n'),
+      title: `${DATA_TYPE_LABELS[itemType]} results`,
+    });
   };
 
-  const handleExport = async (format: 'txt' | 'csv') => {
-    if (emails.length === 0) {
+  const handleExportSection = async (
+    itemType: ExtractableDataType,
+    items: string[],
+    format: 'txt' | 'csv',
+  ) => {
+    if (items.length === 0) {
       return;
     }
 
     try {
-      const exported = await exportEmails(emails, format);
+      const exported = await exportExtractedItems(itemType, items, format);
       await Share.share({
         url: exported.fileUri,
-        message: `Exported ${emails.length} emails as ${format.toUpperCase()}.`,
+        message: `Exported ${formatDataTypeCount(itemType, items.length)} as ${format.toUpperCase()}.`,
       });
     } catch {
       setErrorMessage(`Unable to export ${format.toUpperCase()} file.`);
     }
   };
 
-  const renderEmailItem = ({item}: {item: string}) => (
-    <Pressable
-      accessibilityRole="button"
-      onPress={() => handleCopyEmail(item)}
-      style={({pressed}) => [styles.resultCard, pressed && styles.resultCardPressed]}>
-      <View style={styles.resultCardHeader}>
-        <View style={styles.resultDot} />
-        <Text style={styles.resultMeta}>Tap to copy</Text>
+  const renderResultSection = ({item}: {item: ResultSection}) => (
+    <View style={styles.resultSectionCard}>
+      <View style={styles.resultSectionHeader}>
+        <View style={styles.resultSectionCopy}>
+          <Text style={styles.sectionEyebrow}>{DATA_TYPE_LABELS[item.type]}</Text>
+          <Text style={styles.resultSectionTitle}>
+            {formatDataTypeCount(item.type, item.items.length)}
+          </Text>
+          <Text style={styles.sectionSubtitle}>
+            Tap any result to copy it, or use the section actions below.
+          </Text>
+        </View>
       </View>
-      <Text style={styles.resultItem} testID="result-email">
-        {item}
-      </Text>
-    </Pressable>
+
+      <View style={[styles.actionsRow, styles.sectionActionsRow]}>
+        <Pressable
+          onPress={() => handleCopySection(item.type, item.items)}
+          style={({pressed}) => [styles.actionButton, pressed && styles.actionButtonPressed]}>
+          <Text style={styles.actionButtonText}>Copy</Text>
+        </Pressable>
+        <Pressable
+          onPress={() => {
+            handleShareSection(item.type, item.items).catch(() => {
+              setErrorMessage(`Unable to share extracted ${DATA_TYPE_LABELS[item.type].toLowerCase()}.`);
+            });
+          }}
+          style={({pressed}) => [styles.actionButton, pressed && styles.actionButtonPressed]}>
+          <Text style={styles.actionButtonText}>Share</Text>
+        </Pressable>
+        <Pressable
+          onPress={() => {
+            handleExportSection(item.type, item.items, 'txt').catch(() => {
+              setErrorMessage('Unable to export TXT file.');
+            });
+          }}
+          style={({pressed}) => [styles.actionButton, pressed && styles.actionButtonPressed]}>
+          <Text style={styles.actionButtonText}>Export TXT</Text>
+        </Pressable>
+        <Pressable
+          onPress={() => {
+            handleExportSection(item.type, item.items, 'csv').catch(() => {
+              setErrorMessage('Unable to export CSV file.');
+            });
+          }}
+          style={({pressed}) => [styles.actionButton, pressed && styles.actionButtonPressed]}>
+          <Text style={styles.actionButtonText}>Export CSV</Text>
+        </Pressable>
+      </View>
+
+      {item.items.map((match, index) => (
+        <Pressable
+          key={`${item.type}-${match}-${index}`}
+          accessibilityRole="button"
+          onPress={() => handleCopyItem(item.type, match)}
+          style={({pressed}) => [styles.resultCard, pressed && styles.resultCardPressed]}>
+          <View style={styles.resultCardHeader}>
+            <View style={styles.resultDot} />
+            <Text style={styles.resultMeta}>Tap to copy</Text>
+          </View>
+          <Text style={styles.resultItem} testID={`result-${item.type}`}>
+            {match}
+          </Text>
+        </Pressable>
+      ))}
+    </View>
   );
 
   const screenHeader = (
@@ -412,7 +524,7 @@ export const ExtractorScreen = forwardRef<
           <View style={styles.sectionHeaderCopy}>
             <Text style={styles.sectionEyebrow}>Input</Text>
             <Text style={styles.sectionTitle} testID="screen-title">
-              Email Extractor
+              Data Extractor
             </Text>
           </View>
           <Pressable
@@ -466,7 +578,7 @@ export const ExtractorScreen = forwardRef<
             <TextInput
               ref={textInputRef}
               multiline
-              placeholder="Paste text to scan for email addresses"
+              placeholder="Paste text to scan for the selected data types"
               placeholderTextColor={theme.colors.textMuted}
               style={styles.textInput}
               value={text}
@@ -541,59 +653,22 @@ export const ExtractorScreen = forwardRef<
         <View style={styles.resultsHeader}>
           <View style={styles.resultsCopy}>
             <Text style={styles.sectionEyebrow}>Results</Text>
-            <Text style={styles.sectionTitle}>Extracted emails</Text>
+            <Text style={styles.sectionTitle}>Extracted results</Text>
             <Text style={styles.sectionSubtitle}>
-              {emails.length > 0
-                ? 'Tap any result to copy it instantly, or use the quick actions.'
-                : 'Your extracted addresses will appear here once you run a scan.'}
+              {totalMatchCount > 0
+                ? 'Results are grouped by data type so each section can be copied, shared, or exported separately.'
+                : 'Your extracted data will appear here once you run a scan.'}
             </Text>
           </View>
           <View
             style={[
               styles.resultCountBadge,
-              emails.length === 0 && styles.resultCountBadgeEmpty,
+              totalMatchCount === 0 && styles.resultCountBadgeEmpty,
             ]}>
-            <Text style={styles.resultCountValue}>{emails.length}</Text>
+            <Text style={styles.resultCountValue}>{totalMatchCount}</Text>
             <Text style={styles.resultCountLabel}>found</Text>
           </View>
         </View>
-
-        {emails.length > 0 ? (
-          <View style={styles.actionsRow}>
-            <Pressable
-              onPress={handleCopy}
-              style={({pressed}) => [styles.actionButton, pressed && styles.actionButtonPressed]}>
-              <Text style={styles.actionButtonText}>Copy</Text>
-            </Pressable>
-            <Pressable
-              onPress={() => {
-                handleShare().catch(() => {
-                  setErrorMessage('Unable to share extracted emails.');
-                });
-              }}
-              style={({pressed}) => [styles.actionButton, pressed && styles.actionButtonPressed]}>
-              <Text style={styles.actionButtonText}>Share</Text>
-            </Pressable>
-            <Pressable
-              onPress={() => {
-                handleExport('txt').catch(() => {
-                  setErrorMessage('Unable to export TXT file.');
-                });
-              }}
-              style={({pressed}) => [styles.actionButton, pressed && styles.actionButtonPressed]}>
-              <Text style={styles.actionButtonText}>Export TXT</Text>
-            </Pressable>
-            <Pressable
-              onPress={() => {
-                handleExport('csv').catch(() => {
-                  setErrorMessage('Unable to export CSV file.');
-                });
-              }}
-              style={({pressed}) => [styles.actionButton, pressed && styles.actionButtonPressed]}>
-              <Text style={styles.actionButtonText}>Export CSV</Text>
-            </Pressable>
-          </View>
-        ) : null}
       </View>
     </>
   );
@@ -604,21 +679,21 @@ export const ExtractorScreen = forwardRef<
         behavior={Platform.select({ios: 'padding', default: undefined})}
         style={styles.flex}>
         <FlatList
-          data={emails}
-          keyExtractor={(item, index) => `${item}-${index}`}
+          data={resultSections}
+          keyExtractor={item => item.type}
           keyboardShouldPersistTaps="handled"
           contentContainerStyle={screenContentStyle}
           ListHeaderComponent={screenHeader}
           ListEmptyComponent={
             <View style={styles.emptyStateCard}>
               <Text style={styles.emptyEyebrow}>Ready when you are</Text>
-              <Text style={styles.emptyText}>No emails found</Text>
+              <Text style={styles.emptyText}>No results found</Text>
               <Text style={styles.emptySubtext}>
-                Paste text or import a source, then run extraction to populate this list.
+                Paste text or import a source, then run extraction to populate the selected result types.
               </Text>
             </View>
           }
-          renderItem={renderEmailItem}
+          renderItem={renderResultSection}
         />
       </KeyboardAvoidingView>
     </SafeAreaView>
@@ -1019,6 +1094,24 @@ function createStyles(theme: AppTheme) {
         theme.id === 'dark'
           ? 'rgba(8, 17, 26, 0.72)'
           : 'rgba(255, 255, 255, 0.78)',
+    },
+    resultSectionCard: {
+      marginBottom: 14,
+    },
+    resultSectionHeader: {
+      marginBottom: 12,
+    },
+    resultSectionCopy: {
+      flex: 1,
+    },
+    resultSectionTitle: {
+      fontSize: 20,
+      fontWeight: '800',
+      color: theme.colors.textPrimary,
+      marginBottom: 6,
+    },
+    sectionActionsRow: {
+      marginBottom: 12,
     },
     actionsRow: {
       flexDirection: 'row',

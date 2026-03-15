@@ -1,5 +1,6 @@
-import {extractEmails} from './extractionEngine';
+import {createEmptyMatches} from '../../shared/extractedData';
 import * as nativeBridge from '../../native/emailExtractionBridge';
+import {extractData} from './extractionEngine';
 import * as docxExtraction from './docxExtraction';
 
 jest.mock('../../native/emailExtractionBridge', () => ({
@@ -9,24 +10,27 @@ jest.mock('../../native/emailExtractionBridge', () => ({
 }));
 
 jest.mock('./docxExtraction', () => ({
-  extractEmailsFromDocxFile: jest.fn(),
+  extractTextFromDocxFile: jest.fn(),
 }));
 
-describe('extractEmails', () => {
+describe('extractData', () => {
   beforeEach(() => {
     jest.resetAllMocks();
   });
 
   it('preserves the photos source when image extraction resolves natively', async () => {
     jest.spyOn(nativeBridge, 'extractFromImage').mockResolvedValue({
-      emails: ['photo@example.com'],
+      matches: {
+        ...createEmptyMatches(),
+        email: ['photo@example.com'],
+      },
       source: 'camera',
       rawTextLength: 24,
       extractedAt: '2026-03-11T00:00:00.000Z',
       warnings: [],
     });
 
-    const result = await extractEmails({
+    const result = await extractData({
       source: 'photos',
       text: '',
       selectedAsset: {
@@ -34,18 +38,19 @@ describe('extractEmails', () => {
         name: 'imported-photo.jpg',
         mimeType: 'image/jpeg',
       },
+      enabledTypes: ['email'],
     });
 
     expect(result.source).toBe('photos');
-    expect(result.emails).toEqual(['photo@example.com']);
+    expect(result.matches.email).toEqual(['photo@example.com']);
   });
 
   it('routes docx files through the DOCX parser', async () => {
     jest
-      .spyOn(docxExtraction, 'extractEmailsFromDocxFile')
-      .mockResolvedValue(['docx@example.com']);
+      .spyOn(docxExtraction, 'extractTextFromDocxFile')
+      .mockResolvedValue('docx@example.com');
 
-    const result = await extractEmails({
+    const result = await extractData({
       source: 'files',
       text: '',
       selectedAsset: {
@@ -53,12 +58,13 @@ describe('extractEmails', () => {
         name: 'leads.docx',
         mimeType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
       },
+      enabledTypes: ['email'],
     });
 
-    expect(docxExtraction.extractEmailsFromDocxFile).toHaveBeenCalledWith(
+    expect(docxExtraction.extractTextFromDocxFile).toHaveBeenCalledWith(
       'file:///tmp/leads.docx',
     );
     expect(result.source).toBe('files');
-    expect(result.emails).toEqual(['docx@example.com']);
+    expect(result.matches.email).toEqual(['docx@example.com']);
   });
 });

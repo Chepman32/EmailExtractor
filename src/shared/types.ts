@@ -1,7 +1,18 @@
-export type ExtractionSource = 'text' | 'camera' | 'photos' | 'files';
+import {ExtractedMatches} from './extractedData';
+
+export const EXTRACTION_SOURCES = ['text', 'camera', 'photos', 'files'] as const;
+
+export type ExtractionSource = (typeof EXTRACTION_SOURCES)[number];
+
+export function isExtractionSource(value: unknown): value is ExtractionSource {
+  return (
+    typeof value === 'string' &&
+    (EXTRACTION_SOURCES as readonly string[]).includes(value)
+  );
+}
 
 export type ExtractionResult = {
-  emails: string[];
+  matches: ExtractedMatches;
   source: ExtractionSource;
   rawTextLength: number;
   extractedAt: string;
@@ -11,7 +22,7 @@ export type ExtractionResult = {
 export type HistorySession = {
   id: string;
   source: ExtractionSource;
-  emails: string[];
+  matches: ExtractedMatches;
   createdAt: string;
   inputLabel: string;
 };

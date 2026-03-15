@@ -1,26 +1,41 @@
 import {extractEmailsFromText} from '../../domain/email/parseEmails';
+import {
+  createEmptyMatches,
+  ExtractedMatches,
+} from '../../shared/extractedData';
 import {ExtractionResult} from '../../shared/types';
 import {
   extractFromFile,
   extractFromImage,
   extractFromText as nativeExtractFromText,
 } from '../../native/emailExtractionBridge';
-import {extractEmailsFromDocxFile} from './docxExtraction';
+import {extractTextFromDocxFile} from './docxExtraction';
 import {ExtractionInput} from './types';
 
 function createResult(
-  emails: string[],
+  matches: ExtractedMatches,
   source: ExtractionResult['source'],
   rawTextLength: number,
   warnings: string[] = [],
 ): ExtractionResult {
   return {
-    emails,
+    matches,
     source,
     rawTextLength,
     warnings,
     extractedAt: new Date().toISOString(),
   };
+}
+
+function createEmailOnlyMatches(emails: string[]): ExtractedMatches {
+  return {
+    ...createEmptyMatches(),
+    email: emails,
+  };
+}
+
+function isEmailOnlySelection(enabledTypes: ExtractionInput['enabledTypes']): boolean {
+  return enabledTypes.length === 1 && enabledTypes[0] === 'email';
 }
 
 function getExtension(nameOrUri: string | undefined): string {
@@ -34,18 +49,27 @@ function getExtension(nameOrUri: string | undefined): string {
   return extension.toLowerCase();
 }
 
-export async function extractEmails(input: ExtractionInput): Promise<ExtractionResult> {
+export async function extractData(input: ExtractionInput): Promise<ExtractionResult> {
   if (input.source === 'text') {
-    const jsEmails = extractEmailsFromText(input.text);
+    const isEmailOnly = isEmailOnlySelection(input.enabledTypes);
+    const jsEmails = isEmailOnly ? extractEmailsFromText(input.text) : [];
 
     if (jsEmails.length > 0) {
-      return createResult(jsEmails, 'text', input.text.length);
+      return createResult(
+        createEmailOnlyMatches(jsEmails),
+        'text',
+        input.text.length,
+      );
     }
 
     try {
-      return await nativeExtractFromText(input.text);
+      return await nativeExtractFromText(input.text, input.enabledTypes);
     } catch {
-      return createResult([], 'text', input.text.length);
+      if (isEmailOnly) {
+        return createResult(createEmptyMatches(), 'text', input.text.length);
+      }
+
+      throw new Error('Multi-type extraction is unavailable for this source.');
     }
   }
 
@@ -54,7 +78,10 @@ export async function extractEmails(input: ExtractionInput): Promise<ExtractionR
   }
 
   if (input.source === 'camera' || input.source === 'photos') {
-    const result = await extractFromImage(input.selectedAsset.uri);
+    const result = await extractFromImage(
+      input.selectedAsset.uri,
+      input.enabledTypes,
+    );
 
     return {
       ...result,
@@ -65,10 +92,28 @@ export async function extractEmails(input: ExtractionInput): Promise<ExtractionR
   const extension = getExtension(input.selectedAsset.name ?? input.selectedAsset.uri);
 
   if (extension === 'docx') {
-    const emails = await extractEmailsFromDocxFile(input.selectedAsset.uri);
+    const docxText = await extractTextFromDocxFile(input.selectedAsset.uri);
 
-    return createResult(emails, 'files', 0);
+    if (isEmailOnlySelection(input.enabledTypes)) {
+      return createResult(
+        createEmailOnlyMatches(extractEmailsFromText(docxText)),
+        'files',
+        docxText.length,
+      );
+    }
+
+    const result = await nativeExtractFromText(docxText, input.enabledTypes);
+
+    return {
+      ...result,
+      source: 'files',
+      rawTextLength: docxText.length,
+    };
   }
 
-  return extractFromFile(input.selectedAsset.uri, input.selectedAsset.mimeType ?? undefined);
+  return extractFromFile(
+    input.selectedAsset.uri,
+    input.selectedAsset.mimeType ?? undefined,
+    input.enabledTypes,
+  );
 }

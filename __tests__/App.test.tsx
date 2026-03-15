@@ -2,6 +2,7 @@ import React from 'react';
 import {fireEvent, render, waitFor} from '@testing-library/react-native';
 
 import App from '../App';
+import {createEmptyMatches} from '../src/shared/extractedData';
 import * as historyStorage from '../src/domain/history/historyStorage';
 import {HistorySession} from '../src/shared/types';
 
@@ -18,7 +19,7 @@ describe('App navigation', () => {
       expect(getByTestId('tab-home')).toBeTruthy();
       expect(getByTestId('tab-history')).toBeTruthy();
       expect(getByTestId('tab-settings')).toBeTruthy();
-      expect(getByText('Email Extractor')).toBeTruthy();
+      expect(getByText('Data Extractor')).toBeTruthy();
     });
   });
 
@@ -26,7 +27,10 @@ describe('App navigation', () => {
     const historySession: HistorySession = {
       id: 'session-1',
       source: 'files',
-      emails: ['team@example.com'],
+      matches: {
+        ...createEmptyMatches(),
+        email: ['team@example.com'],
+      },
       createdAt: '2026-03-11T00:00:00.000Z',
       inputLabel: 'Imported.pdf',
     };

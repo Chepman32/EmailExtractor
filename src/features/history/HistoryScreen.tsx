@@ -9,6 +9,10 @@ import {
 } from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
 
+import {
+  EXTRACTABLE_DATA_TYPES,
+  formatDataTypeCount,
+} from '../../shared/extractedData';
 import {readHistory} from '../../domain/history/historyStorage';
 import {HistorySession} from '../../shared/types';
 import {AppTheme, createShadow, themes} from '../../theme/themes';
@@ -48,6 +52,15 @@ function sourceLabel(source: string) {
   }
 
   return 'Text';
+}
+
+function buildSessionSummary(session: HistorySession): string {
+  const summary = EXTRACTABLE_DATA_TYPES.flatMap(type => {
+    const count = session.matches[type].length;
+    return count > 0 ? [formatDataTypeCount(type, count)] : [];
+  });
+
+  return summary.join(' • ') || 'No results stored';
 }
 
 export function HistoryScreen({
@@ -111,7 +124,7 @@ export function HistoryScreen({
               </View>
             </View>
             <Text style={styles.sessionMeta}>
-              {item.emails.length} emails extracted
+              {buildSessionSummary(item)}
             </Text>
             <Text style={styles.sessionTime}>{formatSessionDate(item.createdAt)}</Text>
           </Pressable>

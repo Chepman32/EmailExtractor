@@ -63,25 +63,29 @@ class EmailExtractionModule: NSObject, RCTBridgeModule {
     false
   }
 
-  @objc(extractFromText:resolver:rejecter:)
+  @objc(extractFromText:enabledTypes:resolver:rejecter:)
   func extractFromText(_ input: String,
+                       enabledTypes: [String],
                        resolver resolve: @escaping RCTPromiseResolveBlock,
                        rejecter reject: @escaping RCTPromiseRejectBlock) {
     processingQueue.async {
-      let emails = self.extractEmails(from: input)
-      resolve(self.makeResult(emails: emails, source: "text", rawTextLength: input.count, warnings: []))
+      let resolvedTypes = self.resolveEnabledTypes(enabledTypes)
+      let matches = self.detectMatches(in: input, enabledTypes: resolvedTypes)
+      resolve(self.makeResult(matches: matches, source: "text", rawTextLength: input.count, warnings: []))
     }
   }
 
-  @objc(extractFromImage:resolver:rejecter:)
+  @objc(extractFromImage:enabledTypes:resolver:rejecter:)
   func extractFromImage(_ fileUri: String,
+                        enabledTypes: [String],
                         resolver resolve: @escaping RCTPromiseResolveBlock,
                         rejecter reject: @escaping RCTPromiseRejectBlock) {
     processingQueue.async {
       do {
-        let result = try self.extractFromImageFile(fileUri)
+        let resolvedTypes = self.resolveEnabledTypes(enabledTypes)
+        let result = try self.extractFromImageFile(fileUri, enabledTypes: resolvedTypes)
         resolve(self.makeResult(
-          emails: result.emails,
+          matches: result.matches,
           source: "camera",
           rawTextLength: result.text.count,
           warnings: result.warnings
@@ -93,15 +97,17 @@ class EmailExtractionModule: NSObject, RCTBridgeModule {
     }
   }
 
-  @objc(extractFromFile:mimeType:resolver:rejecter:)
+  @objc(extractFromFile:mimeType:enabledTypes:resolver:rejecter:)
   func extractFromFile(_ fileUri: String,
                        mimeType: String?,
+                       enabledTypes: [String],
                        resolver resolve: @escaping RCTPromiseResolveBlock,
                        rejecter reject: @escaping RCTPromiseRejectBlock) {
     processingQueue.async {
       do {
         let url = try self.resolveFileURL(fileUri)
         let extensionName = url.pathExtension.lowercased()
+        let resolvedTypes = self.resolveEnabledTypes(enabledTypes)
         var warnings: [String] = []
         let sourceText: String
 
@@ -112,15 +118,15 @@ class EmailExtractionModule: NSObject, RCTBridgeModule {
         } else if ["txt", "text", "csv", "md"].contains(extensionName) || (mimeType ?? "").contains("text") {
           sourceText = try self.extractTextFromTextFile(url)
         } else if ["jpg", "jpeg", "png", "heic", "heif", "webp"].contains(extensionName) || (mimeType ?? "").contains("image") {
-          let result = try self.extractFromImageFile(fileUri)
+          let result = try self.extractFromImageFile(fileUri, enabledTypes: resolvedTypes)
           sourceText = result.text
           warnings.append(contentsOf: result.warnings)
         } else {
           throw NSError(domain: "EmailExtractionModule", code: 1001, userInfo: [NSLocalizedDescriptionKey: "Unsupported file type"])
         }
 
-        let emails = self.extractEmails(from: sourceText)
-        resolve(self.makeResult(emails: emails, source: "files", rawTextLength: sourceText.count, warnings: warnings))
+        let matches = self.detectMatches(in: sourceText, enabledTypes: resolvedTypes)
+        resolve(self.makeResult(matches: matches, source: "files", rawTextLength: sourceText.count, warnings: warnings))
       } catch {
         NSLog("[EmailExtraction] extractFromFile failed: %@", error.localizedDescription)
         reject("extract_file_failed", error.localizedDescription, error)
@@ -128,36 +134,38 @@ class EmailExtractionModule: NSObject, RCTBridgeModule {
     }
   }
 
-  @objc(exportEmails:format:resolver:rejecter:)
-  func exportEmails(_ emails: [String],
-                    format: String,
+  @objc(exportExtractedItems:items:format:resolver:rejecter:)
+  func exportExtractedItems(_ itemType: String,
+                            items: [String],
+                            format: String,
                     resolver resolve: @escaping RCTPromiseResolveBlock,
                     rejecter reject: @escaping RCTPromiseRejectBlock) {
     processingQueue.async {
       do {
         let exportFormat = format.lowercased() == "csv" ? "csv" : "txt"
-        let fileName = "emails-\(Int(Date().timeIntervalSince1970)).\(exportFormat)"
+        let normalizedItemType = self.normalizedExportItemType(itemType)
+        let fileName = "\(self.fileStem(for: normalizedItemType))-\(Int(Date().timeIntervalSince1970)).\(exportFormat)"
         let fileURL = URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent(fileName)
         let payload: String
 
         if exportFormat == "csv" {
-          let rows = emails.map { email in "\"\(email.replacingOccurrences(of: "\"", with: "\"\""))\"" }
-          payload = (["email"] + rows).joined(separator: "\n")
+          let rows = items.map { item in "\"\(item.replacingOccurrences(of: "\"", with: "\"\""))\"" }
+          payload = ([self.csvHeader(for: normalizedItemType)] + rows).joined(separator: "\n")
         } else {
-          payload = emails.joined(separator: "\n")
+          payload = items.joined(separator: "\n")
         }
 
         try payload.write(to: fileURL, atomically: true, encoding: .utf8)
         resolve(["fileUri": fileURL.absoluteString])
       } catch {
-        reject("export_failed", "Unable to export emails", error)
+        reject("export_failed", "Unable to export extracted items", error)
       }
     }
   }
 
-  private func makeResult(emails: [String], source: String, rawTextLength: Int, warnings: [String]) -> [String: Any] {
+  private func makeResult(matches: [String: [String]], source: String, rawTextLength: Int, warnings: [String]) -> [String: Any] {
     return [
-      "emails": emails,
+      "matches": matches,
       "source": source,
       "rawTextLength": rawTextLength,
       "extractedAt": ISO8601DateFormatter().string(from: Date()),
@@ -203,7 +211,7 @@ class EmailExtractionModule: NSObject, RCTBridgeModule {
     return image
   }
 
-  private func extractFromImageFile(_ fileUri: String) throws -> (emails: [String], text: String, warnings: [String]) {
+  private func extractFromImageFile(_ fileUri: String, enabledTypes: [String]) throws -> (matches: [String: [String]], text: String, warnings: [String]) {
     let image = try loadImage(from: fileUri)
     var collectedText: [String] = []
     var warnings: [String] = []
@@ -218,9 +226,9 @@ class EmailExtractionModule: NSObject, RCTBridgeModule {
       warnings.append("Primary OCR pass failed")
     }
 
-    var emails = extractEmails(from: collectedText.joined(separator: "\n"))
+    var matches = detectMatches(in: collectedText.joined(separator: "\n"), enabledTypes: enabledTypes)
 
-    if emails.isEmpty, let highContrastImage = makeHighContrastImage(from: image) {
+    if totalMatchCount(in: matches) == 0, let highContrastImage = makeHighContrastImage(from: image) {
       do {
         let fallbackText = try ocrText(from: highContrastImage)
 
@@ -231,10 +239,10 @@ class EmailExtractionModule: NSObject, RCTBridgeModule {
         warnings.append("High-contrast OCR fallback failed")
       }
 
-      emails = extractEmails(from: collectedText.joined(separator: "\n"))
+      matches = detectMatches(in: collectedText.joined(separator: "\n"), enabledTypes: enabledTypes)
     }
 
-    return (emails, collectedText.joined(separator: "\n"), warnings)
+    return (matches, collectedText.joined(separator: "\n"), warnings)
   }
 
   private func ocrText(from image: UIImage) throws -> String {
@@ -367,6 +375,150 @@ class EmailExtractionModule: NSObject, RCTBridgeModule {
     }
 
     throw NSError(domain: "EmailExtractionModule", code: 1006, userInfo: [NSLocalizedDescriptionKey: "Unable to decode text file"])
+  }
+
+  private func emptyMatches() -> [String: [String]] {
+    return [
+      "email": [],
+      "date": [],
+      "link": []
+    ]
+  }
+
+  private func resolveEnabledTypes(_ enabledTypes: [String]) -> [String] {
+    let supportedTypes = ["email", "date", "link"]
+    var resolvedTypes: [String] = []
+
+    for type in enabledTypes {
+      guard supportedTypes.contains(type), !resolvedTypes.contains(type) else {
+        continue
+      }
+
+      resolvedTypes.append(type)
+    }
+
+    return resolvedTypes.isEmpty ? ["email"] : resolvedTypes
+  }
+
+  private func detectMatches(in input: String, enabledTypes: [String]) -> [String: [String]] {
+    guard !input.isEmpty else {
+      return emptyMatches()
+    }
+
+    var matches = emptyMatches()
+
+    if enabledTypes.contains("email") {
+      matches["email"] = extractEmails(from: input)
+    }
+
+    if enabledTypes.contains("date") {
+      matches["date"] = extractDates(from: input)
+    }
+
+    if enabledTypes.contains("link") {
+      matches["link"] = extractLinks(from: input)
+    }
+
+    return matches
+  }
+
+  private func totalMatchCount(in matches: [String: [String]]) -> Int {
+    return matches.values.reduce(0) { partialResult, items in
+      partialResult + items.count
+    }
+  }
+
+  private func extractLinks(from input: String) -> [String] {
+    guard let detector = try? NSDataDetector(types: NSTextCheckingResult.CheckingType.link.rawValue) else {
+      return []
+    }
+
+    let nsRange = NSRange(input.startIndex..<input.endIndex, in: input)
+    var result: [String] = []
+    var seen = Set<String>()
+
+    detector.enumerateMatches(in: input, options: [], range: nsRange) { match, _, _ in
+      guard let match = match,
+            let url = match.url,
+            let scheme = url.scheme?.lowercased(),
+            ["http", "https"].contains(scheme) else {
+        return
+      }
+
+      let value = url.absoluteString
+      let dedupeKey = value.lowercased()
+
+      if seen.contains(dedupeKey) {
+        return
+      }
+
+      seen.insert(dedupeKey)
+      result.append(value)
+    }
+
+    return result
+  }
+
+  private func extractDates(from input: String) -> [String] {
+    guard let detector = try? NSDataDetector(types: NSTextCheckingResult.CheckingType.date.rawValue) else {
+      return []
+    }
+
+    let nsRange = NSRange(input.startIndex..<input.endIndex, in: input)
+    var result: [String] = []
+    var seen = Set<String>()
+
+    detector.enumerateMatches(in: input, options: [], range: nsRange) { match, _, _ in
+      guard let match = match,
+            match.date != nil,
+            let range = Range(match.range, in: input) else {
+        return
+      }
+
+      let value = String(input[range]).trimmingCharacters(in: .whitespacesAndNewlines)
+
+      guard !value.isEmpty, !seen.contains(value) else {
+        return
+      }
+
+      seen.insert(value)
+      result.append(value)
+    }
+
+    return result
+  }
+
+  private func normalizedExportItemType(_ itemType: String) -> String {
+    switch itemType {
+    case "date":
+      return "date"
+    case "link":
+      return "link"
+    default:
+      return "email"
+    }
+  }
+
+  private func fileStem(for itemType: String) -> String {
+    switch itemType {
+    case "date":
+      return "dates"
+    case "link":
+      return "links"
+    default:
+      return "emails"
+    }
+  }
+
+  private func csvHeader(for itemType: String) -> String {
+    switch itemType {
+    case "date":
+      return "date"
+    case "link":
+      return "link"
+    default:
+      return "email"
+    }
   }
 
   private func extractEmails(from input: String) -> [String] {

@@ -1,6 +1,7 @@
 import React, {useMemo, useState} from 'react';
 import {
   Pressable,
+  ScrollView,
   StyleSheet,
   Text,
   View,
@@ -8,9 +9,16 @@ import {
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import {SafeAreaView} from 'react-native-safe-area-context';
 
+import {
+  DataTypeSelection,
+  ExtractableDataType,
+  hasEnabledDataType,
+} from '../../shared/extractedData';
 import {AppTheme, createShadow, ThemeId, themeOptions, themes} from '../../theme/themes';
 
 type SettingsScreenProps = {
+  dataTypeSelection: DataTypeSelection;
+  onDataTypeSelectionChange: (selection: DataTypeSelection) => void;
   onThemeChange: (themeId: ThemeId) => void;
   selectedThemeId: ThemeId;
   theme?: AppTheme;
@@ -23,30 +31,81 @@ const themeIcons: Record<ThemeId, string> = {
   mono: 'circle-slice-8',
 };
 
+const dataTypeOptions: Array<{
+  description: string;
+  icon: string;
+  id: ExtractableDataType;
+  label: string;
+}> = [
+  {
+    id: 'email',
+    label: 'Email',
+    icon: 'email-outline',
+    description: 'Capture email addresses with OCR-tolerant matching.',
+  },
+  {
+    id: 'date',
+    label: 'Dates',
+    icon: 'calendar-month-outline',
+    description: 'Detect date strings from text, documents, and OCR output.',
+  },
+  {
+    id: 'link',
+    label: 'Links',
+    icon: 'link-variant',
+    description: 'Pull out URLs and web links from the scanned content.',
+  },
+];
+
 export function SettingsScreen({
+  dataTypeSelection,
+  onDataTypeSelectionChange,
   onThemeChange,
   selectedThemeId,
   theme = themes.light,
 }: SettingsScreenProps) {
-  const [message, setMessage] = useState<string | null>(null);
+  const [statusMessage, setStatusMessage] = useState<{
+    kind: 'success' | 'warning';
+    text: string;
+  } | null>(null);
   const styles = useMemo(() => createStyles(theme), [theme]);
 
   const handleThemePress = (nextThemeId: ThemeId) => {
     onThemeChange(nextThemeId);
-    setMessage(`${themes[nextThemeId].label} theme applied.`);
+    setStatusMessage({
+      kind: 'success',
+      text: `${themes[nextThemeId].label} theme applied.`,
+    });
+  };
+
+  const handleDataTypePress = (nextType: ExtractableDataType) => {
+    const nextSelection = {
+      ...dataTypeSelection,
+      [nextType]: !dataTypeSelection[nextType],
+    };
+
+    if (!hasEnabledDataType(nextSelection)) {
+      setStatusMessage({
+        kind: 'warning',
+        text: 'Select at least one data type.',
+      });
+      return;
+    }
+
+    onDataTypeSelectionChange(nextSelection);
+    setStatusMessage({
+      kind: 'success',
+      text: `${dataTypeOptions.find(option => option.id === nextType)?.label} extraction ${
+        nextSelection[nextType] ? 'enabled' : 'disabled'
+      }.`,
+    });
   };
 
   return (
     <SafeAreaView edges={['top']} style={styles.safeArea}>
-      <View style={styles.content}>
-        <View style={styles.heroCard}>
-          <Text style={styles.heroEyebrow}>Settings</Text>
-          <Text style={styles.heroTitle}>Adjust the atmosphere</Text>
-          <Text style={styles.heroSubtitle}>
-            Swap the entire app palette and preview each look before applying it.
-          </Text>
-        </View>
-
+      <ScrollView
+        contentContainerStyle={styles.content}
+        showsVerticalScrollIndicator={false}>
         <View style={styles.themeCard}>
           <Text style={styles.sectionEyebrow}>Theme</Text>
           <Text style={styles.sectionTitle}>Choose a look</Text>
@@ -126,8 +185,95 @@ export function SettingsScreen({
           </View>
         </View>
 
-        {message ? <Text style={styles.successText}>{message}</Text> : null}
-      </View>
+        <View style={styles.dataTypeCard}>
+          <Text style={styles.sectionEyebrow}>Data types</Text>
+          <Text style={styles.sectionTitle}>Choose what to extract</Text>
+          <Text style={styles.sectionSubtitle}>
+            These selections apply across the app for every new scan.
+          </Text>
+
+          <View style={styles.dataTypeList}>
+            {dataTypeOptions.map(option => {
+              const isSelected = dataTypeSelection[option.id];
+
+              return (
+                <Pressable
+                  key={option.id}
+                  onPress={() => handleDataTypePress(option.id)}
+                  testID={`data-type-${option.id}`}
+                  style={({pressed}) => [
+                    styles.dataTypeOption,
+                    {
+                      backgroundColor: isSelected
+                        ? theme.colors.primarySoft
+                        : theme.colors.surfaceMuted,
+                      borderColor: isSelected
+                        ? theme.colors.primary
+                        : theme.colors.border,
+                    },
+                    pressed && styles.dataTypeOptionPressed,
+                  ]}>
+                  <View style={styles.dataTypeOptionCopy}>
+                    <View
+                      style={[
+                        styles.dataTypeIconWrap,
+                        {
+                          backgroundColor: isSelected
+                            ? theme.colors.primary
+                            : theme.colors.surface,
+                        },
+                      ]}>
+                      <MaterialCommunityIcons
+                        color={isSelected ? theme.colors.primaryOn : theme.colors.primary}
+                        name={option.icon}
+                        size={18}
+                      />
+                    </View>
+
+                    <View style={styles.dataTypeCopy}>
+                      <Text
+                        style={[
+                          styles.dataTypeTitle,
+                          {
+                            color: isSelected
+                              ? theme.colors.primarySoftText
+                              : theme.colors.textPrimary,
+                          },
+                        ]}>
+                        {option.label}
+                      </Text>
+                      <Text
+                        style={[
+                          styles.dataTypeDescription,
+                          {color: theme.colors.textSecondary},
+                        ]}>
+                        {option.description}
+                      </Text>
+                    </View>
+                  </View>
+
+                  <MaterialCommunityIcons
+                    color={isSelected ? theme.colors.primary : theme.colors.textMuted}
+                    name={isSelected ? 'check-circle' : 'circle-outline'}
+                    size={20}
+                  />
+                </Pressable>
+              );
+            })}
+          </View>
+        </View>
+
+        {statusMessage ? (
+          <Text
+            style={
+              statusMessage.kind === 'warning'
+                ? styles.warningText
+                : styles.successText
+            }>
+            {statusMessage.text}
+          </Text>
+        ) : null}
+      </ScrollView>
     </SafeAreaView>
   );
 }
@@ -139,40 +285,22 @@ function createStyles(theme: AppTheme) {
       backgroundColor: theme.colors.appBackground,
     },
     content: {
-      flex: 1,
+      flexGrow: 1,
       paddingHorizontal: 18,
       paddingTop: 8,
       paddingBottom: 28,
     },
-    heroCard: {
-      backgroundColor: theme.colors.heroBackground,
-      borderRadius: 30,
-      paddingHorizontal: 22,
-      paddingVertical: 22,
-      marginBottom: 18,
+    themeCard: {
+      backgroundColor: theme.colors.surface,
+      borderRadius: 24,
+      borderWidth: 1,
+      borderColor: theme.colors.border,
+      paddingHorizontal: 18,
+      paddingVertical: 18,
+      marginBottom: 14,
       ...createShadow(theme.colors.shadow, 0.08, 18, 10, 4),
     },
-    heroEyebrow: {
-      fontSize: 12,
-      fontWeight: '700',
-      letterSpacing: 1.1,
-      textTransform: 'uppercase',
-      color: theme.colors.heroTextSecondary,
-      marginBottom: 10,
-    },
-    heroTitle: {
-      fontSize: 30,
-      fontWeight: '800',
-      letterSpacing: -1,
-      color: theme.colors.heroTextPrimary,
-      marginBottom: 10,
-    },
-    heroSubtitle: {
-      fontSize: 14,
-      lineHeight: 21,
-      color: theme.colors.heroTextSecondary,
-    },
-    themeCard: {
+    dataTypeCard: {
       backgroundColor: theme.colors.surface,
       borderRadius: 24,
       borderWidth: 1,
@@ -220,6 +348,48 @@ function createStyles(theme: AppTheme) {
     },
     themeOptionPressed: {
       opacity: 0.94,
+    },
+    dataTypeList: {
+      gap: 10,
+    },
+    dataTypeOption: {
+      borderRadius: 20,
+      borderWidth: 1.5,
+      paddingHorizontal: 14,
+      paddingVertical: 14,
+      flexDirection: 'row',
+      alignItems: 'flex-start',
+      justifyContent: 'space-between',
+      gap: 12,
+      ...createShadow(theme.colors.shadow, 0.05, 12, 6, 2),
+    },
+    dataTypeOptionPressed: {
+      opacity: 0.95,
+    },
+    dataTypeOptionCopy: {
+      flex: 1,
+      flexDirection: 'row',
+      gap: 12,
+    },
+    dataTypeIconWrap: {
+      width: 36,
+      height: 36,
+      borderRadius: 18,
+      alignItems: 'center',
+      justifyContent: 'center',
+      marginTop: 2,
+    },
+    dataTypeCopy: {
+      flex: 1,
+    },
+    dataTypeTitle: {
+      fontSize: 16,
+      fontWeight: '700',
+      marginBottom: 4,
+    },
+    dataTypeDescription: {
+      fontSize: 13,
+      lineHeight: 18,
     },
     themePreview: {
       height: 58,
@@ -272,6 +442,11 @@ function createStyles(theme: AppTheme) {
       fontSize: 13,
       lineHeight: 19,
       color: theme.colors.successText,
+    },
+    warningText: {
+      fontSize: 13,
+      lineHeight: 19,
+      color: theme.colors.warningText,
     },
   });
 }
