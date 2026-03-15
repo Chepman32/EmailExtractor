@@ -239,15 +239,15 @@ function AppShell() {
                         isActive && styles.tabBadgeActive,
                         {transform: [{scale: badgeScale}]},
                       ]}>
-                      <MaterialCommunityIcons
-                        color={
-                          isActive
-                            ? theme.colors.tabLabelActive
-                            : theme.colors.tabInactiveIcon
-                        }
-                        name={isActive ? tab.icon.active : tab.icon.inactive}
-                        size={18}
-                      />
+	                      <MaterialCommunityIcons
+	                        color={
+	                          isActive
+	                            ? theme.colors.tabLabelActive
+	                            : theme.colors.tabInactiveIcon
+	                        }
+	                        name={isActive ? tab.icon.active : tab.icon.inactive}
+	                        size={22}
+	                      />
                     </Animated.View>
                     <Text
                       style={[
@@ -330,15 +330,15 @@ function createStyles(theme: AppTheme) {
       opacity: 0.94,
       transform: [{scale: 0.985}],
     },
-    tabBadge: {
-      width: 30,
-      height: 30,
-      borderRadius: 15,
-      backgroundColor: theme.colors.tabInactiveBadgeBackground,
-      alignItems: 'center',
-      justifyContent: 'center',
-      marginBottom: 6,
-    },
+	    tabBadge: {
+	      width: 36,
+	      height: 36,
+	      borderRadius: 18,
+	      backgroundColor: theme.colors.tabInactiveBadgeBackground,
+	      alignItems: 'center',
+	      justifyContent: 'center',
+	      marginBottom: 6,
+	    },
     tabBadgeActive: {
       backgroundColor:
         theme.id === 'dark'

@@ -429,31 +429,71 @@ class EmailExtractionModule: NSObject, RCTBridgeModule {
   }
 
   private func extractLinks(from input: String) -> [String] {
-    guard let detector = try? NSDataDetector(types: NSTextCheckingResult.CheckingType.link.rawValue) else {
-      return []
-    }
-
     let nsRange = NSRange(input.startIndex..<input.endIndex, in: input)
     var result: [String] = []
     var seen = Set<String>()
+    var claimedRanges: [NSRange] = []
 
-    detector.enumerateMatches(in: input, options: [], range: nsRange) { match, _, _ in
-      guard let match = match,
-            let url = match.url,
-            let scheme = url.scheme?.lowercased(),
-            ["http", "https"].contains(scheme) else {
-        return
+    if let detector = try? NSDataDetector(types: NSTextCheckingResult.CheckingType.link.rawValue) {
+      detector.enumerateMatches(in: input, options: [], range: nsRange) { match, _, _ in
+        guard let match = match,
+              let url = match.url,
+              let range = Range(match.range, in: input),
+              let scheme = url.scheme?.lowercased(),
+              ["http", "https"].contains(scheme) else {
+          return
+        }
+
+        let rawValue = trimLinkCandidate(String(input[range]))
+        let value: String
+
+        if rawValue.range(of: #"^https?://"#, options: [.regularExpression, .caseInsensitive]) != nil {
+          value = rawValue
+        } else if let normalized = normalizeBareLink(rawValue) {
+          value = normalized
+        } else {
+          return
+        }
+
+        let dedupeKey = value.lowercased()
+
+        if seen.contains(dedupeKey) {
+          return
+        }
+
+        seen.insert(dedupeKey)
+        claimedRanges.append(match.range)
+        result.append(value)
+      }
+    }
+
+    guard let regex = try? NSRegularExpression(
+      pattern: #"(?<![@\p{L}\p{N}_])((?:www\.)?(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,63}(?::\d{2,5})?(?:/[^\s<>()\[\]{}"']*)?(?:\?[^\s<>()\[\]{}"']*)?(?:#[^\s<>()\[\]{}"']*)?)"#,
+      options: [.caseInsensitive]
+    ) else {
+      return result
+    }
+
+    for match in regex.matches(in: input, options: [], range: nsRange) {
+      let candidateRange = match.range(at: 1)
+
+      if claimedRanges.contains(where: { NSIntersectionRange($0, candidateRange).length > 0 }) {
+        continue
       }
 
-      let value = url.absoluteString
-      let dedupeKey = value.lowercased()
+      guard let range = Range(candidateRange, in: input),
+            let normalized = normalizeBareLink(String(input[range])) else {
+        continue
+      }
+
+      let dedupeKey = normalized.lowercased()
 
       if seen.contains(dedupeKey) {
-        return
+        continue
       }
 
       seen.insert(dedupeKey)
-      result.append(value)
+      result.append(normalized)
     }
 
     return result
@@ -604,6 +644,72 @@ class EmailExtractionModule: NSObject, RCTBridgeModule {
       .replacingOccurrences(of: "\u{FEFF}", with: "")
   }
 
+  private func trimLinkCandidate(_ value: String) -> String {
+    var candidate = removeZeroWidthCharacters(from: value)
+      .trimmingCharacters(in: CharacterSet(charactersIn: "[](){}<>\"'` ").union(.whitespacesAndNewlines))
+
+    while let lastCharacter = candidate.last, ".,;:!?".contains(lastCharacter) {
+      candidate.removeLast()
+    }
+
+    return candidate
+  }
+
+  private func normalizeBareLink(_ value: String) -> String? {
+    let candidate = trimLinkCandidate(value)
+
+    guard !candidate.isEmpty, !candidate.contains("@") else {
+      return nil
+    }
+
+    let hostEndIndex = candidate.firstIndex(where: { ["/", "?", "#"].contains($0) }) ?? candidate.endIndex
+    let hostAndPort = String(candidate[..<hostEndIndex])
+    let host: String
+
+    if let colonIndex = hostAndPort.lastIndex(of: ":") {
+      let port = hostAndPort[hostAndPort.index(after: colonIndex)...]
+
+      if !port.isEmpty && port.allSatisfy(\.isNumber) {
+        host = String(hostAndPort[..<colonIndex])
+      } else {
+        host = hostAndPort
+      }
+    } else {
+      host = hostAndPort
+    }
+
+    guard normalizedDomain(from: host) != nil else {
+      return nil
+    }
+
+    return candidate
+  }
+
+  private func normalizedDomain(from value: String) -> String? {
+    let domain = value.lowercased()
+
+    if domain.hasPrefix(".") || domain.hasSuffix(".") || domain.contains("..") || domain.hasPrefix("-") || domain.hasSuffix("-") {
+      return nil
+    }
+
+    let labels = domain.split(separator: ".", omittingEmptySubsequences: false).map(String.init)
+
+    if labels.count < 2 || labels.contains(where: {
+      $0.isEmpty ||
+      $0.hasPrefix("-") ||
+      $0.hasSuffix("-") ||
+      $0.rangeOfCharacter(from: CharacterSet(charactersIn: "abcdefghijklmnopqrstuvwxyz0123456789-").inverted) != nil
+    }) {
+      return nil
+    }
+
+    guard let topLevelLabel = labels.last, topLevelLabel.count >= 2, topLevelLabel.count <= 63 else {
+      return nil
+    }
+
+    return domain
+  }
+
   private func normalizeEmail(_ email: String, permissive: Bool = false) -> String? {
     let trimmed = removeZeroWidthCharacters(from: email)
       .trimmingCharacters(in: CharacterSet(charactersIn: "[](){}<>\"'`.,;:!? ").union(.whitespacesAndNewlines))
@@ -640,24 +746,7 @@ class EmailExtractionModule: NSObject, RCTBridgeModule {
       return nil
     }
 
-    let domain = domainRaw.lowercased()
-
-    if domain.hasPrefix(".") || domain.hasSuffix(".") || domain.contains("..") || domain.hasPrefix("-") || domain.hasSuffix("-") {
-      return nil
-    }
-
-    let labels = domain.split(separator: ".", omittingEmptySubsequences: false).map(String.init)
-
-    if labels.contains(where: {
-      $0.isEmpty ||
-      $0.hasPrefix("-") ||
-      $0.hasSuffix("-") ||
-      $0.rangeOfCharacter(from: CharacterSet(charactersIn: "abcdefghijklmnopqrstuvwxyz0123456789-").inverted) != nil
-    }) {
-      return nil
-    }
-
-    guard let topLevelLabel = labels.last, topLevelLabel.count >= 2, topLevelLabel.count <= 63 else {
+    guard let domain = normalizedDomain(from: domainRaw) else {
       return nil
     }
 
