@@ -1,9 +1,11 @@
-import React, {useMemo, useState} from 'react';
+import React, {useEffect, useMemo, useRef, useState} from 'react';
 import {
+  Animated,
   Pressable,
   ScrollView,
   StyleSheet,
   Text,
+  useWindowDimensions,
   View,
 } from 'react-native';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -153,6 +155,7 @@ export function OnboardingFlow({
   onComplete,
   theme,
 }: OnboardingFlowProps) {
+  const {width} = useWindowDimensions();
   const [stepIndex, setStepIndex] = useState(0);
   const [dataTypeSelection, setDataTypeSelection] = useState<DataTypeSelection>(
     initialSelection,
@@ -163,6 +166,13 @@ export function OnboardingFlow({
     'photos',
   ]);
   const [hasRunPreview, setHasRunPreview] = useState(false);
+  const scrollViewRef = useRef<ScrollView>(null);
+  const transitionDirectionRef = useRef<1 | -1>(1);
+  const hasAnimatedOnceRef = useRef(false);
+  const slideTranslateX = useRef(new Animated.Value(0)).current;
+  const slideTranslateY = useRef(new Animated.Value(0)).current;
+  const slideScale = useRef(new Animated.Value(1)).current;
+  const slideOpacity = useRef(new Animated.Value(1)).current;
 
   const styles = useMemo(() => createStyles(theme), [theme]);
   const enabledTypes = getEnabledDataTypes(dataTypeSelection);
@@ -174,6 +184,7 @@ export function OnboardingFlow({
   );
   const currentStep = ONBOARDING_STEPS[stepIndex];
   const progress = (stepIndex + 1) / ONBOARDING_STEPS.length;
+  const transitionDistance = Math.min(Math.max(width * 0.12, 36), 64);
   const typesSummary = formatLabelList(
     resolvedTypes.map(type => DATA_TYPE_LABELS[type].toLowerCase()),
   );
@@ -213,6 +224,15 @@ export function OnboardingFlow({
     onComplete(resolveSelection(dataTypeSelection));
   };
 
+  const goToStep = (nextIndex: number, direction: 1 | -1) => {
+    if (nextIndex === stepIndex) {
+      return;
+    }
+
+    transitionDirectionRef.current = direction;
+    setStepIndex(nextIndex);
+  };
+
   const handlePrimaryAction = () => {
     if (!canContinue) {
       return;
@@ -228,10 +248,68 @@ export function OnboardingFlow({
       return;
     }
 
-    setStepIndex(index =>
-      Math.min(index + 1, ONBOARDING_STEPS.length - 1),
-    );
+    goToStep(Math.min(stepIndex + 1, ONBOARDING_STEPS.length - 1), 1);
   };
+
+  useEffect(() => {
+    if (!hasAnimatedOnceRef.current) {
+      hasAnimatedOnceRef.current = true;
+      return;
+    }
+
+    scrollViewRef.current?.scrollTo({y: 0, animated: false});
+
+    slideTranslateX.stopAnimation();
+    slideTranslateY.stopAnimation();
+    slideScale.stopAnimation();
+    slideOpacity.stopAnimation();
+
+    const direction = transitionDirectionRef.current;
+
+    slideTranslateX.setValue(direction * transitionDistance);
+    slideTranslateY.setValue(18);
+    slideScale.setValue(0.985);
+    slideOpacity.setValue(0);
+
+    Animated.parallel([
+      Animated.spring(slideTranslateX, {
+        toValue: 0,
+        velocity: direction * 3.6,
+        stiffness: 260,
+        damping: 24,
+        mass: 0.9,
+        useNativeDriver: true,
+      }),
+      Animated.spring(slideTranslateY, {
+        toValue: 0,
+        velocity: 1.8,
+        stiffness: 230,
+        damping: 22,
+        mass: 0.92,
+        useNativeDriver: true,
+      }),
+      Animated.spring(slideScale, {
+        toValue: 1,
+        velocity: 1.4,
+        stiffness: 280,
+        damping: 18,
+        mass: 0.82,
+        useNativeDriver: true,
+      }),
+      Animated.timing(slideOpacity, {
+        toValue: 1,
+        duration: 220,
+        useNativeDriver: true,
+      }),
+    ]).start();
+  }, [
+    stepIndex,
+    slideOpacity,
+    slideScale,
+    slideTranslateX,
+    slideTranslateY,
+    transitionDistance,
+  ]);
 
   const toggleDataType = (type: ExtractableDataType) => {
     setDataTypeSelection(selection => ({
@@ -664,17 +742,31 @@ export function OnboardingFlow({
         </View>
 
         <ScrollView
+          ref={scrollViewRef}
           bounces={false}
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}>
-          {renderStep()}
+          <Animated.View
+            style={[
+              styles.stepContent,
+              {
+                opacity: slideOpacity,
+                transform: [
+                  {translateX: slideTranslateX},
+                  {translateY: slideTranslateY},
+                  {scale: slideScale},
+                ],
+              },
+            ]}>
+            {renderStep()}
+          </Animated.View>
         </ScrollView>
 
         <View style={styles.footer}>
           <Pressable
             disabled={stepIndex === 0}
             onPress={() => {
-              setStepIndex(index => Math.max(index - 1, 0));
+              goToStep(Math.max(stepIndex - 1, 0), -1);
             }}
             testID="onboarding-back"
             style={({pressed}) => [
@@ -767,6 +859,8 @@ function createStyles(theme: AppTheme) {
     },
     scrollContent: {
       paddingBottom: 20,
+    },
+    stepContent: {
       gap: 18,
     },
     heroCard: {
