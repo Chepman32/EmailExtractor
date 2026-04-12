@@ -1,6 +1,5 @@
 import React, {
   forwardRef,
-  useRef,
   useImperativeHandle,
   useMemo,
   useState,
@@ -9,6 +8,8 @@ import {
   ActivityIndicator,
   Alert,
   FlatList,
+  InputAccessoryView,
+  Keyboard,
   KeyboardAvoidingView,
   Platform,
   Pressable,
@@ -91,6 +92,8 @@ type ResultSection = {
   type: ExtractableDataType;
 };
 
+const TEXT_INPUT_ACCESSORY_VIEW_ID = 'extractor-text-input-accessory';
+
 function buildInputLabel(source: SourceId, text: string, asset: SelectedAsset | null): string {
   if (source === 'text') {
     return text.trim().slice(0, 64) || 'Manual text';
@@ -170,7 +173,6 @@ export const ExtractorScreen = forwardRef<
   const [result, setResult] = useState<ExtractionResult | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isExtracting, setIsExtracting] = useState(false);
-  const textInputRef = useRef<TextInput>(null);
   const styles = useMemo(() => createStyles(theme), [theme]);
   const enabledTypes = useMemo(
     () => getEnabledDataTypes(dataTypeSelection),
@@ -339,7 +341,6 @@ export const ExtractorScreen = forwardRef<
       setErrorMessage(null);
       setResult(null);
       setText(clipboardText);
-      textInputRef.current?.focus();
     } catch {
       setErrorMessage('Unable to paste from clipboard.');
     }
@@ -577,13 +578,15 @@ export const ExtractorScreen = forwardRef<
 
           {source === 'text' ? (
             <TextInput
-              ref={textInputRef}
               multiline
               placeholder="Paste text to scan for the selected data types"
               placeholderTextColor={theme.colors.textMuted}
               style={styles.textInput}
               value={text}
               onChangeText={setText}
+              inputAccessoryViewID={
+                Platform.OS === 'ios' ? TEXT_INPUT_ACCESSORY_VIEW_ID : undefined
+              }
             />
           ) : (
             <View style={styles.assetCard}>
@@ -698,6 +701,23 @@ export const ExtractorScreen = forwardRef<
           }
           renderItem={renderResultSection}
         />
+        {Platform.OS === 'ios' ? (
+          <InputAccessoryView nativeID={TEXT_INPUT_ACCESSORY_VIEW_ID}>
+            <View style={styles.keyboardAccessory}>
+              <Pressable
+                accessibilityLabel="Dismiss keyboard"
+                accessibilityRole="button"
+                onPress={Keyboard.dismiss}
+                testID="keyboard-dismiss-button"
+                style={({pressed}) => [
+                  styles.keyboardAccessoryButton,
+                  pressed && styles.keyboardAccessoryButtonPressed,
+                ]}>
+                <Text style={styles.keyboardAccessoryButtonText}>Dismiss</Text>
+              </Pressable>
+            </View>
+          </InputAccessoryView>
+        ) : null}
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
@@ -711,6 +731,28 @@ function createStyles(theme: AppTheme) {
     },
     flex: {
       flex: 1,
+    },
+    keyboardAccessory: {
+      alignItems: 'flex-end',
+      backgroundColor: theme.colors.surface,
+      borderTopWidth: 1,
+      borderColor: theme.colors.border,
+      paddingHorizontal: 16,
+      paddingVertical: 10,
+    },
+    keyboardAccessoryButton: {
+      backgroundColor: theme.colors.primarySoft,
+      borderRadius: 999,
+      paddingHorizontal: 14,
+      paddingVertical: 8,
+    },
+    keyboardAccessoryButtonPressed: {
+      backgroundColor: theme.colors.primarySoftPressed,
+    },
+    keyboardAccessoryButtonText: {
+      color: theme.colors.primarySoftText,
+      fontSize: 15,
+      fontWeight: '700',
     },
     scrollContent: {
       flexGrow: 1,

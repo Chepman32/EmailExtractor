@@ -1,5 +1,6 @@
 import React from 'react';
 import {fireEvent, render, waitFor} from '@testing-library/react-native';
+import {Keyboard, Platform} from 'react-native';
 import Clipboard from '@react-native-clipboard/clipboard';
 import {ExtractorScreen} from './ExtractorScreen';
 import * as historyStorage from '../../domain/history/historyStorage';
@@ -78,6 +79,24 @@ describe('ExtractorScreen', () => {
     await waitFor(() => {
       expect(getByDisplayValue('clipboard@example.com')).toBeTruthy();
     });
+  });
+
+  it('shows an iOS keyboard dismiss button above the keyboard', () => {
+    const dismissSpy = jest.spyOn(Keyboard, 'dismiss');
+    const {queryByTestId} = render(
+      <ExtractorScreen dataTypeSelection={defaultDataTypeSelection} />,
+    );
+
+    const dismissButton = queryByTestId('keyboard-dismiss-button');
+
+    if (Platform.OS === 'ios') {
+      expect(dismissButton).toBeTruthy();
+      fireEvent.press(dismissButton!);
+      expect(dismissSpy).toHaveBeenCalled();
+      return;
+    }
+
+    expect(dismissButton).toBeNull();
   });
 
   it('keeps extracted results visible when history persistence fails', async () => {
