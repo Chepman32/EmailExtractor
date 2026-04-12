@@ -629,7 +629,7 @@ export const ExtractorScreen = forwardRef<
             <ActivityIndicator color={theme.colors.primaryOn} />
           ) : (
             <View style={styles.extractButtonArrow}>
-              <Text style={styles.extractButtonArrowText}>→</Text>
+              <Text style={styles.extractButtonArrowText}>{'>'}</Text>
             </View>
           )}
         </Pressable>

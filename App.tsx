@@ -20,10 +20,16 @@ import {
   persistDataTypeSelection,
   readDataTypeSelection,
 } from './src/features/settings/dataTypeStorage';
+import {OnboardingFlow} from './src/features/onboarding/OnboardingFlow';
+import {
+  persistOnboardingCompletion,
+  readOnboardingCompletion,
+} from './src/features/onboarding/onboardingStorage';
 import {SettingsScreen} from './src/features/settings/SettingsScreen';
 import {
   createDefaultDataTypeSelection,
   DataTypeSelection,
+  hasEnabledDataType,
 } from './src/shared/extractedData';
 import {HistorySession} from './src/shared/types';
 import {persistThemePreference, readThemePreference} from './src/theme/themeStorage';
@@ -59,6 +65,9 @@ function AppShell() {
     createDefaultDataTypeSelection(),
   );
   const [themeId, setThemeId] = useState<ThemeId>('light');
+  const [hasCompletedOnboarding, setHasCompletedOnboarding] = useState<boolean | null>(
+    null,
+  );
   const animatedTabIndex = useRef(new Animated.Value(0)).current;
   const animatedPillScale = useRef(new Animated.Value(1)).current;
   const previousTabIndexRef = useRef(0);
@@ -71,17 +80,25 @@ function AppShell() {
   const tabSegmentWidth = tabTrackWidth / TABS.length;
 
   useEffect(() => {
-    readThemePreference()
-      .then(setThemeId)
-      .catch(() => {
-        setThemeId('light');
-      });
+    let isMounted = true;
 
-    readDataTypeSelection()
-      .then(setDataTypeSelection)
-      .catch(() => {
-        setDataTypeSelection(createDefaultDataTypeSelection());
-      });
+    Promise.all([
+      readThemePreference().catch(() => 'light' as ThemeId),
+      readDataTypeSelection().catch(() => createDefaultDataTypeSelection()),
+      readOnboardingCompletion().catch(() => false),
+    ]).then(([nextThemeId, nextDataTypeSelection, nextOnboardingState]) => {
+      if (!isMounted) {
+        return;
+      }
+
+      setThemeId(nextThemeId);
+      setDataTypeSelection(nextDataTypeSelection);
+      setHasCompletedOnboarding(nextOnboardingState);
+    });
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   useEffect(() => {
@@ -131,7 +148,40 @@ function AppShell() {
     persistDataTypeSelection(nextSelection).catch(() => {});
   };
 
+  const handleOnboardingComplete = (nextSelection: DataTypeSelection) => {
+    const resolvedSelection = hasEnabledDataType(nextSelection)
+      ? nextSelection
+      : createDefaultDataTypeSelection();
+
+    setDataTypeSelection(resolvedSelection);
+    setHasCompletedOnboarding(true);
+    persistDataTypeSelection(resolvedSelection).catch(() => {});
+    persistOnboardingCompletion().catch(() => {});
+  };
+
   const activePillTranslateX = Animated.multiply(animatedTabIndex, tabSegmentWidth);
+
+  if (hasCompletedOnboarding === null) {
+    return (
+      <>
+        <StatusBar barStyle={theme.statusBarStyle} />
+        <View style={styles.app} testID="app-loading" />
+      </>
+    );
+  }
+
+  if (!hasCompletedOnboarding) {
+    return (
+      <>
+        <StatusBar barStyle={theme.statusBarStyle} />
+        <OnboardingFlow
+          initialSelection={dataTypeSelection}
+          onComplete={handleOnboardingComplete}
+          theme={theme}
+        />
+      </>
+    );
+  }
 
   return (
     <>
