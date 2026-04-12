@@ -11,9 +11,9 @@ module.exports = {
   apps: {
     'ios.debug': {
       type: 'ios.app',
-      binaryPath: 'ios/build/Build/Products/Debug-iphonesimulator/EmailExtractor.app',
+      binaryPath: 'ios/build/Build/Products/Debug-iphonesimulator/Pluq.app',
       build:
-        'xcodebuild -workspace ios/EmailExtractor.xcworkspace -scheme EmailExtractor -configuration Debug -sdk iphonesimulator -derivedDataPath ios/build',
+        'xcodebuild -workspace ios/Pluq.xcworkspace -scheme Pluq -configuration Debug -sdk iphonesimulator -derivedDataPath ios/build',
     },
   },
   devices: {

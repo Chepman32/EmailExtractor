@@ -1,4 +1,4 @@
-package com.emailextractor
+package com.pluq
 
 import android.app.Application
 import com.facebook.react.PackageList

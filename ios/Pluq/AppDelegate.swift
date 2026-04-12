@@ -28,7 +28,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     window = UIWindow(frame: UIScreen.main.bounds)
 
     factory.startReactNative(
-      withModuleName: "EmailExtractor",
+      withModuleName: "Pluq",
       in: window,
       launchOptions: launchOptions
     )

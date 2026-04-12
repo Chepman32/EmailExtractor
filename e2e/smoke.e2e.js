@@ -1,6 +1,6 @@
 /* global beforeEach, by, describe, device, element, expect, it */
 
-describe('EmailExtractor', () => {
+describe('Pluq', () => {
   beforeEach(async () => {
     await device.launchApp({newInstance: true});
   });
