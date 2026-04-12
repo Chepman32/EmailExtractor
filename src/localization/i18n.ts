@@ -1,4 +1,5 @@
 import {useMemo} from 'react';
+import {getLocales} from 'react-native-localize';
 
 import {ExtractableDataType} from '../shared/extractedData';
 import {ExtractionSource} from '../shared/types';
@@ -79,7 +80,8 @@ function pickPluralForm(
 
 function getDeviceLocale(): string {
   try {
-    return Intl.DateTimeFormat().resolvedOptions().locale ?? 'en';
+    const locales = getLocales();
+    return locales.length > 0 ? locales[0].languageTag : 'en';
   } catch {
     return 'en';
   }

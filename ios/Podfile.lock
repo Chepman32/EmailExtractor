@@ -1944,6 +1944,28 @@ PODS:
     - Yoga
   - RNFS (2.20.0):
     - React-Core
+  - RNLocalize (3.7.0):
+    - hermes-engine
+    - RCTRequired
+    - RCTTypeSafety
+    - React-Core
+    - React-Core-prebuilt
+    - React-debug
+    - React-Fabric
+    - React-featureflags
+    - React-graphics
+    - React-ImageManager
+    - React-jsi
+    - React-NativeModulesApple
+    - React-RCTFabric
+    - React-renderercss
+    - React-rendererdebug
+    - React-utils
+    - ReactCodegen
+    - ReactCommon/turbomodule/bridging
+    - ReactCommon/turbomodule/core
+    - ReactNativeDependencies
+    - Yoga
   - RNVectorIcons (10.3.0):
     - hermes-engine
     - RCTRequired
@@ -2056,6 +2078,7 @@ DEPENDENCIES:
   - ReactNativeDependencies (from `../node_modules/react-native/third-party-podspecs/ReactNativeDependencies.podspec`)
   - "RNCClipboard (from `../node_modules/@react-native-clipboard/clipboard`)"
   - RNFS (from `../node_modules/react-native-fs`)
+  - RNLocalize (from `../node_modules/react-native-localize`)
   - RNVectorIcons (from `../node_modules/react-native-vector-icons`)
   - RNZipArchive (from `../node_modules/react-native-zip-archive`)
   - Yoga (from `../node_modules/react-native/ReactCommon/yoga`)
@@ -2222,6 +2245,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/@react-native-clipboard/clipboard"
   RNFS:
     :path: "../node_modules/react-native-fs"
+  RNLocalize:
+    :path: "../node_modules/react-native-localize"
   RNVectorIcons:
     :path: "../node_modules/react-native-vector-icons"
   RNZipArchive:
@@ -2232,7 +2257,7 @@ EXTERNAL SOURCES:
 SPEC CHECKSUMS:
   AsyncStorage: b7e9d8feded2a33e90a600565c35fcf9fcc37543
   FBLazyVector: e97c19a5a442429d1988f182a1940fb08df514da
-  hermes-engine: 8999fd4968fc8aeefa6c5e8a9465168000041aa5
+  hermes-engine: 4cad00f7fbb9d49c9d3b564170669d01a3a7ee3b
   RCTDeprecation: af44b104091a34482596cd9bd7e8d90c4e9b4bd7
   RCTRequired: bb77b070f75f53398ce43c0aaaa58337cebe2bf6
   RCTSwiftUI: afc0a0a635860da1040a0b894bfd529da06d7810
@@ -2241,7 +2266,7 @@ SPEC CHECKSUMS:
   React: 1ba7d364ade7d883a1ec055bfc3606f35fdee17b
   React-callinvoker: bc2a26f8d84fb01f003fc6de6c9337b64715f95b
   React-Core: 7840d3a80b43a95c5e80ef75146bd70925ebab0f
-  React-Core-prebuilt: 20812e59b3e3d5485cd0eb655338f90f2430b317
+  React-Core-prebuilt: 9a0ffdb866d81fad32b324e840e6cf85587c1023
   React-CoreModules: 2eb010400b63b89e53a324ffb3c112e4c7c3ce42
   React-cxxreact: a558e92199d26f145afa9e62c4233cf8e7950efe
   React-debug: 755200a6e7f5e6e0a40ff8d215493d43cce285fc
@@ -2305,9 +2330,10 @@ SPEC CHECKSUMS:
   ReactAppDependencyProvider: e96e93b493d8d86eeaee3e590ba0be53f6abe46f
   ReactCodegen: 797de5178718324c6eba3327b07f9a423fbd5787
   ReactCommon: 07572bf9e687c8a52fbe4a3641e9e3a1a477c78e
-  ReactNativeDependencies: 88ec4b33388511bafeff7a552ae3501a397538b6
+  ReactNativeDependencies: 62e22ef05ca75b161ac4519893580041371be415
   RNCClipboard: 88d7eeb555d1183915f0885bdbc5c97eb6f7f3ba
   RNFS: 89de7d7f4c0f6bafa05343c578f61118c8282ed8
+  RNLocalize: 1e6eb4290e89502c3d2193d82dfb7de14a9e672b
   RNVectorIcons: 4351544f100d4f12cac156a7c13399e60bab3e26
   RNZipArchive: 4304f5100eab004eeb7349adc51997b3a28deb76
   SSZipArchive: c69881e8ac5521f0e622291387add5f60f30f3c4

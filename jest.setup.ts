@@ -61,6 +61,12 @@ jest.mock('react-native-safe-area-context', () => {
   };
 });
 
+jest.mock('react-native-localize', () => ({
+  getLocales: jest.fn(() => [
+    {languageTag: 'en-US', languageCode: 'en', countryCode: 'US', isRTL: false},
+  ]),
+}));
+
 jest.mock('react-native-vector-icons/MaterialCommunityIcons', () => {
   const React = require('react');
   const {Text} = require('react-native');
