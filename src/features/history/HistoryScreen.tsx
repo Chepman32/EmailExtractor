@@ -9,9 +9,9 @@ import {
 } from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
 
+import {useI18n} from '../../localization/i18n';
 import {
   EXTRACTABLE_DATA_TYPES,
-  formatDataTypeCount,
 } from '../../shared/extractedData';
 import {readHistory} from '../../domain/history/historyStorage';
 import {HistorySession} from '../../shared/types';
@@ -23,44 +23,17 @@ type HistoryScreenProps = {
   theme?: AppTheme;
 };
 
-function formatSessionDate(value: string) {
-  const date = new Date(value);
-
-  if (Number.isNaN(date.getTime())) {
-    return 'Unknown time';
-  }
-
-  return date.toLocaleString(undefined, {
-    month: 'short',
-    day: 'numeric',
-    hour: 'numeric',
-    minute: '2-digit',
-  });
-}
-
-function sourceLabel(source: string) {
-  if (source === 'camera') {
-    return 'Camera';
-  }
-
-  if (source === 'photos') {
-    return 'Photos';
-  }
-
-  if (source === 'files') {
-    return 'Files';
-  }
-
-  return 'Text';
-}
-
-function buildSessionSummary(session: HistorySession): string {
+function buildSessionSummary(
+  session: HistorySession,
+  formatCount: (type: (typeof EXTRACTABLE_DATA_TYPES)[number], count: number) => string,
+  emptyLabel: string,
+): string {
   const summary = EXTRACTABLE_DATA_TYPES.flatMap(type => {
     const count = session.matches[type].length;
-    return count > 0 ? [formatDataTypeCount(type, count)] : [];
+    return count > 0 ? [formatCount(type, count)] : [];
   });
 
-  return summary.join(' • ') || 'No results stored';
+  return summary.join(' • ') || emptyLabel;
 }
 
 export function HistoryScreen({
@@ -68,6 +41,7 @@ export function HistoryScreen({
   onSelectSession,
   theme = themes.light,
 }: HistoryScreenProps) {
+  const i18n = useI18n();
   const {width} = useWindowDimensions();
   const isTablet = width >= 768;
   const [sessions, setSessions] = useState<HistorySession[]>([]);
@@ -97,20 +71,19 @@ export function HistoryScreen({
         ]}
         ListHeaderComponent={
           <View style={styles.heroCard}>
-            <Text style={styles.heroEyebrow}>History</Text>
-            <Text style={styles.heroTitle}>Recent extraction sessions</Text>
+            <Text style={styles.heroEyebrow}>{i18n.strings.history.heroEyebrow}</Text>
+            <Text style={styles.heroTitle}>{i18n.strings.history.heroTitle}</Text>
             <Text style={styles.heroSubtitle}>
-              Reopen previous scans and jump straight back into the Home tab with the
-              selected source and results restored.
+              {i18n.t(i18n.strings.history.heroSubtitle, {
+                homeTabLabel: i18n.strings.tabs.home,
+              })}
             </Text>
           </View>
         }
         ListEmptyComponent={
           <View style={styles.emptyCard}>
-            <Text style={styles.emptyTitle}>No history yet</Text>
-            <Text style={styles.emptyText}>
-              Completed scans will appear here so you can reopen them later.
-            </Text>
+            <Text style={styles.emptyTitle}>{i18n.strings.history.emptyTitle}</Text>
+            <Text style={styles.emptyText}>{i18n.strings.history.emptyText}</Text>
           </View>
         }
         renderItem={({item}) => (
@@ -120,13 +93,13 @@ export function HistoryScreen({
             <View style={styles.sessionHeader}>
               <Text style={styles.sessionTitle}>{item.inputLabel}</Text>
               <View style={styles.sourceBadge}>
-                <Text style={styles.sourceBadgeText}>{sourceLabel(item.source)}</Text>
+                <Text style={styles.sourceBadgeText}>{i18n.sourceLabel(item.source)}</Text>
               </View>
             </View>
             <Text style={styles.sessionMeta}>
-              {buildSessionSummary(item)}
+              {buildSessionSummary(item, i18n.formatCount, i18n.strings.history.noResultsStored)}
             </Text>
-            <Text style={styles.sessionTime}>{formatSessionDate(item.createdAt)}</Text>
+            <Text style={styles.sessionTime}>{i18n.formatHistoryDate(item.createdAt)}</Text>
           </Pressable>
         )}
       />

@@ -31,13 +31,12 @@ import {
 import {persistHistory, readHistory} from '../../domain/history/historyStorage';
 import {
   countExtractedMatches,
-  DATA_TYPE_LABELS,
   DataTypeSelection,
   EXTRACTABLE_DATA_TYPES,
   ExtractableDataType,
-  formatDataTypeCount,
   getEnabledDataTypes,
 } from '../../shared/extractedData';
+import {useI18n} from '../../localization/i18n';
 import {ExtractionResult, HistorySession} from '../../shared/types';
 import {exportExtractedItems} from '../../native/emailExtractionBridge';
 import {extractData} from './extractionEngine';
@@ -48,26 +47,18 @@ import {AppTheme, createShadow, themes} from '../../theme/themes';
 const SOURCE_ITEMS = [
   {
     id: 'text',
-    label: 'Text',
-    description: 'Paste copied content',
     badge: 'Aa',
   },
   {
     id: 'camera',
-    label: 'Camera',
-    description: 'Capture on the spot',
     badge: 'C',
   },
   {
     id: 'photos',
-    label: 'Photos',
-    description: 'Pick from library',
     badge: 'P',
   },
   {
     id: 'files',
-    label: 'Files',
-    description: 'Import a document',
     badge: 'F',
   },
 ] as const;
@@ -94,12 +85,18 @@ type ResultSection = {
 
 const TEXT_INPUT_ACCESSORY_VIEW_ID = 'extractor-text-input-accessory';
 
-function buildInputLabel(source: SourceId, text: string, asset: SelectedAsset | null): string {
+function buildInputLabel(
+  source: SourceId,
+  text: string,
+  asset: SelectedAsset | null,
+  fallbackManualText: string,
+  fallbackImportedSource: string,
+): string {
   if (source === 'text') {
-    return text.trim().slice(0, 64) || 'Manual text';
+    return text.trim().slice(0, 64) || fallbackManualText;
   }
 
-  return asset?.name?.trim() || 'Imported source';
+  return asset?.name?.trim() || fallbackImportedSource;
 }
 
 function mapSessionToResult(session: HistorySession): ExtractionResult {
@@ -127,36 +124,6 @@ function findSourceItem(source: string) {
   return SOURCE_ITEMS.find(item => item.id === source) ?? SOURCE_ITEMS[0];
 }
 
-function getSourceHelperText(
-  source: SourceId,
-  sourceLabel: string,
-  selectedAsset: SelectedAsset | null,
-) {
-  if (source === 'text') {
-    return 'Paste any copied thread, note, or document text and the app will pull out the selected data types.';
-  }
-
-  if (selectedAsset?.uri) {
-    return 'Source attached and ready to scan. Tap the same option again to replace it.';
-  }
-
-  return `Choose a ${sourceLabel.toLowerCase()} source to continue.`;
-}
-
-function describeEnabledDataTypes(enabledTypes: ExtractableDataType[]): string {
-  const labels = enabledTypes.map(type => DATA_TYPE_LABELS[type].toLowerCase());
-
-  if (labels.length <= 1) {
-    return labels[0] ?? 'data';
-  }
-
-  if (labels.length === 2) {
-    return `${labels[0]} and ${labels[1]}`;
-  }
-
-  return `${labels.slice(0, -1).join(', ')}, and ${labels[labels.length - 1]}`;
-}
-
 export const ExtractorScreen = forwardRef<
   ExtractorScreenHandle,
   ExtractorScreenProps
@@ -164,6 +131,7 @@ export const ExtractorScreen = forwardRef<
   {dataTypeSelection, onHistoryChanged, theme = themes.light},
   ref,
 ) {
+  const i18n = useI18n();
   const {width} = useWindowDimensions();
   const isTablet = width >= 768;
 
@@ -188,20 +156,29 @@ export const ExtractorScreen = forwardRef<
   }, [source, text, selectedAsset]);
 
   const activeSource = findSourceItem(source);
-  const enabledTypesSummary = describeEnabledDataTypes(enabledTypes);
-  const extractButtonTitle = isExtracting ? 'Extracting...' : 'Extract Data';
+  const enabledTypesSummary = i18n.formatList(
+    enabledTypes.map(type => i18n.dataTypeListLabel(type)),
+  );
+  const extractButtonTitle = isExtracting
+    ? i18n.strings.extractor.extracting
+    : i18n.strings.extractor.extractData;
   const readyStateLabel = canExtract
-    ? 'Ready'
+    ? i18n.strings.extractor.ready
     : source === 'text'
-      ? 'Awaiting text'
-      : 'Awaiting import';
+      ? i18n.strings.extractor.awaitingText
+      : i18n.strings.extractor.awaitingImport;
   const statusIconName = source === 'text' ? 'content-paste' : 'tray-arrow-down';
   const extractButtonHint = canExtract
-    ? `Extract ${enabledTypesSummary} from the current input.`
+    ? i18n.t(i18n.strings.extractor.extractHintReady, {typesSummary: enabledTypesSummary})
     : source === 'text'
-      ? 'Paste some text to enable extraction.'
-      : `Import a ${activeSource.label.toLowerCase()} source to enable extraction.`;
-  const sourceHelperText = getSourceHelperText(source, activeSource.label, selectedAsset);
+      ? i18n.strings.extractor.extractHintNeedText
+      : i18n.strings.extractor.extractHintNeedImport;
+  const sourceHelperText =
+    source === 'text'
+      ? i18n.strings.extractor.sourceHelperText
+      : selectedAsset?.uri
+        ? i18n.strings.extractor.sourceHelperAttached
+        : i18n.strings.extractor.sourceHelperChoose;
   const resultSections = useMemo<ResultSection[]>(
     () =>
       EXTRACTABLE_DATA_TYPES.flatMap(type => {
@@ -272,7 +249,7 @@ export const ExtractorScreen = forwardRef<
 
       setSelectedAsset(asset);
     } catch {
-      setErrorMessage('Unable to import source. Please try again.');
+      setErrorMessage(i18n.strings.extractor.importError);
     }
   };
 
@@ -295,8 +272,11 @@ export const ExtractorScreen = forwardRef<
 
       setResult(extraction);
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'Unknown extraction error';
-      setErrorMessage(`Extraction failed: ${message}`);
+      const message =
+        err instanceof Error
+          ? i18n.localizeMessage(err.message)
+          : i18n.strings.extractor.unknownExtractionError;
+      setErrorMessage(i18n.t(i18n.strings.extractor.extractionFailed, {message}));
       setResult(null);
       setIsExtracting(false);
       return;
@@ -312,14 +292,20 @@ export const ExtractorScreen = forwardRef<
       const session = createHistorySession(
         source,
         extraction.matches,
-        buildInputLabel(source, text, selectedAsset),
+        buildInputLabel(
+          source,
+          text,
+          selectedAsset,
+          i18n.strings.extractor.manualTextFallback,
+          i18n.strings.extractor.importedSourceFallback,
+        ),
       );
       const nextHistory = addSessionToHistory(existingHistory, session);
 
       await persistHistory(nextHistory);
       onHistoryChanged?.(nextHistory.length);
     } catch {
-      setErrorMessage('Results were extracted, but history could not be saved.');
+      setErrorMessage(i18n.strings.extractor.historySaveError);
     } finally {
       setIsExtracting(false);
     }
@@ -334,7 +320,7 @@ export const ExtractorScreen = forwardRef<
       const clipboardText = await Clipboard.getString();
 
       if (!clipboardText.trim()) {
-        setErrorMessage('Clipboard is empty.');
+        setErrorMessage(i18n.strings.extractor.clipboardEmpty);
         return;
       }
 
@@ -342,7 +328,7 @@ export const ExtractorScreen = forwardRef<
       setResult(null);
       setText(clipboardText);
     } catch {
-      setErrorMessage('Unable to paste from clipboard.');
+      setErrorMessage(i18n.strings.extractor.pasteClipboardError);
     }
   };
 
@@ -355,7 +341,12 @@ export const ExtractorScreen = forwardRef<
     }
 
     Clipboard.setString(items.join('\n'));
-    Alert.alert('Copied', `${formatDataTypeCount(itemType, items.length)} copied.`);
+    Alert.alert(
+      i18n.strings.common.copied,
+      i18n.t(i18n.strings.extractor.sectionCopied, {
+        countLabel: i18n.formatCount(itemType, items.length),
+      }),
+    );
   };
 
   const handleCopyItem = (
@@ -363,7 +354,7 @@ export const ExtractorScreen = forwardRef<
     value: string,
   ) => {
     Clipboard.setString(value);
-    Alert.alert('Copied', `${DATA_TYPE_LABELS[itemType]} copied to clipboard.`);
+    Alert.alert(i18n.strings.common.copied, i18n.strings.extractor.itemCopied);
   };
 
   const handleShareSection = async (
@@ -376,7 +367,7 @@ export const ExtractorScreen = forwardRef<
 
     await Share.share({
       message: items.join('\n'),
-      title: `${DATA_TYPE_LABELS[itemType]} results`,
+      title: i18n.strings.extractor.shareTitle,
     });
   };
 
@@ -393,10 +384,17 @@ export const ExtractorScreen = forwardRef<
       const exported = await exportExtractedItems(itemType, items, format);
       await Share.share({
         url: exported.fileUri,
-        message: `Exported ${formatDataTypeCount(itemType, items.length)} as ${format.toUpperCase()}.`,
+        message: i18n.t(i18n.strings.extractor.exportedMessage, {
+          countLabel: i18n.formatCount(itemType, items.length),
+          format: format.toUpperCase(),
+        }),
       });
     } catch {
-      setErrorMessage(`Unable to export ${format.toUpperCase()} file.`);
+      setErrorMessage(
+        i18n.t(i18n.strings.extractor.exportError, {
+          format: format.toUpperCase(),
+        }),
+      );
     }
   };
 
@@ -404,13 +402,11 @@ export const ExtractorScreen = forwardRef<
     <View style={styles.resultSectionCard}>
       <View style={styles.resultSectionHeader}>
         <View style={styles.resultSectionCopy}>
-          <Text style={styles.sectionEyebrow}>{DATA_TYPE_LABELS[item.type]}</Text>
+          <Text style={styles.sectionEyebrow}>{i18n.dataTypeLabel(item.type)}</Text>
           <Text style={styles.resultSectionTitle}>
-            {formatDataTypeCount(item.type, item.items.length)}
+            {i18n.formatCount(item.type, item.items.length)}
           </Text>
-          <Text style={styles.sectionSubtitle}>
-            Tap any result to copy it, or use the section actions below.
-          </Text>
+          <Text style={styles.sectionSubtitle}>{i18n.strings.extractor.resultSectionHint}</Text>
         </View>
       </View>
 
@@ -418,34 +414,38 @@ export const ExtractorScreen = forwardRef<
         <Pressable
           onPress={() => handleCopySection(item.type, item.items)}
           style={({pressed}) => [styles.actionButton, pressed && styles.actionButtonPressed]}>
-          <Text style={styles.actionButtonText}>Copy</Text>
+          <Text style={styles.actionButtonText}>{i18n.strings.common.copy}</Text>
         </Pressable>
         <Pressable
           onPress={() => {
             handleShareSection(item.type, item.items).catch(() => {
-              setErrorMessage(`Unable to share extracted ${DATA_TYPE_LABELS[item.type].toLowerCase()}.`);
+              setErrorMessage(i18n.strings.extractor.shareError);
             });
           }}
           style={({pressed}) => [styles.actionButton, pressed && styles.actionButtonPressed]}>
-          <Text style={styles.actionButtonText}>Share</Text>
+          <Text style={styles.actionButtonText}>{i18n.strings.common.share}</Text>
         </Pressable>
         <Pressable
           onPress={() => {
             handleExportSection(item.type, item.items, 'txt').catch(() => {
-              setErrorMessage('Unable to export TXT file.');
+              setErrorMessage(
+                i18n.t(i18n.strings.extractor.exportError, {format: 'TXT'}),
+              );
             });
           }}
           style={({pressed}) => [styles.actionButton, pressed && styles.actionButtonPressed]}>
-          <Text style={styles.actionButtonText}>Export TXT</Text>
+          <Text style={styles.actionButtonText}>{i18n.strings.common.exportTxt}</Text>
         </Pressable>
         <Pressable
           onPress={() => {
             handleExportSection(item.type, item.items, 'csv').catch(() => {
-              setErrorMessage('Unable to export CSV file.');
+              setErrorMessage(
+                i18n.t(i18n.strings.extractor.exportError, {format: 'CSV'}),
+              );
             });
           }}
           style={({pressed}) => [styles.actionButton, pressed && styles.actionButtonPressed]}>
-          <Text style={styles.actionButtonText}>Export CSV</Text>
+          <Text style={styles.actionButtonText}>{i18n.strings.common.exportCsv}</Text>
         </Pressable>
       </View>
 
@@ -457,7 +457,7 @@ export const ExtractorScreen = forwardRef<
           style={({pressed}) => [styles.resultCard, pressed && styles.resultCardPressed]}>
           <View style={styles.resultCardHeader}>
             <View style={styles.resultDot} />
-            <Text style={styles.resultMeta}>Tap to copy</Text>
+            <Text style={styles.resultMeta}>{i18n.strings.common.tapToCopy}</Text>
           </View>
           <Text style={styles.resultItem} testID={`result-${item.type}`}>
             {match}
@@ -482,7 +482,7 @@ export const ExtractorScreen = forwardRef<
                   accessibilityRole="button"
                   onPress={() => {
                     handleSourcePress(item.id).catch(() => {
-                      setErrorMessage('Unable to import source. Please try again.');
+                      setErrorMessage(i18n.strings.extractor.importError);
                     });
                   }}
                   testID={`source-${item.id}`}
@@ -511,9 +511,11 @@ export const ExtractorScreen = forwardRef<
                       styles.sourceButtonText,
                       source === item.id && styles.sourceButtonTextActive,
                     ]}>
-                    {item.label}
+                    {i18n.sourceLabel(item.id)}
                   </Text>
-                  <Text style={styles.sourceButtonDescription}>{item.description}</Text>
+                  <Text style={styles.sourceButtonDescription}>
+                    {i18n.strings.sources[item.id].extractorDescription}
+                  </Text>
                 </Pressable>
               ))}
             </View>
@@ -524,9 +526,9 @@ export const ExtractorScreen = forwardRef<
       <View style={styles.sectionCard}>
         <View style={styles.sectionHeaderRow}>
           <View style={styles.sectionHeaderCopy}>
-            <Text style={styles.sectionEyebrow}>Input</Text>
+            <Text style={styles.sectionEyebrow}>{i18n.strings.extractor.inputEyebrow}</Text>
             <Text style={styles.sectionTitle} testID="screen-title">
-              Data Extractor
+              {i18n.strings.extractor.inputTitle}
             </Text>
           </View>
           <Pressable
@@ -537,28 +539,28 @@ export const ExtractorScreen = forwardRef<
               styles.resetButton,
               pressed && styles.resetButtonPressed,
             ]}>
-            <Text style={styles.resetButtonText}>Reset</Text>
+            <Text style={styles.resetButtonText}>{i18n.strings.common.reset}</Text>
           </Pressable>
         </View>
-        <Text style={styles.sectionSubtitle}>
-          Select a source above, prepare the content here, and run the scan when it is ready.
-        </Text>
+        <Text style={styles.sectionSubtitle}>{i18n.strings.extractor.inputSubtitle}</Text>
 
         <View style={styles.inputCard}>
           <View style={styles.inputCardHeader}>
             <View style={styles.inputCardCopy}>
               <Text style={styles.inputCardTitle}>
-                {source === 'text' ? 'Paste text to scan' : `${activeSource.label} source`}
+                {source === 'text'
+                  ? i18n.strings.extractor.pasteTextTitle
+                  : i18n.strings.extractor.importedSourceTitle}
               </Text>
               <Text style={styles.inputCardSubtitle}>{sourceHelperText}</Text>
             </View>
             <Pressable
-              accessibilityLabel={source === 'text' ? 'Paste from clipboard' : readyStateLabel}
+              accessibilityLabel={readyStateLabel}
               accessibilityRole={source === 'text' ? 'button' : undefined}
               onPress={() => {
                 if (source === 'text') {
                   handlePasteFromClipboard().catch(() => {
-                    setErrorMessage('Unable to paste from clipboard.');
+                    setErrorMessage(i18n.strings.extractor.pasteClipboardError);
                   });
                 }
               }}
@@ -579,7 +581,7 @@ export const ExtractorScreen = forwardRef<
           {source === 'text' ? (
             <TextInput
               multiline
-              placeholder="Paste text to scan for the selected data types"
+              placeholder={i18n.strings.extractor.pastePlaceholder}
               placeholderTextColor={theme.colors.textMuted}
               style={styles.textInput}
               value={text}
@@ -595,12 +597,14 @@ export const ExtractorScreen = forwardRef<
               </View>
               <View style={styles.assetCopy}>
                 <Text style={styles.assetLabel}>
-                  {selectedAsset?.name || selectedAsset?.uri || 'No source selected'}
+                  {selectedAsset?.name ||
+                    selectedAsset?.uri ||
+                    i18n.strings.extractor.noSourceSelected}
                 </Text>
                 <Text style={styles.assetHint}>
                   {selectedAsset?.uri
-                    ? 'Tap the same source option above to replace this file.'
-                    : `Select a ${activeSource.label.toLowerCase()} source to continue.`}
+                    ? i18n.strings.extractor.replaceSourceHint
+                    : i18n.strings.extractor.chooseSourceHint}
                 </Text>
               </View>
             </View>
@@ -612,8 +616,11 @@ export const ExtractorScreen = forwardRef<
           disabled={!canExtract || isExtracting}
           onPress={() => {
             handleExtract().catch((err: unknown) => {
-              const msg = err instanceof Error ? err.message : 'Unknown error';
-              setErrorMessage(`Extraction failed: ${msg}`);
+              const msg =
+                err instanceof Error
+                  ? i18n.localizeMessage(err.message)
+                  : i18n.strings.extractor.unknownExtractionError;
+              setErrorMessage(i18n.t(i18n.strings.extractor.extractionFailed, {message: msg}));
             });
           }}
           style={({pressed}) => [
@@ -636,17 +643,17 @@ export const ExtractorScreen = forwardRef<
 
         {errorMessage ? (
           <View style={[styles.messageCard, styles.errorCard]}>
-            <Text style={styles.messageEyebrow}>Issue</Text>
+            <Text style={styles.messageEyebrow}>{i18n.strings.common.issue}</Text>
             <Text style={styles.errorText}>{errorMessage}</Text>
           </View>
         ) : null}
 
         {result?.warnings.length ? (
           <View style={[styles.messageCard, styles.warningCard]}>
-            <Text style={styles.messageEyebrow}>Warnings</Text>
+            <Text style={styles.messageEyebrow}>{i18n.strings.common.warnings}</Text>
             {result.warnings.map(warning => (
               <Text key={warning} style={styles.warningText}>
-                {warning}
+                {i18n.localizeMessage(warning)}
               </Text>
             ))}
           </View>
@@ -656,12 +663,12 @@ export const ExtractorScreen = forwardRef<
       <View style={styles.resultsPanel}>
         <View style={styles.resultsHeader}>
           <View style={styles.resultsCopy}>
-            <Text style={styles.sectionEyebrow}>Results</Text>
-            <Text style={styles.sectionTitle}>Extracted results</Text>
+            <Text style={styles.sectionEyebrow}>{i18n.strings.extractor.resultsEyebrow}</Text>
+            <Text style={styles.sectionTitle}>{i18n.strings.extractor.resultsTitle}</Text>
             <Text style={styles.sectionSubtitle}>
               {totalMatchCount > 0
-                ? 'Results are grouped by data type so each section can be copied, shared, or exported separately.'
-                : 'Your extracted data will appear here once you run a scan.'}
+                ? i18n.strings.extractor.resultsSubtitlePopulated
+                : i18n.strings.extractor.resultsSubtitleEmpty}
             </Text>
           </View>
           <View
@@ -670,7 +677,7 @@ export const ExtractorScreen = forwardRef<
               totalMatchCount === 0 && styles.resultCountBadgeEmpty,
             ]}>
             <Text style={styles.resultCountValue}>{totalMatchCount}</Text>
-            <Text style={styles.resultCountLabel}>found</Text>
+            <Text style={styles.resultCountLabel}>{i18n.strings.common.found}</Text>
           </View>
         </View>
       </View>
@@ -691,11 +698,9 @@ export const ExtractorScreen = forwardRef<
           ListEmptyComponent={
             shouldShowEmptyState ? (
               <View style={styles.emptyStateCard}>
-                <Text style={styles.emptyEyebrow}>Ready when you are</Text>
-                <Text style={styles.emptyText}>No results found</Text>
-                <Text style={styles.emptySubtext}>
-                  Paste text or import a source, then run extraction to populate the selected result types.
-                </Text>
+                <Text style={styles.emptyEyebrow}>{i18n.strings.extractor.emptyEyebrow}</Text>
+                <Text style={styles.emptyText}>{i18n.strings.extractor.emptyTitle}</Text>
+                <Text style={styles.emptySubtext}>{i18n.strings.extractor.emptySubtitle}</Text>
               </View>
             ) : null
           }
@@ -705,7 +710,7 @@ export const ExtractorScreen = forwardRef<
           <InputAccessoryView nativeID={TEXT_INPUT_ACCESSORY_VIEW_ID}>
             <View style={styles.keyboardAccessory}>
               <Pressable
-                accessibilityLabel="Dismiss keyboard"
+                accessibilityLabel={i18n.strings.common.dismiss}
                 accessibilityRole="button"
                 onPress={Keyboard.dismiss}
                 testID="keyboard-dismiss-button"
@@ -713,7 +718,9 @@ export const ExtractorScreen = forwardRef<
                   styles.keyboardAccessoryButton,
                   pressed && styles.keyboardAccessoryButtonPressed,
                 ]}>
-                <Text style={styles.keyboardAccessoryButtonText}>Dismiss</Text>
+                <Text style={styles.keyboardAccessoryButtonText}>
+                  {i18n.strings.common.dismiss}
+                </Text>
               </Pressable>
             </View>
           </InputAccessoryView>

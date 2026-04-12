@@ -31,6 +31,7 @@ import {
   DataTypeSelection,
   hasEnabledDataType,
 } from './src/shared/extractedData';
+import {useI18n} from './src/localization/i18n';
 import {HistorySession} from './src/shared/types';
 import {persistThemePreference, readThemePreference} from './src/theme/themeStorage';
 import {AppTheme, ThemeId, themes, createShadow} from './src/theme/themes';
@@ -38,17 +39,14 @@ import {AppTheme, ThemeId, themes, createShadow} from './src/theme/themes';
 const TABS = [
   {
     id: 'home',
-    label: 'Home',
     icon: {inactive: 'home-variant-outline', active: 'home-variant'},
   },
   {
     id: 'history',
-    label: 'History',
     icon: {inactive: 'history', active: 'history'},
   },
   {
     id: 'settings',
-    label: 'Settings',
     icon: {inactive: 'cog-outline', active: 'cog'},
   },
 ] as const;
@@ -56,6 +54,7 @@ const TABS = [
 type TabId = (typeof TABS)[number]['id'];
 
 function AppShell() {
+  const i18n = useI18n();
   const {width} = useWindowDimensions();
   const insets = useSafeAreaInsets();
   const extractorRef = useRef<ExtractorScreenHandle>(null);
@@ -304,7 +303,7 @@ function AppShell() {
                         styles.tabLabel,
                         isActive && styles.tabLabelActive,
                       ]}>
-                      {tab.label}
+                      {i18n.strings.tabs[tab.id]}
                     </Text>
                   </Animated.View>
                 </Pressable>

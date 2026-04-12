@@ -31,7 +31,7 @@ function requireModule(): EmailExtractionNativeModule {
     | undefined;
 
   if (!nativeModule) {
-    throw new Error('EmailExtractionModule is not available');
+    throw new Error('error.native.moduleUnavailable');
   }
 
   return nativeModule;

@@ -9,6 +9,7 @@ import {
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import {SafeAreaView} from 'react-native-safe-area-context';
 
+import {useI18n} from '../../localization/i18n';
 import {
   DataTypeSelection,
   ExtractableDataType,
@@ -32,28 +33,20 @@ const themeIcons: Record<ThemeId, string> = {
 };
 
 const dataTypeOptions: Array<{
-  description: string;
   icon: string;
   id: ExtractableDataType;
-  label: string;
 }> = [
   {
     id: 'email',
-    label: 'Email',
     icon: 'email-outline',
-    description: 'Capture email addresses with OCR-tolerant matching.',
   },
   {
     id: 'date',
-    label: 'Dates',
     icon: 'calendar-month-outline',
-    description: 'Detect date strings from text, documents, and OCR output.',
   },
   {
     id: 'link',
-    label: 'Links',
     icon: 'link-variant',
-    description: 'Pull out URLs and web links from the scanned content.',
   },
 ];
 
@@ -64,6 +57,7 @@ export function SettingsScreen({
   selectedThemeId,
   theme = themes.light,
 }: SettingsScreenProps) {
+  const i18n = useI18n();
   const [statusMessage, setStatusMessage] = useState<{
     kind: 'success' | 'warning';
     text: string;
@@ -74,7 +68,7 @@ export function SettingsScreen({
     onThemeChange(nextThemeId);
     setStatusMessage({
       kind: 'success',
-      text: `${themes[nextThemeId].label} theme applied.`,
+      text: i18n.strings.settings.themeUpdated,
     });
   };
 
@@ -87,7 +81,7 @@ export function SettingsScreen({
     if (!hasEnabledDataType(nextSelection)) {
       setStatusMessage({
         kind: 'warning',
-        text: 'Select at least one data type.',
+        text: i18n.strings.settings.selectOneDataType,
       });
       return;
     }
@@ -95,9 +89,7 @@ export function SettingsScreen({
     onDataTypeSelectionChange(nextSelection);
     setStatusMessage({
       kind: 'success',
-      text: `${dataTypeOptions.find(option => option.id === nextType)?.label} extraction ${
-        nextSelection[nextType] ? 'enabled' : 'disabled'
-      }.`,
+      text: i18n.strings.settings.preferencesUpdated,
     });
   };
 
@@ -107,8 +99,8 @@ export function SettingsScreen({
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}>
         <View style={styles.themeCard}>
-          <Text style={styles.sectionEyebrow}>Theme</Text>
-          <Text style={styles.sectionTitle}>Choose a look</Text>
+          <Text style={styles.sectionEyebrow}>{i18n.strings.settings.themeEyebrow}</Text>
+          <Text style={styles.sectionTitle}>{i18n.strings.settings.themeTitle}</Text>
 
           <View style={styles.themeGrid}>
             {themeOptions.map(option => {
@@ -169,7 +161,7 @@ export function SettingsScreen({
                     ) : null}
                   </View>
                   <Text style={[styles.themeOptionTitle, {color: option.colors.textPrimary}]}>
-                    {option.label}
+                    {i18n.themeLabel(option.id)}
                   </Text>
                   <Text
                     style={[
@@ -177,7 +169,7 @@ export function SettingsScreen({
                       {color: option.colors.textSecondary},
                     ]}
                     numberOfLines={2}>
-                    {option.description}
+                    {i18n.themeDescription(option.id)}
                   </Text>
                 </Pressable>
               );
@@ -186,11 +178,9 @@ export function SettingsScreen({
         </View>
 
         <View style={styles.dataTypeCard}>
-          <Text style={styles.sectionEyebrow}>Data types</Text>
-          <Text style={styles.sectionTitle}>Choose what to extract</Text>
-          <Text style={styles.sectionSubtitle}>
-            These selections apply across the app for every new scan.
-          </Text>
+          <Text style={styles.sectionEyebrow}>{i18n.strings.settings.dataTypesEyebrow}</Text>
+          <Text style={styles.sectionTitle}>{i18n.strings.settings.dataTypesTitle}</Text>
+          <Text style={styles.sectionSubtitle}>{i18n.strings.settings.dataTypesSubtitle}</Text>
 
           <View style={styles.dataTypeList}>
             {dataTypeOptions.map(option => {
@@ -240,14 +230,14 @@ export function SettingsScreen({
                               : theme.colors.textPrimary,
                           },
                         ]}>
-                        {option.label}
+                        {i18n.dataTypeLabel(option.id)}
                       </Text>
                       <Text
                         style={[
                           styles.dataTypeDescription,
                           {color: theme.colors.textSecondary},
                         ]}>
-                        {option.description}
+                        {i18n.strings.dataTypes[option.id].settingsDescription}
                       </Text>
                     </View>
                   </View>

@@ -11,9 +11,9 @@ import {
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import {SafeAreaView} from 'react-native-safe-area-context';
 
+import {useI18n} from '../../localization/i18n';
 import {
   createDefaultDataTypeSelection,
-  DATA_TYPE_LABELS,
   DataTypeSelection,
   ExtractableDataType,
   getEnabledDataTypes,
@@ -40,27 +40,19 @@ const ONBOARDING_STEPS = [
 type OnboardingStepId = (typeof ONBOARDING_STEPS)[number];
 
 const GOAL_OPTIONS: Array<{
-  description: string;
   icon: string;
   id: ExtractableDataType;
-  label: string;
 }> = [
   {
     id: 'email',
-    label: 'Email addresses',
-    description: 'Turn threads and screenshots into a clean contact list.',
     icon: 'email-fast-outline',
   },
   {
     id: 'date',
-    label: 'Dates and deadlines',
-    description: 'Catch events, due dates, and follow-up moments fast.',
     icon: 'calendar-clock-outline',
   },
   {
     id: 'link',
-    label: 'Links and references',
-    description: 'Pull buried URLs out of long messages and documents.',
     icon: 'link-variant',
   },
 ];
@@ -68,26 +60,18 @@ const GOAL_OPTIONS: Array<{
 const PAIN_POINTS = [
   {
     id: 'retyping',
-    label: 'I keep retyping details by hand',
-    description: 'The info is already there, but not in a usable format.',
     icon: 'keyboard-outline',
   },
   {
     id: 'buried',
-    label: 'Important info gets buried in long threads',
-    description: 'I waste time scanning messages just to find one key detail.',
     icon: 'message-text-clock-outline',
   },
   {
     id: 'screenshots',
-    label: 'I save screenshots and forget to process them',
-    description: 'Useful details sit in my camera roll instead of becoming actions.',
     icon: 'image-search-outline',
   },
   {
     id: 'handoff',
-    label: 'I need a clean list I can share fast',
-    description: 'I want results I can immediately copy, send, or export.',
     icon: 'send-outline',
   },
 ] as const;
@@ -95,54 +79,32 @@ const PAIN_POINTS = [
 type PainPointId = (typeof PAIN_POINTS)[number]['id'];
 
 const SOURCE_OPTIONS: Array<{
-  description: string;
   icon: string;
   id: ExtractionSource;
-  label: string;
 }> = [
   {
     id: 'text',
-    label: 'Copied text',
-    description: 'Threads, notes, copied docs',
     icon: 'content-paste',
   },
   {
     id: 'photos',
-    label: 'Screenshots',
-    description: 'Images already in your library',
     icon: 'image-outline',
   },
   {
     id: 'files',
-    label: 'Files',
-    description: 'Docs, PDFs, and imports',
     icon: 'file-document-outline',
   },
   {
     id: 'camera',
-    label: 'Live capture',
-    description: 'Grab details on the spot',
     icon: 'camera-outline',
   },
 ];
 
 const SAMPLE_RESULTS: Record<ExtractableDataType, string> = {
   email: 'hello@northstar.studio',
-  date: 'April 18, 2026',
+  date: '2026-04-18T00:00:00.000Z',
   link: 'https://northstar.studio/invite',
 };
-
-function formatLabelList(labels: string[]): string {
-  if (labels.length <= 1) {
-    return labels[0] ?? '';
-  }
-
-  if (labels.length === 2) {
-    return `${labels[0]} and ${labels[1]}`;
-  }
-
-  return `${labels.slice(0, -1).join(', ')}, and ${labels[labels.length - 1]}`;
-}
 
 function resolveSelection(selection: DataTypeSelection): DataTypeSelection {
   return hasEnabledDataType(selection)
@@ -155,6 +117,7 @@ export function OnboardingFlow({
   onComplete,
   theme,
 }: OnboardingFlowProps) {
+  const i18n = useI18n();
   const {width} = useWindowDimensions();
   const [stepIndex, setStepIndex] = useState(0);
   const [dataTypeSelection, setDataTypeSelection] = useState<DataTypeSelection>(
@@ -185,16 +148,16 @@ export function OnboardingFlow({
   const currentStep = ONBOARDING_STEPS[stepIndex];
   const progress = (stepIndex + 1) / ONBOARDING_STEPS.length;
   const transitionDistance = Math.min(Math.max(width * 0.12, 36), 64);
-  const typesSummary = formatLabelList(
-    resolvedTypes.map(type => DATA_TYPE_LABELS[type].toLowerCase()),
+  const typesSummary = i18n.formatList(
+    resolvedTypes.map(type => i18n.dataTypeListLabel(type)),
   );
-  const sourcesSummary = formatLabelList(
-    selectedSources.map(source => source.label.toLowerCase()),
+  const sourcesSummary = i18n.formatList(
+    selectedSources.map(source => i18n.sourceListLabel(source.id)),
   );
   const permissionNote =
     preferredSources.includes('camera') || preferredSources.includes('photos')
-      ? 'Photo and camera access are only requested when you tap those tools.'
-      : 'You can start with pasted text now and bring in files or camera later.';
+      ? i18n.strings.onboarding.permissionTimingMedia
+      : i18n.strings.onboarding.permissionTimingText;
 
   const canContinue =
     currentStep === 'welcome'
@@ -211,14 +174,14 @@ export function OnboardingFlow({
 
   const primaryButtonLabel =
     currentStep === 'welcome'
-      ? 'Get started'
+      ? i18n.strings.common.getStarted
       : currentStep === 'demo'
         ? hasRunPreview
-          ? 'Keep going'
-          : 'Run the preview'
+          ? i18n.strings.common.keepGoing
+          : i18n.strings.common.runPreview
         : currentStep === 'ready'
-          ? 'Start extracting'
-          : 'Continue';
+          ? i18n.strings.common.startExtracting
+          : i18n.strings.common.continue;
 
   const handleComplete = () => {
     onComplete(resolveSelection(dataTypeSelection));
@@ -331,33 +294,31 @@ export function OnboardingFlow({
       <View style={styles.heroCard}>
         <View style={styles.heroGlowPrimary} />
         <View style={styles.heroGlowSecondary} />
-        <Text style={styles.eyebrow}>Fast first-run setup</Text>
-        <Text style={styles.title}>Turn messy messages into clean details</Text>
-        <Text style={styles.subtitle}>
-          Paste a thread, scan a screenshot, or import a file. The app pulls out
-          the parts you actually need.
-        </Text>
+        <Text style={styles.eyebrow}>{i18n.strings.onboarding.welcomeEyebrow}</Text>
+        <Text style={styles.title}>{i18n.strings.onboarding.welcomeTitle}</Text>
+        <Text style={styles.subtitle}>{i18n.strings.onboarding.welcomeSubtitle}</Text>
 
         <View style={styles.previewMessage}>
-          <Text style={styles.previewLabel}>Sample input</Text>
+          <Text style={styles.previewLabel}>{i18n.strings.onboarding.sampleInputLabel}</Text>
           <Text style={styles.previewText}>
-            &ldquo;Can you send the signed file before April 18, 2026? If not,
-            email hello@northstar.studio or use the link in the brief.&rdquo;
+            {i18n.t(i18n.strings.onboarding.sampleInputText, {
+              sampleDate: i18n.formatSampleDate(SAMPLE_RESULTS.date),
+            })}
           </Text>
         </View>
 
         <View style={styles.previewChipRow}>
-          {['Text', 'Photos', 'Files'].map(label => (
-            <View key={label} style={styles.previewChip}>
-              <Text style={styles.previewChipText}>{label}</Text>
+          {(['text', 'photos', 'files'] as const).map(source => (
+            <View key={source} style={styles.previewChip}>
+              <Text style={styles.previewChipText}>{i18n.sourceLabel(source)}</Text>
             </View>
           ))}
         </View>
 
         <View style={styles.previewResultRow}>
-          {['Email', 'Date', 'Link'].map(label => (
-            <View key={label} style={styles.previewResultPill}>
-              <Text style={styles.previewResultText}>{label}</Text>
+          {(['email', 'date', 'link'] as const).map(type => (
+            <View key={type} style={styles.previewResultPill}>
+              <Text style={styles.previewResultText}>{i18n.dataTypeLabel(type)}</Text>
             </View>
           ))}
         </View>
@@ -373,10 +334,8 @@ export function OnboardingFlow({
             />
           </View>
           <View style={styles.featureCopy}>
-            <Text style={styles.featureTitle}>One tap to start</Text>
-            <Text style={styles.featureText}>
-              Pick a source and the home screen is ready immediately after setup.
-            </Text>
+            <Text style={styles.featureTitle}>{i18n.strings.onboarding.featureStartTitle}</Text>
+            <Text style={styles.featureText}>{i18n.strings.onboarding.featureStartText}</Text>
           </View>
         </View>
 
@@ -389,9 +348,11 @@ export function OnboardingFlow({
             />
           </View>
           <View style={styles.featureCopy}>
-            <Text style={styles.featureTitle}>Fits your workflow</Text>
+            <Text style={styles.featureTitle}>
+              {i18n.strings.onboarding.featureWorkflowTitle}
+            </Text>
             <Text style={styles.featureText}>
-              We'll personalize the extractor around what you pull out most.
+              {i18n.strings.onboarding.featureWorkflowText}
             </Text>
           </View>
         </View>
@@ -402,11 +363,14 @@ export function OnboardingFlow({
   const renderGoalsStep = () => (
     <>
       <View style={styles.questionHeader}>
-        <Text style={styles.eyebrow}>Step 1</Text>
-        <Text style={styles.title}>What do you usually need first?</Text>
-        <Text style={styles.subtitle}>
-          Pick everything that would save you the most time on day one.
+        <Text style={styles.eyebrow}>
+          {i18n.t(i18n.strings.common.stepCounter, {
+            current: 1,
+            total: ONBOARDING_STEPS.length,
+          })}
         </Text>
+        <Text style={styles.title}>{i18n.strings.onboarding.goalsTitle}</Text>
+        <Text style={styles.subtitle}>{i18n.strings.onboarding.goalsSubtitle}</Text>
       </View>
 
       <View style={styles.optionStack}>
@@ -431,8 +395,12 @@ export function OnboardingFlow({
                 />
               </View>
               <View style={styles.optionCopy}>
-                <Text style={styles.optionTitle}>{option.label}</Text>
-                <Text style={styles.optionText}>{option.description}</Text>
+                <Text style={styles.optionTitle}>
+                  {i18n.strings.dataTypes[option.id].goalLabel}
+                </Text>
+                <Text style={styles.optionText}>
+                  {i18n.strings.dataTypes[option.id].goalDescription}
+                </Text>
               </View>
               <MaterialCommunityIcons
                 color={
@@ -457,11 +425,14 @@ export function OnboardingFlow({
   const renderPainStep = () => (
     <>
       <View style={styles.questionHeader}>
-        <Text style={styles.eyebrow}>Step 2</Text>
-        <Text style={styles.title}>What slows you down most?</Text>
-        <Text style={styles.subtitle}>
-          Choose the one that feels uncomfortably familiar.
+        <Text style={styles.eyebrow}>
+          {i18n.t(i18n.strings.common.stepCounter, {
+            current: 2,
+            total: ONBOARDING_STEPS.length,
+          })}
         </Text>
+        <Text style={styles.title}>{i18n.strings.onboarding.painTitle}</Text>
+        <Text style={styles.subtitle}>{i18n.strings.onboarding.painSubtitle}</Text>
       </View>
 
       <View style={styles.optionStack}>
@@ -486,8 +457,12 @@ export function OnboardingFlow({
                 />
               </View>
               <View style={styles.optionCopy}>
-                <Text style={styles.optionTitle}>{option.label}</Text>
-                <Text style={styles.optionText}>{option.description}</Text>
+                <Text style={styles.optionTitle}>
+                  {i18n.strings.onboarding.painPoints[option.id].label}
+                </Text>
+                <Text style={styles.optionText}>
+                  {i18n.strings.onboarding.painPoints[option.id].description}
+                </Text>
               </View>
               <MaterialCommunityIcons
                 color={
@@ -512,11 +487,14 @@ export function OnboardingFlow({
   const renderSourcesStep = () => (
     <>
       <View style={styles.questionHeader}>
-        <Text style={styles.eyebrow}>Step 3</Text>
-        <Text style={styles.title}>Where does the mess usually live?</Text>
-        <Text style={styles.subtitle}>
-          We'll tune the first run around the sources you reach for most.
+        <Text style={styles.eyebrow}>
+          {i18n.t(i18n.strings.common.stepCounter, {
+            current: 3,
+            total: ONBOARDING_STEPS.length,
+          })}
         </Text>
+        <Text style={styles.title}>{i18n.strings.onboarding.sourcesTitle}</Text>
+        <Text style={styles.subtitle}>{i18n.strings.onboarding.sourcesSubtitle}</Text>
       </View>
 
       <View style={styles.sourceGrid}>
@@ -540,8 +518,12 @@ export function OnboardingFlow({
                   size={22}
                 />
               </View>
-              <Text style={styles.sourceTitle}>{option.label}</Text>
-              <Text style={styles.sourceText}>{option.description}</Text>
+              <Text style={styles.sourceTitle}>
+                {i18n.strings.sources[option.id].onboardingLabel}
+              </Text>
+              <Text style={styles.sourceText}>
+                {i18n.strings.sources[option.id].onboardingDescription}
+              </Text>
               <MaterialCommunityIcons
                 color={
                   isSelected
@@ -562,7 +544,7 @@ export function OnboardingFlow({
       </View>
 
       <View style={styles.infoCard}>
-        <Text style={styles.featureTitle}>Permission timing</Text>
+        <Text style={styles.featureTitle}>{i18n.strings.onboarding.permissionTimingTitle}</Text>
         <Text style={styles.featureText}>{permissionNote}</Text>
       </View>
     </>
@@ -571,21 +553,23 @@ export function OnboardingFlow({
   const renderDemoStep = () => (
     <>
       <View style={styles.questionHeader}>
-        <Text style={styles.eyebrow}>Step 4</Text>
-        <Text style={styles.title}>Run a 10-second preview</Text>
-        <Text style={styles.subtitle}>
-          This is the core moment: messy input in, usable details out.
+        <Text style={styles.eyebrow}>
+          {i18n.t(i18n.strings.common.stepCounter, {
+            current: 4,
+            total: ONBOARDING_STEPS.length,
+          })}
         </Text>
+        <Text style={styles.title}>{i18n.strings.onboarding.demoTitle}</Text>
+        <Text style={styles.subtitle}>{i18n.strings.onboarding.demoSubtitle}</Text>
       </View>
 
       <View style={styles.demoCard}>
         <View style={styles.previewMessage}>
-          <Text style={styles.previewLabel}>Preview thread</Text>
+          <Text style={styles.previewLabel}>{i18n.strings.onboarding.previewThreadLabel}</Text>
           <Text style={styles.previewText}>
-            Alex, can you review the brief before April 18, 2026? If anything
-            changes, message hello@northstar.studio or use
-            {' '}
-            https://northstar.studio/invite.
+            {i18n.t(i18n.strings.onboarding.previewThreadText, {
+              sampleDate: i18n.formatSampleDate(SAMPLE_RESULTS.date),
+            })}
           </Text>
         </View>
 
@@ -593,7 +577,7 @@ export function OnboardingFlow({
           {resolvedTypes.map(type => (
             <View key={type} style={styles.previewChip}>
               <Text style={styles.previewChipText}>
-                {DATA_TYPE_LABELS[type]}
+                {i18n.dataTypeLabel(type)}
               </Text>
             </View>
           ))}
@@ -601,19 +585,20 @@ export function OnboardingFlow({
 
         {hasRunPreview ? (
           <View style={styles.previewResultsCard}>
-            <Text style={styles.featureTitle}>Pulled out for you</Text>
+            <Text style={styles.featureTitle}>{i18n.strings.onboarding.pulledOutForYou}</Text>
             {resolvedTypes.map(type => (
               <View key={type} style={styles.previewResultItem}>
-                <Text style={styles.previewResultType}>{DATA_TYPE_LABELS[type]}</Text>
-                <Text style={styles.previewResultValue}>{SAMPLE_RESULTS[type]}</Text>
+                <Text style={styles.previewResultType}>{i18n.dataTypeLabel(type)}</Text>
+                <Text style={styles.previewResultValue}>
+                  {type === 'date'
+                    ? i18n.formatSampleDate(SAMPLE_RESULTS[type])
+                    : SAMPLE_RESULTS[type]}
+                </Text>
               </View>
             ))}
           </View>
         ) : (
-          <Text style={styles.demoHint}>
-            Tap "Run the preview" to reveal the exact details this app would
-            surface first.
-          </Text>
+          <Text style={styles.demoHint}>{i18n.strings.onboarding.runPreviewHint}</Text>
         )}
       </View>
     </>
@@ -622,12 +607,14 @@ export function OnboardingFlow({
   const renderReadyStep = () => (
     <>
       <View style={styles.questionHeader}>
-        <Text style={styles.eyebrow}>All set</Text>
-        <Text style={styles.title}>Your extractor is tuned for fast wins</Text>
-        <Text style={styles.subtitle}>
-          You can change any of this later, but this gives you the fastest path
-          to value on the home screen.
+        <Text style={styles.eyebrow}>
+          {i18n.t(i18n.strings.common.stepCounter, {
+            current: ONBOARDING_STEPS.length,
+            total: ONBOARDING_STEPS.length,
+          })}
         </Text>
+        <Text style={styles.title}>{i18n.strings.onboarding.readyTitle}</Text>
+        <Text style={styles.subtitle}>{i18n.strings.onboarding.readySubtitle}</Text>
       </View>
 
       <View style={styles.optionStack}>
@@ -640,13 +627,13 @@ export function OnboardingFlow({
             />
           </View>
           <View style={styles.optionCopy}>
-            <Text style={styles.optionTitle}>Prioritized outputs</Text>
+            <Text style={styles.optionTitle}>
+              {i18n.strings.onboarding.prioritizedOutputsTitle}
+            </Text>
             <Text style={styles.optionText}>
-              We'll put
-              {' '}
-              {typesSummary}
-              {' '}
-              front and center from the first scan.
+              {i18n.t(i18n.strings.onboarding.prioritizedOutputsText, {
+                typesSummary,
+              })}
             </Text>
           </View>
         </View>
@@ -660,12 +647,11 @@ export function OnboardingFlow({
             />
           </View>
           <View style={styles.optionCopy}>
-            <Text style={styles.optionTitle}>Best-fit sources</Text>
+            <Text style={styles.optionTitle}>{i18n.strings.onboarding.bestFitSourcesTitle}</Text>
             <Text style={styles.optionText}>
-              Your likely first win comes from
-              {' '}
-              {sourcesSummary}
-              .
+              {i18n.t(i18n.strings.onboarding.bestFitSourcesText, {
+                sourcesSummary,
+              })}
             </Text>
           </View>
         </View>
@@ -680,8 +666,10 @@ export function OnboardingFlow({
               />
             </View>
             <View style={styles.optionCopy}>
-              <Text style={styles.optionTitle}>Built to remove this friction</Text>
-              <Text style={styles.optionText}>{selectedPainPoint.label}</Text>
+              <Text style={styles.optionTitle}>{i18n.strings.onboarding.frictionTitle}</Text>
+              <Text style={styles.optionText}>
+                {i18n.strings.onboarding.painPoints[selectedPainPoint.id].label}
+              </Text>
             </View>
           </View>
         ) : null}
@@ -718,13 +706,10 @@ export function OnboardingFlow({
         <View style={styles.topBar}>
           <View style={styles.progressWrap}>
             <Text style={styles.progressText}>
-              Step
-              {' '}
-              {stepIndex + 1}
-              {' '}
-              of
-              {' '}
-              {ONBOARDING_STEPS.length}
+              {i18n.t(i18n.strings.common.stepCounter, {
+                current: stepIndex + 1,
+                total: ONBOARDING_STEPS.length,
+              })}
             </Text>
             <View style={styles.progressTrack}>
               <View
@@ -737,7 +722,7 @@ export function OnboardingFlow({
           </View>
 
           <Pressable onPress={handleComplete} testID="onboarding-skip">
-            <Text style={styles.skipText}>Skip</Text>
+            <Text style={styles.skipText}>{i18n.strings.common.skip}</Text>
           </Pressable>
         </View>
 
@@ -774,7 +759,7 @@ export function OnboardingFlow({
               stepIndex === 0 && styles.backButtonDisabled,
               pressed && stepIndex > 0 && styles.backButtonPressed,
             ]}>
-            <Text style={styles.backButtonText}>Back</Text>
+            <Text style={styles.backButtonText}>{i18n.strings.common.back}</Text>
           </Pressable>
 
           <Pressable

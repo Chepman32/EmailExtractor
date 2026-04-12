@@ -69,12 +69,12 @@ export async function extractData(input: ExtractionInput): Promise<ExtractionRes
         return createResult(createEmptyMatches(), 'text', input.text.length);
       }
 
-      throw new Error('Multi-type extraction is unavailable for this source.');
+      throw new Error('error.extract.multiTypeUnavailable');
     }
   }
 
   if (!input.selectedAsset?.uri) {
-    throw new Error('No source asset selected');
+    throw new Error('error.extract.noSourceAsset');
   }
 
   if (input.source === 'camera' || input.source === 'photos') {
