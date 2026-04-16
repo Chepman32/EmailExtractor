@@ -1,0 +1,73 @@
+¿Esa captura de pantalla llena de correos? ¿Ese documento repleto de fechas y enlaces? Deja de reescribir — solo usa Pluq.
+
+Pluq es la forma más rápida de extraer correos electrónicos, fechas y enlaces de cualquier cosa en tu teléfono. Pega texto, toma una foto, importa un archivo o apunta tu cámara — Pluq extrae los datos que necesitas en segundos y te permite exportarlos al instante.
+
+EXTRAE DESDE CUALQUIER LUGAR
+
+Pluq funciona con cualquier fuente:
+
+- Pega texto de correos, chats, notas de reuniones o cualquier app
+- Usa tu cámara para capturar texto de documentos impresos, tarjetas de presentación o pizarras en tiempo real
+- Elige una foto de tu biblioteca — Pluq la lee con OCR
+- Importa archivos como documentos DOCX y deja que Pluq haga el resto
+
+Sin importar dónde estén tus datos, Pluq los alcanza.
+
+¿QUÉ PUEDE EXTRAER PLUQ?
+
+Correos — Cada dirección de correo electrónico, encontrada y validada automáticamente. Pluq detecta direcciones incluso de escaneos OCR desordenados con caracteres especiales o espacios extras.
+
+Fechas — Las fechas en cualquier formato común son detectadas y extraídas al instante.
+
+Enlaces — ¿URLs enterradas en documentos largos o hilos de chat? Pluq las encuentra todas.
+
+Elige qué tipos extraer antes de cada sesión, o configura tus valores predeterminados y listo.
+
+OCR INTELIGENTE INTEGRADO
+
+Apunta tu cámara a una página impresa, una pizarra o una nota manuscrita. Pluq usa OCR en el dispositivo para leer el texto y extraer datos estructurados — sin conexión a internet. Incluso maneja artefactos OCR complicados como caracteres sustituidos y espacios extra.
+
+EXPORTA Y COMPARTE CON UN TOQUE
+
+Una vez que Pluq extrae tus datos, obtenerlos es instantáneo:
+
+- Exporta como CSV — listo para hojas de cálculo, CRMs o bases de datos
+- Exporta como TXT — texto limpio para cualquier uso
+- Copia elementos individuales al portapapeles con un solo toque
+- Comparte directamente a través del menú de compartir a cualquier app
+
+Tus datos extraídos van donde los necesites.
+
+HISTORIAL DE EXTRACCIONES
+
+Cada sesión de extracción se guarda automáticamente. Regresa a cualquier sesión anterior para revisar, re-exportar o copiar datos. Pluq almacena hasta 100 sesiones con marcas de tiempo y etiquetas de origen.
+
+PERSONALIZABLE
+
+Haz Pluq tuyo:
+
+- Elige tu tema visual: Light, Dark, Solar o Mono
+- Activa o desactiva los tipos de datos a extraer (correos, fechas, enlaces)
+- Las preferencias se mantienen entre sesiones
+
+COMPLETAMENTE PRIVADO
+
+Pluq funciona 100% sin conexión. Tus datos nunca salen de tu dispositivo.
+
+- Toda la extracción ocurre localmente en tu dispositivo
+- No se requiere cuenta
+- No se necesita conexión a internet
+- Sin rastreo, sin analíticas, sin anuncios
+- Tus documentos y fotos siguen siendo tuyos
+
+¿PARA QUIÉN ES PLUQ?
+
+- Reclutadores que recopilan correos de candidatos de currículums
+- Equipos de ventas que extraen contactos de materiales de eventos
+- Organizadores de eventos que extraen información de asistentes de listas de registro
+- Estudiantes que recopilan enlaces y fechas de diapositivas de clase
+- Cualquiera que haya reescrito una dirección de correo desde una captura de pantalla
+
+DEJA DE REESCRIBIR. EMPIEZA A EXTRAER.
+
+Pluq convierte el tedioso trabajo de copiar datos a mano en una operación de un solo toque. Pégalo, fotográfialo o impórtalo — Pluq se encarga del resto.

@@ -1,0 +1,1 @@
+email,kinyerő,ocr,szkenner,dátum,link,csv,exportálás,névjegyek,szöveg,adat,fotó,dokumentum

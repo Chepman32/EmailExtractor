@@ -1,0 +1,73 @@
+Screenshot plný e-mailů? Dokument nacpaný daty a odkazy? Přestaňte přepisovat — prostě to Pluqněte.
+
+Pluq je nejrychlejší způsob, jak extrahovat e-maily, data a odkazy z čehokoli na vašem telefonu. Vložte text, vyfoťte dokument, importujte soubor nebo namiřte kameru — Pluq vytáhne potřebná data během sekund a umožní vám je okamžitě exportovat.
+
+EXTRAKCE ODKUDKOLI
+
+Pluq pracuje s jakýmkoli zdrojem:
+
+- Vložte text z e-mailů, chatů, poznámek ze schůzek nebo jakékoli aplikace
+- Použijte kameru k zachycení textu z papírových dokumentů, vizitek nebo tabulí v reálném čase
+- Vyberte fotografii z knihovny — Pluq ji přečte pomocí OCR
+- Importujte soubory jako DOCX dokumenty a nechte Pluq udělat zbytek
+
+Ať jsou vaše data kdekoli, Pluq se k nim dostane.
+
+CO MŮŽE PLUQ EXTRAHOVAT?
+
+E-maily — Každá e-mailová adresa je nalezena a automaticky ověřena. Pluq zachytí adresy i z nekvalitních OCR skenů se speciálními znaky nebo mezerami.
+
+Data — Data v jakémkoli běžném formátu jsou detekována a okamžitě vytažena.
+
+Odkazy — URL skryté v dlouhých dokumentech nebo konverzacích? Pluq je najde všechny.
+
+Zvolte, které typy dat extrahovat před každou relací, nebo nastavte výchozí hodnoty a jděte.
+
+CHYTRÉ OCR VESTAVĚNÉ
+
+Namiřte kameru na tištěnou stránku, tabuli nebo ručně psanou poznámku. Pluq používá OCR přímo na zařízení k přečtení textu a extrakci strukturovaných dat — bez připojení k internetu. Zvládne i záludné OCR artefakty jako záměny znaků a nadbytečné mezery.
+
+EXPORT A SDÍLENÍ JEDNÍM KLEPNUTÍM
+
+Jakmile Pluq extrahuje vaše data, jejich získání je okamžité:
+
+- Export jako CSV — připraveno pro tabulky, CRM nebo databáze
+- Export jako TXT — čistý prostý text pro jakékoli použití
+- Kopírování jednotlivých položek do schránky jedním klepnutím
+- Sdílení přímo přes systémové menu sdílení do jakékoli aplikace
+
+Vaše extrahovaná data putují, kam potřebujete.
+
+HISTORIE EXTRAKCÍ
+
+Každá relace extrakce se automaticky uloží. Vraťte se k jakékoli předchozí relaci a zkontrolujte, znovu exportujte nebo zkopírujte data. Pluq ukládá až 100 relací s časovými razítky a štítky zdrojů.
+
+PŘIZPŮSOBITELNÉ
+
+Přizpůsobte si Pluq:
+
+- Zvolte vizuální motiv: Světlý, Tmavý, Solar nebo Mono
+- Přepínejte typy dat k extrakci (e-maily, data, odkazy)
+- Předvolby se uchovávají mezi relacemi
+
+ZCELA SOUKROMÉ
+
+Pluq funguje 100% offline. Vaše data nikdy neopustí vaše zařízení.
+
+- Veškerá extrakce probíhá lokálně na vašem zařízení
+- Není vyžadován žádný účet
+- Není potřeba připojení k internetu
+- Žádné sledování, žádná analytika, žádné reklamy
+- Vaše dokumenty a fotografie zůstávají vaše
+
+PRO KOHO JE PLUQ?
+
+- Personalisté sbírající e-maily kandidátů z životopisů
+- Obchodní týmy vytahující kontakty z materiálů z akcí
+- Organizátoři akcí extrahující informace o účastnících z přihlašovacích formulářů
+- Studenti sbírající odkazy a data z přednáškových slajdů
+- Kdokoli, kdo kdy přepisoval e-mailovou adresu ze screenshotu
+
+PŘESTAŇTE PŘEPISOVAT. ZAČNĚTE EXTRAHOVAT.
+
+Pluq promění únavnou práci ručního kopírování dat v operaci na jedno klepnutí. Vložte, vyfoťte nebo importujte — Pluq se postará o zbytek.

@@ -1,0 +1,1 @@
+eposta,çıkarıcı,ocr,tarayıcı,tarih,bağlantı,csv,dışa aktar,kişiler,metin,veri,fotoğraf,belge

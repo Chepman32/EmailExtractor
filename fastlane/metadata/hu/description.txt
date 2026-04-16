@@ -1,0 +1,69 @@
+Az a képernyőkép tele e-mail címekkel? Az a dokumentum tele dátumokkal és linkekkel? Ne gépeld újra — csak Pluq-old.
+
+A Pluq a leggyorsabb módja az e-mailek, dátumok és linkek kinyerésének bármiből a telefonodon. Illeszd be a szöveget, fotózz, importálj fájlt vagy irányítsd a kamerát — a Pluq másodpercek alatt kiszedi a szükséges adatokat és azonnal exportálhatod.
+
+KINYERÉS BÁRHONNAN
+
+A Pluq bármilyen forrással működik:
+
+- Illeszd be a szöveget e-mailekből, chatekből, megbeszélés-jegyzetekből vagy bármely alkalmazásból
+- Használd a kamerádat szöveg rögzítéséhez papír dokumentumokról, névjegykártyákról vagy tábláról valós időben
+- Válassz egy fotót a könyvtáradból — a Pluq OCR-rel olvassa
+- Importálj fájlokat, például DOCX dokumentumokat, és hagyd, hogy a Pluq elvégezze a többit
+
+Bárhol is vannak az adataid, a Pluq eléri őket.
+
+MIT TUD A PLUQ KINYERNI?
+
+E-mailek — Minden e-mail cím automatikusan megtalálva és érvényesítve. A Pluq még a rendezetlen OCR szkennekből is megfogja a címeket.
+
+Dátumok — Bármilyen általános formátumú dátum felismerve és azonnal kinyerve.
+
+Linkek — Hosszú dokumentumokba vagy chat-szálakba rejtett URL-ek? A Pluq mindet megtalálja.
+
+Válaszd ki, milyen típusokat nyerj ki minden munkamenet előtt, vagy állítsd be az alapértékeket.
+
+INTELLIGENS BEÉPÍTETT OCR
+
+Irányítsd a kamerádat egy nyomtatott oldalra, táblára vagy kézírásos jegyzetre. A Pluq az eszközön lévő OCR-t használja — internetkapcsolat nélkül.
+
+EXPORTÁLÁS ÉS MEGOSZTÁS EGYETLEN ÉRINTÉSSEL
+
+Amint a Pluq kinyeri az adataidat:
+
+- Exportálás CSV-ként — táblázatokhoz, CRM-ekhez vagy adatbázisokhoz
+- Exportálás TXT-ként — tiszta szöveg bármilyen célra
+- Egyedi elemek másolása a vágólapra egyetlen érintéssel
+- Közvetlen megosztás a rendszer megosztási menüjén keresztül
+
+KINYERÉSI ELŐZMÉNYEK
+
+Minden munkamenet automatikusan mentésre kerül. A Pluq akár 100 munkamenetet tárol időbélyegekkel és forráscímkékkel.
+
+TESTRESZABHATÓ
+
+- Válassz vizuális témát: Light, Dark, Solar vagy Mono
+- Kapcsold be/ki a kinyerendő adattípusokat (e-mailek, dátumok, linkek)
+- A beállítások munkamenetek között megmaradnak
+
+TELJESEN PRIVÁT
+
+A Pluq 100% offline működik. Az adataid soha nem hagyják el az eszközödet.
+
+- Minden kinyerés helyben történik az eszközödön
+- Nincs szükség fiókra
+- Nincs szükség internetkapcsolatra
+- Nincs követés, nincs analitika, nincs reklám
+- A dokumentumaid és fotóid a tieid maradnak
+
+KINEK SZÓL A PLUQ?
+
+- Toborzók, akik jelöltek e-mailjeit gyűjtik önéletrajzokból
+- Értékesítési csapatok, akik kapcsolatokat nyernek ki rendezvényanyagokból
+- Rendezvényszervezők, akik résztvevői adatokat nyernek ki regisztrációs listákból
+- Diákok, akik linkeket és dátumokat gyűjtenek előadás-diákból
+- Bárki, aki valaha újragépelt egy e-mail címet egy képernyőképről
+
+NE GÉPELD ÚJRA. KEZDJ EL KINYERNI.
+
+A Pluq az adatok kézi másolásának fárasztó munkáját egyetlen érintéses műveletté alakítja. Illeszd be, fotózd le vagy importáld — a Pluq intézi a többit.

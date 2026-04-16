@@ -1,0 +1,1 @@
+email,extractor,ocr,scanner,dată,link,csv,export,contacte,text,date,foto,document,offline

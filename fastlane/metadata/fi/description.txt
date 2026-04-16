@@ -1,0 +1,71 @@
+Se kuvakaappaus täynnä sähköposteja? Se dokumentti täynnä päivämääriä ja linkkejä? Lopeta uudelleenkirjoittaminen — käytä Pluqia.
+
+Pluq on nopein tapa poimia sähköpostit, päivämäärät ja linkit mistä tahansa puhelimessasi. Liitä tekstiä, ota kuva, tuo tiedosto tai suuntaa kamerasi — Pluq vetää tarvitsemasi tiedot sekunneissa ja antaa sinun viedä ne välittömästi.
+
+POIMI MISTÄ VAIN
+
+Pluq toimii minkä tahansa lähteen kanssa:
+
+- Liitä tekstiä sähköposteista, chateista, kokousmuistiinpanoista tai mistä tahansa sovelluksesta
+- Käytä kameraasi tekstin kaappaamiseen paperidokumenteista, käyntikorteista tai valkotauluista reaaliajassa
+- Valitse kuva kirjastostasi — Pluq lukee sen OCR:llä
+- Tuo tiedostoja kuten DOCX-dokumentteja ja anna Pluqin hoitaa loput
+
+Missä ikinä tietosi ovatkin, Pluq tavoittaa ne.
+
+MITÄ PLUQ VOI POIMIA?
+
+Sähköpostit — Jokainen sähköpostiosoite löydetään ja vahvistetaan automaattisesti. Pluq nappaa osoitteet jopa sotkuisista OCR-skannauksista erikoismerkkeineen ja ylimääräisine välilyönteineen.
+
+Päivämäärät — Päivämäärät missä tahansa yleisessä muodossa tunnistetaan ja poimitaan välittömästi.
+
+Linkit — URL-osoitteita pitkissä dokumenteissa tai keskusteluketjuissa? Pluq löytää ne kaikki.
+
+Valitse mitä tyyppejä poimit ennen jokaista istuntoa tai aseta oletusasetuksesi.
+
+ÄLYKÄS OCR SISÄÄNRAKENNETTU
+
+Suuntaa kamerasi painettuun sivuun, valkotauluun tai käsinkirjoitettuun muistiinpanoon. Pluq käyttää laitteen OCR:ää tekstin lukemiseen ja rakenteellisten tietojen poimimiseen — ei internetyhteyttä tarvita.
+
+VIE JA JAA YHDELLÄ NAPAUTUKSELLA
+
+Kun Pluq on poiminut tietosi, niiden saaminen ulos on välitöntä:
+
+- Vie CSV:nä — valmis taulukkolaskentaan, CRM:iin tai tietokantoihin
+- Vie TXT:nä — puhdasta tekstiä mihin tahansa käyttöön
+- Kopioi yksittäisiä kohteita leikepöydälle yhdellä napautuksella
+- Jaa suoraan järjestelmän jakovalikon kautta mihin tahansa sovellukseen
+
+POIMINTAHISTORIA
+
+Jokainen poimintaistunto tallennetaan automaattisesti. Palaa mihin tahansa aiempaan istuntoon. Pluq tallentaa jopa 100 istuntoa aikaleimoineen ja lähdetunnisteineen.
+
+MUOKATTAVA
+
+Tee Pluqista omasi:
+
+- Valitse visuaalinen teema: Light, Dark, Solar tai Mono
+- Vaihda poimittavia tietotyyppejä (sähköpostit, päivämäärät, linkit)
+- Asetukset säilyvät istuntojen välillä
+
+TÄYSIN YKSITYINEN
+
+Pluq toimii 100% offline. Tietosi eivät koskaan poistu laitteestasi.
+
+- Kaikki poiminta tapahtuu paikallisesti laitteellasi
+- Ei tiliä tarvita
+- Ei internetyhteyttä tarvita
+- Ei seurantaa, ei analytiikkaa, ei mainoksia
+- Dokumenttisi ja kuvasi pysyvät sinun
+
+KENELLE PLUQ ON?
+
+- Rekrytoijat jotka keräävät ehdokkaiden sähköposteja ansioluetteloista
+- Myyntitiimit jotka poimivat yhteystietoja tapahtumamateriaaleista
+- Tapahtumajärjestäjät jotka poimivat osallistujatietoja ilmoittautumislistoilta
+- Opiskelijat jotka keräävät linkkejä ja päivämääriä luentodioista
+- Kuka tahansa joka on koskaan kirjoittanut sähköpostiosoitteen uudelleen kuvakaappauksesta
+
+LOPETA UUDELLEENKIRJOITTAMINEN. ALOITA POIMINTA.
+
+Pluq muuttaa tylsän tietojen käsin kopioinnin yhden napautuksen toiminnoksi. Liitä, nappaa tai tuo — Pluq hoitaa loput.

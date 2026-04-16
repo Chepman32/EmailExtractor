@@ -1,0 +1,69 @@
+Ten zrzut ekranu pełen e-maili? Ten dokument nafaszerowany datami i linkami? Przestań przepisywać — po prostu użyj Pluq.
+
+Pluq to najszybszy sposób na wyodrębnienie e-maili, dat i linków z czegokolwiek na Twoim telefonie. Wklej tekst, zrób zdjęcie, zaimportuj plik lub skieruj kamerę — Pluq wyciągnie potrzebne dane w kilka sekund i pozwoli Ci je natychmiast wyeksportować.
+
+WYODRĘBNIAJ ZEWSZĄD
+
+Pluq działa z dowolnym źródłem:
+
+- Wklej tekst z e-maili, czatów, notatek ze spotkań lub dowolnej aplikacji
+- Użyj kamery do przechwycenia tekstu z dokumentów papierowych, wizytówek lub tablic w czasie rzeczywistym
+- Wybierz zdjęcie z biblioteki — Pluq odczyta je za pomocą OCR
+- Importuj pliki jak dokumenty DOCX i pozwól Pluq zrobić resztę
+
+Gdziekolwiek są Twoje dane, Pluq do nich dotrze.
+
+CO MOŻE WYODRĘBNIĆ PLUQ?
+
+E-maile — Każdy adres e-mail jest automatycznie znajdowany i weryfikowany. Pluq wyłapuje adresy nawet z niedokładnych skanów OCR ze specjalnymi znakami lub dodatkowymi spacjami.
+
+Daty — Daty w dowolnym popularnym formacie są wykrywane i wyodrębniane natychmiast.
+
+Linki — URL-e ukryte w długich dokumentach lub wątkach czatu? Pluq znajdzie je wszystkie.
+
+Wybierz typy do wyodrębnienia przed każdą sesją lub ustaw domyślne wartości.
+
+INTELIGENTNE OCR WBUDOWANE
+
+Skieruj kamerę na wydrukowaną stronę, tablicę lub odręczną notatkę. Pluq używa OCR na urządzeniu — bez połączenia z internetem.
+
+EKSPORTUJ I UDOSTĘPNIAJ JEDNYM DOTKNIĘCIEM
+
+Gdy Pluq wyodrębni Twoje dane:
+
+- Eksportuj jako CSV — gotowe do arkuszy kalkulacyjnych, CRM lub baz danych
+- Eksportuj jako TXT — czysty tekst do dowolnego użytku
+- Kopiuj pojedyncze elementy do schowka jednym dotknięciem
+- Udostępniaj bezpośrednio przez menu systemowe do dowolnej aplikacji
+
+HISTORIA WYODRĘBNIEŃ
+
+Każda sesja jest zapisywana automatycznie. Pluq przechowuje do 100 sesji ze znacznikami czasu i etykietami źródeł.
+
+KONFIGUROWALNY
+
+- Wybierz motyw wizualny: Light, Dark, Solar lub Mono
+- Przełączaj typy danych do wyodrębnienia (e-maile, daty, linki)
+- Ustawienia zachowują się między sesjami
+
+CAŁKOWICIE PRYWATNY
+
+Pluq działa w 100% offline. Twoje dane nigdy nie opuszczają urządzenia.
+
+- Całe wyodrębnianie odbywa się lokalnie na Twoim urządzeniu
+- Nie wymaga konta
+- Nie wymaga połączenia z internetem
+- Brak śledzenia, brak analityki, brak reklam
+- Twoje dokumenty i zdjęcia pozostają Twoje
+
+DLA KOGO JEST PLUQ?
+
+- Rekruterzy zbierający e-maile kandydatów z CV
+- Zespoły sprzedaży wyodrębniające kontakty z materiałów eventowych
+- Organizatorzy wydarzeń wyodrębniający dane uczestników z list rejestracji
+- Studenci zbierający linki i daty ze slajdów wykładowych
+- Każdy, kto kiedykolwiek przepisywał adres e-mail ze zrzutu ekranu
+
+PRZESTAŃ PRZEPISYWAĆ. ZACZNIJ WYODRĘBNIAĆ.
+
+Pluq zamienia żmudną pracę ręcznego kopiowania danych w operację jednego dotknięcia. Wklej, sfotografuj lub zaimportuj — Pluq zajmie się resztą.

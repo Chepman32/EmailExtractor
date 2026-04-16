@@ -1,0 +1,1 @@
+epost,extraktor,ocr,skanner,datum,länk,csv,export,kontakter,text,data,foto,dokument,offline

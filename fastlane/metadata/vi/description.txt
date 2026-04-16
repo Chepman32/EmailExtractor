@@ -1,0 +1,69 @@
+Ảnh chụp màn hình đầy email? Tài liệu chứa đầy ngày tháng và liên kết? Dừng gõ lại — chỉ cần Pluq.
+
+Pluq là cách nhanh nhất để trích xuất email, ngày tháng và liên kết từ bất kỳ thứ gì trên điện thoại. Dán văn bản, chụp ảnh, nhập tệp hoặc hướng camera — Pluq rút ra dữ liệu bạn cần trong vài giây và cho phép xuất ngay lập tức.
+
+TRÍCH XUẤT TỪ MỌI NƠI
+
+Pluq hoạt động với mọi nguồn:
+
+- Dán văn bản từ email, chat, ghi chú cuộc họp hoặc bất kỳ ứng dụng nào
+- Dùng camera chụp văn bản từ tài liệu giấy, danh thiếp hoặc bảng trắng theo thời gian thực
+- Chọn ảnh từ thư viện — Pluq đọc bằng OCR
+- Nhập tệp như tài liệu DOCX và để Pluq xử lý phần còn lại
+
+Dữ liệu ở đâu, Pluq đều tiếp cận được.
+
+PLUQ CÓ THỂ TRÍCH XUẤT GÌ?
+
+Email — Mọi địa chỉ email được tìm và xác minh tự động. Pluq bắt được địa chỉ ngay cả từ bản quét OCR lộn xộn với ký tự đặc biệt hoặc khoảng trắng thừa.
+
+Ngày tháng — Ngày tháng ở bất kỳ định dạng phổ biến nào được phát hiện và trích xuất ngay lập tức.
+
+Liên kết — URL ẩn trong tài liệu dài hoặc chuỗi chat? Pluq tìm tất cả.
+
+Chọn loại cần trích xuất trước mỗi phiên, hoặc đặt mặc định.
+
+OCR THÔNG MINH TÍCH HỢP
+
+Hướng camera vào trang in, bảng trắng hoặc ghi chú viết tay. Pluq sử dụng OCR trên thiết bị — không cần kết nối internet.
+
+XUẤT VÀ CHIA SẺ CHỈ MỘT CHẠM
+
+Sau khi Pluq trích xuất dữ liệu:
+
+- Xuất dạng CSV — sẵn sàng cho bảng tính, CRM hoặc cơ sở dữ liệu
+- Xuất dạng TXT — văn bản thuần cho mọi mục đích
+- Sao chép từng mục vào clipboard chỉ một chạm
+- Chia sẻ trực tiếp qua menu chia sẻ đến bất kỳ ứng dụng nào
+
+LỊCH SỬ TRÍCH XUẤT
+
+Mỗi phiên trích xuất được lưu tự động. Pluq lưu trữ đến 100 phiên với dấu thời gian và nhãn nguồn.
+
+TÙY CHỈNH
+
+- Chọn giao diện: Light, Dark, Solar hoặc Mono
+- Bật/tắt loại dữ liệu cần trích xuất (email, ngày tháng, liên kết)
+- Cài đặt được giữ giữa các phiên
+
+HOÀN TOÀN RIÊNG TƯ
+
+Pluq hoạt động 100% ngoại tuyến. Dữ liệu không bao giờ rời khỏi thiết bị.
+
+- Mọi trích xuất diễn ra cục bộ trên thiết bị
+- Không cần tài khoản
+- Không cần kết nối internet
+- Không theo dõi, không phân tích, không quảng cáo
+- Tài liệu và ảnh của bạn vẫn thuộc về bạn
+
+PLUQ DÀNH CHO AI?
+
+- Nhà tuyển dụng thu thập email ứng viên từ CV
+- Đội ngũ bán hàng trích xuất liên hệ từ tài liệu sự kiện
+- Nhà tổ chức sự kiện trích xuất thông tin người tham dự từ danh sách đăng ký
+- Sinh viên thu thập liên kết và ngày tháng từ slide bài giảng
+- Bất kỳ ai từng gõ lại địa chỉ email từ ảnh chụp màn hình
+
+DỪNG GÕ LẠI. BẮT ĐẦU TRÍCH XUẤT.
+
+Pluq biến công việc nhàm chán sao chép dữ liệu thủ công thành thao tác một chạm. Dán, chụp hoặc nhập — Pluq lo phần còn lại.

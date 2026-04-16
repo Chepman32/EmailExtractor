@@ -1,0 +1,69 @@
+Det skjermbildet fullt av e-poster? Det dokumentet stappet med datoer og lenker? Slutt å skrive om — bare Pluq det.
+
+Pluq er den raskeste måten å trekke ut e-poster, datoer og lenker fra hva som helst på telefonen din. Lim inn tekst, ta et bilde, importer en fil eller pek kameraet — Pluq henter ut dataene du trenger på sekunder og lar deg eksportere dem umiddelbart.
+
+TREKK UT FRA HVOR SOM HELST
+
+Pluq fungerer med enhver kilde:
+
+- Lim inn tekst fra e-poster, chatter, møtenotater eller hvilken som helst app
+- Bruk kameraet til å fange tekst fra papirdokumenter, visittkort eller tavler i sanntid
+- Velg et bilde fra biblioteket — Pluq leser det med OCR
+- Importer filer som DOCX-dokumenter og la Pluq gjøre resten
+
+Uansett hvor dataene dine er, kan Pluq nå dem.
+
+HVA KAN PLUQ TREKKE UT?
+
+E-poster — Hver e-postadresse finnes og valideres automatisk. Pluq fanger adresser selv fra rotete OCR-skanninger.
+
+Datoer — Datoer i ethvert vanlig format oppdages og trekkes ut umiddelbart.
+
+Lenker — URL-er gjemt i lange dokumenter eller chattråder? Pluq finner dem alle.
+
+Velg hvilke typer som skal trekkes ut før hver økt, eller sett dine standarder.
+
+SMART OCR INNEBYGD
+
+Pek kameraet mot en trykt side, tavle eller håndskrevet notat. Pluq bruker OCR på enheten — ingen internettforbindelse nødvendig.
+
+EKSPORTER OG DEL MED ETT TRYKK
+
+Når Pluq har trukket ut dataene dine:
+
+- Eksporter som CSV — klar for regneark, CRM eller databaser
+- Eksporter som TXT — ren tekst for enhver bruk
+- Kopier individuelle elementer til utklippstavlen med ett trykk
+- Del direkte via systemets delingsmeny til hvilken som helst app
+
+UTTREKKSHISTORIKK
+
+Hver uttrekksøkt lagres automatisk. Pluq lagrer opptil 100 økter med tidsstempler og kildelabeler.
+
+TILPASSBAR
+
+- Velg visuelt tema: Light, Dark, Solar eller Mono
+- Slå av/på datatyper å trekke ut (e-poster, datoer, lenker)
+- Innstillinger bevares mellom økter
+
+FULLSTENDIG PRIVAT
+
+Pluq fungerer 100% offline. Dataene dine forlater aldri enheten din.
+
+- All uttrekking skjer lokalt på enheten din
+- Ingen konto nødvendig
+- Ingen internettforbindelse nødvendig
+- Ingen sporing, ingen analyse, ingen reklame
+- Dokumentene og bildene dine forblir dine
+
+HVEM ER PLUQ FOR?
+
+- Rekrutterere som samler kandidat-e-poster fra CV-er
+- Salgsteam som trekker ut kontakter fra arrangementmateriell
+- Arrangører som trekker ut deltakerinformasjon fra påmeldingslister
+- Studenter som samler lenker og datoer fra forelesningsslider
+- Alle som noen gang har skrevet om en e-postadresse fra et skjermbilde
+
+SLUTT Å SKRIVE OM. BEGYNN Å TREKKE UT.
+
+Pluq forvandler det kjedelige arbeidet med å kopiere data for hånd til en operasjon med ett trykk. Lim inn, fotografer eller importer — Pluq tar seg av resten.

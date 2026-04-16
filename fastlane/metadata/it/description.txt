@@ -1,0 +1,69 @@
+Quello screenshot pieno di email? Quel documento pieno di date e link? Smetti di riscrivere — usa Pluq.
+
+Pluq è il modo più veloce per estrarre email, date e link da qualsiasi cosa sul tuo telefono. Incolla testo, scatta una foto, importa un file o punta la fotocamera — Pluq estrae i dati che ti servono in pochi secondi e ti permette di esportarli istantaneamente.
+
+ESTRAI DA OVUNQUE
+
+Pluq funziona con qualsiasi fonte:
+
+- Incolla testo da email, chat, appunti di riunioni o qualsiasi app
+- Usa la fotocamera per acquisire testo da documenti cartacei, biglietti da visita o lavagne in tempo reale
+- Scegli una foto dalla tua libreria — Pluq la legge con OCR
+- Importa file come documenti DOCX e lascia che Pluq faccia il resto
+
+Ovunque siano i tuoi dati, Pluq li raggiunge.
+
+COSA PUÒ ESTRARRE PLUQ?
+
+Email — Ogni indirizzo email, trovato e validato automaticamente. Pluq cattura gli indirizzi anche da scansioni OCR disordinate con caratteri speciali o spazi extra.
+
+Date — Le date in qualsiasi formato comune vengono rilevate ed estratte istantaneamente.
+
+Link — URL nascosti in lunghi documenti o thread di chat? Pluq li trova tutti.
+
+Scegli quali tipi estrarre prima di ogni sessione, o imposta i tuoi predefiniti.
+
+OCR INTELLIGENTE INTEGRATO
+
+Punta la fotocamera su una pagina stampata, una lavagna o un appunto scritto a mano. Pluq usa l'OCR sul dispositivo per leggere il testo ed estrarre dati strutturati — nessuna connessione internet necessaria.
+
+ESPORTA E CONDIVIDI CON UN TOCCO
+
+Una volta che Pluq estrae i tuoi dati:
+
+- Esporta come CSV — pronto per fogli di calcolo, CRM o database
+- Esporta come TXT — testo pulito per qualsiasi uso
+- Copia singoli elementi negli appunti con un tocco
+- Condividi direttamente tramite il menu di condivisione verso qualsiasi app
+
+CRONOLOGIA ESTRAZIONI
+
+Ogni sessione di estrazione viene salvata automaticamente. Pluq memorizza fino a 100 sessioni con timestamp ed etichette di origine.
+
+PERSONALIZZABILE
+
+- Scegli il tuo tema visivo: Light, Dark, Solar o Mono
+- Attiva/disattiva i tipi di dati da estrarre (email, date, link)
+- Le preferenze persistono tra le sessioni
+
+COMPLETAMENTE PRIVATO
+
+Pluq funziona al 100% offline. I tuoi dati non lasciano mai il tuo dispositivo.
+
+- Tutta l'estrazione avviene localmente sul tuo dispositivo
+- Nessun account richiesto
+- Nessuna connessione internet necessaria
+- Nessun tracciamento, nessuna analitica, nessuna pubblicità
+- I tuoi documenti e le tue foto restano tuoi
+
+PER CHI È PLUQ?
+
+- Recruiter che raccolgono email di candidati dai CV
+- Team di vendita che estraggono contatti da materiali di eventi
+- Organizzatori di eventi che estraggono info dei partecipanti da liste di iscrizione
+- Studenti che raccolgono link e date dalle slide delle lezioni
+- Chiunque abbia mai riscritto un indirizzo email da uno screenshot
+
+SMETTI DI RISCRIVERE. INIZIA A ESTRARRE.
+
+Pluq trasforma il noioso lavoro di copiare dati a mano in un'operazione con un solo tocco. Incolla, scatta o importa — Pluq fa il resto.

@@ -1,0 +1,1 @@
+Pega texto, toma una foto o elige un archivo — Pluq extrae al instante cada email, fecha y enlace. Exporta a CSV con un toque. Sin cuenta, sin internet.

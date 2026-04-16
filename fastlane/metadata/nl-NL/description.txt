@@ -1,0 +1,69 @@
+Die screenshot vol e-mailadressen? Dat document vol datums en links? Stop met overtypen — gebruik gewoon Pluq.
+
+Pluq is de snelste manier om e-mails, datums en links te extraheren uit alles op je telefoon. Plak tekst, maak een foto, importeer een bestand of richt je camera — Pluq haalt de gegevens eruit die je nodig hebt in seconden en laat je ze direct exporteren.
+
+EXTRAHEER VAN OVERAL
+
+Pluq werkt met elke bron:
+
+- Plak tekst uit e-mails, chats, vergadernotities of elke app
+- Gebruik je camera om tekst vast te leggen van papieren documenten, visitekaartjes of whiteboards in realtime
+- Kies een foto uit je bibliotheek — Pluq leest het met OCR
+- Importeer bestanden zoals DOCX-documenten en laat Pluq de rest doen
+
+Waar je gegevens ook zijn, Pluq bereikt ze.
+
+WAT KAN PLUQ EXTRAHEREN?
+
+E-mails — Elk e-mailadres, automatisch gevonden en gevalideerd. Pluq vangt adressen zelfs uit rommelige OCR-scans met speciale tekens of extra spaties.
+
+Datums — Datums in elk gangbaar formaat worden gedetecteerd en direct geëxtraheerd.
+
+Links — URL's verborgen in lange documenten of chatgesprekken? Pluq vindt ze allemaal.
+
+Kies welke typen je wilt extraheren voor elke sessie, of stel je standaarden in.
+
+SLIMME OCR INGEBOUWD
+
+Richt je camera op een gedrukte pagina, whiteboard of handgeschreven notitie. Pluq gebruikt OCR op het apparaat — geen internetverbinding nodig.
+
+EXPORTEREN EN DELEN MET ÉÉN TIK
+
+Zodra Pluq je gegevens extraheert:
+
+- Exporteer als CSV — klaar voor spreadsheets, CRM's of databases
+- Exporteer als TXT — schone platte tekst
+- Kopieer individuele items naar het klembord met één tik
+- Deel direct via het systeemdeelmenu naar elke app
+
+EXTRACTIEGESCHIEDENIS
+
+Elke extractiesessie wordt automatisch opgeslagen. Pluq slaat tot 100 sessies op met tijdstempels en bronlabels.
+
+AANPASBAAR
+
+- Kies je visuele thema: Light, Dark, Solar of Mono
+- Schakel datatypes om te extraheren (e-mails, datums, links)
+- Voorkeuren blijven behouden tussen sessies
+
+VOLLEDIG PRIVÉ
+
+Pluq werkt 100% offline. Je gegevens verlaten nooit je apparaat.
+
+- Alle extractie vindt lokaal plaats op je apparaat
+- Geen account nodig
+- Geen internetverbinding nodig
+- Geen tracking, geen analytics, geen advertenties
+- Je documenten en foto's blijven van jou
+
+VOOR WIE IS PLUQ?
+
+- Recruiters die kandidaat-e-mails verzamelen uit CV's
+- Verkoopteams die contacten extraheren uit evenementmateriaal
+- Evenementorganisatoren die deelnemerinfo extraheren uit inschrijflijsten
+- Studenten die links en datums verzamelen uit collegeslides
+- Iedereen die ooit een e-mailadres heeft overgetypt van een screenshot
+
+STOP MET OVERTYPEN. BEGIN MET EXTRAHEREN.
+
+Pluq verandert het vervelende werk van handmatig gegevens kopiëren in een bewerking met één tik. Plak het, fotografeer het of importeer het — Pluq doet de rest.

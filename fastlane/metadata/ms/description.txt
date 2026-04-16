@@ -1,0 +1,69 @@
+Tangkapan skrin penuh dengan e-mel? Dokumen yang penuh dengan tarikh dan pautan? Berhenti menaip semula — gunakan Pluq sahaja.
+
+Pluq ialah cara terpantas untuk mengekstrak e-mel, tarikh dan pautan daripada apa sahaja di telefon anda. Tampal teks, ambil foto, import fail atau halakan kamera — Pluq mengeluarkan data yang anda perlukan dalam beberapa saat dan membolehkan anda mengeksportnya serta-merta.
+
+EKSTRAK DARI MANA-MANA
+
+Pluq berfungsi dengan mana-mana sumber:
+
+- Tampal teks daripada e-mel, sembang, nota mesyuarat atau mana-mana aplikasi
+- Gunakan kamera untuk menangkap teks daripada dokumen kertas, kad perniagaan atau papan putih secara langsung
+- Pilih foto daripada perpustakaan — Pluq membacanya dengan OCR
+- Import fail seperti dokumen DOCX dan biarkan Pluq melakukan selebihnya
+
+Di mana sahaja data anda berada, Pluq boleh mencapainya.
+
+APA YANG BOLEH DIEKSTRAK PLUQ?
+
+E-mel — Setiap alamat e-mel ditemui dan disahkan secara automatik. Pluq menangkap alamat walaupun daripada imbasan OCR yang tidak kemas.
+
+Tarikh — Tarikh dalam mana-mana format biasa dikesan dan diekstrak serta-merta.
+
+Pautan — URL tersembunyi dalam dokumen panjang atau utas sembang? Pluq menjumpai semuanya.
+
+Pilih jenis yang hendak diekstrak sebelum setiap sesi, atau tetapkan lalai anda.
+
+OCR PINTAR TERBINA DALAM
+
+Halakan kamera ke halaman bercetak, papan putih atau nota tulisan tangan. Pluq menggunakan OCR pada peranti — tiada sambungan internet diperlukan.
+
+EKSPORT & KONGSI DENGAN SATU KETUKAN
+
+Selepas Pluq mengekstrak data anda:
+
+- Eksport sebagai CSV — sedia untuk hamparan, CRM atau pangkalan data
+- Eksport sebagai TXT — teks bersih untuk sebarang kegunaan
+- Salin item individu ke papan keratan dengan satu ketukan
+- Kongsi terus melalui menu perkongsian ke mana-mana aplikasi
+
+SEJARAH EKSTRAKSI
+
+Setiap sesi ekstraksi disimpan secara automatik. Pluq menyimpan sehingga 100 sesi dengan cap masa dan label sumber.
+
+BOLEH DISESUAIKAN
+
+- Pilih tema visual: Light, Dark, Solar atau Mono
+- Togol jenis data untuk diekstrak (e-mel, tarikh, pautan)
+- Tetapan kekal antara sesi
+
+SEPENUHNYA PERIBADI
+
+Pluq berfungsi 100% luar talian. Data anda tidak pernah meninggalkan peranti.
+
+- Semua pengekstrakan berlaku secara setempat pada peranti anda
+- Tiada akaun diperlukan
+- Tiada sambungan internet diperlukan
+- Tiada penjejakan, tiada analitik, tiada iklan
+- Dokumen dan foto anda kekal milik anda
+
+UNTUK SIAPA PLUQ?
+
+- Perekrut yang mengumpul e-mel calon daripada resume
+- Pasukan jualan yang mengekstrak kenalan daripada bahan acara
+- Penganjur acara yang mengekstrak maklumat peserta daripada senarai pendaftaran
+- Pelajar yang mengumpul pautan dan tarikh daripada slaid kuliah
+- Sesiapa yang pernah menaip semula alamat e-mel daripada tangkapan skrin
+
+BERHENTI MENAIP SEMULA. MULA MENGEKSTRAK.
+
+Pluq menukar kerja membosankan menyalin data secara manual kepada operasi satu ketukan. Tampal, tangkap atau import — Pluq menguruskan selebihnya.

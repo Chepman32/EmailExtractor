@@ -1,0 +1,69 @@
+Screenshot penuh email itu? Dokumen yang penuh tanggal dan tautan itu? Berhenti mengetik ulang — cukup Pluq saja.
+
+Pluq adalah cara tercepat untuk mengekstrak email, tanggal, dan tautan dari apa pun di ponsel Anda. Tempel teks, ambil foto, impor file, atau arahkan kamera — Pluq menarik data yang Anda butuhkan dalam hitungan detik dan memungkinkan Anda mengekspornya secara instan.
+
+EKSTRAK DARI MANA SAJA
+
+Pluq bekerja dengan sumber apa pun:
+
+- Tempel teks dari email, chat, catatan rapat, atau aplikasi apa pun
+- Gunakan kamera untuk menangkap teks dari dokumen kertas, kartu nama, atau papan tulis secara real time
+- Pilih foto dari perpustakaan — Pluq membacanya dengan OCR
+- Impor file seperti dokumen DOCX dan biarkan Pluq melakukan sisanya
+
+Di mana pun data Anda berada, Pluq dapat menjangkaunya.
+
+APA YANG BISA DIEKSTRAK PLUQ?
+
+Email — Setiap alamat email ditemukan dan divalidasi secara otomatis. Pluq menangkap alamat bahkan dari pemindaian OCR yang berantakan.
+
+Tanggal — Tanggal dalam format umum apa pun terdeteksi dan diekstrak secara instan.
+
+Tautan — URL tersembunyi di dokumen panjang atau utas chat? Pluq menemukan semuanya.
+
+Pilih tipe yang akan diekstrak sebelum setiap sesi, atau atur default Anda.
+
+OCR CERDAS BAWAAN
+
+Arahkan kamera ke halaman cetak, papan tulis, atau catatan tulisan tangan. Pluq menggunakan OCR di perangkat — tidak perlu koneksi internet.
+
+EKSPOR & BAGIKAN DENGAN SATU KETUKAN
+
+Setelah Pluq mengekstrak data Anda:
+
+- Ekspor sebagai CSV — siap untuk spreadsheet, CRM, atau database
+- Ekspor sebagai TXT — teks bersih untuk penggunaan apa pun
+- Salin item individual ke clipboard dengan satu ketukan
+- Bagikan langsung melalui menu berbagi ke aplikasi apa pun
+
+RIWAYAT EKSTRAKSI
+
+Setiap sesi ekstraksi disimpan secara otomatis. Pluq menyimpan hingga 100 sesi dengan stempel waktu dan label sumber.
+
+DAPAT DISESUAIKAN
+
+- Pilih tema visual: Light, Dark, Solar, atau Mono
+- Atur tipe data yang akan diekstrak (email, tanggal, tautan)
+- Pengaturan tersimpan antar sesi
+
+SEPENUHNYA PRIVAT
+
+Pluq bekerja 100% offline. Data Anda tidak pernah meninggalkan perangkat.
+
+- Semua ekstraksi terjadi secara lokal di perangkat Anda
+- Tidak perlu akun
+- Tidak perlu koneksi internet
+- Tanpa pelacakan, tanpa analitik, tanpa iklan
+- Dokumen dan foto Anda tetap milik Anda
+
+UNTUK SIAPA PLUQ?
+
+- Perekrut yang mengumpulkan email kandidat dari CV
+- Tim penjualan yang mengekstrak kontak dari materi acara
+- Penyelenggara acara yang mengekstrak info peserta dari daftar pendaftaran
+- Mahasiswa yang mengumpulkan tautan dan tanggal dari slide kuliah
+- Siapa pun yang pernah mengetik ulang alamat email dari screenshot
+
+BERHENTI MENGETIK ULANG. MULAI MENGEKSTRAK.
+
+Pluq mengubah pekerjaan melelahkan menyalin data secara manual menjadi operasi satu ketukan. Tempel, foto, atau impor — Pluq menangani sisanya.

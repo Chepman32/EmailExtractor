@@ -1,0 +1,1 @@
+email,udtræk,ocr,scanner,dato,link,csv,eksport,kontakter,tekst,data,foto,dokument,offline

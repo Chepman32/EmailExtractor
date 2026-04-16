@@ -1,0 +1,73 @@
+Det screenshot fyldt med e-mails? Det dokument pakket med datoer og links? Stop med at skrive det om — bare Pluq det.
+
+Pluq er den hurtigste måde at udtrække e-mails, datoer og links fra hvad som helst på din telefon. Indsæt tekst, tag et foto, importér en fil, eller peg dit kamera — Pluq trækker de data ud, du har brug for, på sekunder og lader dig eksportere dem med det samme.
+
+UDTRÆK FRA HVOR SOM HELST
+
+Pluq arbejder med enhver kilde:
+
+- Indsæt tekst fra e-mails, chats, mødenotater eller enhver app
+- Brug dit kamera til at fange tekst fra papirdokumenter, visitkort eller whiteboards i realtid
+- Vælg et foto fra dit bibliotek — Pluq læser det med OCR
+- Importér filer som DOCX-dokumenter og lad Pluq klare resten
+
+Uanset hvor dine data befinder sig, kan Pluq nå dem.
+
+HVAD KAN PLUQ UDTRÆKKE?
+
+E-mails — Hver e-mailadresse findes og valideres automatisk. Pluq fanger adresser selv fra rodede OCR-scanninger med specialtegn eller mellemrumsfejl.
+
+Datoer — Datoer i ethvert almindeligt format detekteres og trækkes ud med det samme.
+
+Links — URL'er begravet i lange dokumenter eller chattråde? Pluq finder dem alle.
+
+Vælg hvilke typer der skal udtrækkes før hver session, eller sæt dine standarder og kør.
+
+SMART OCR INDBYGGET
+
+Peg dit kamera mod en trykt side, et whiteboard eller en håndskrevet note. Pluq bruger OCR på enheden til at læse teksten og udtrække strukturerede data — ingen internetforbindelse nødvendig. Det håndterer endda vanskelige OCR-artefakter som erstattede tegn og ekstra mellemrum.
+
+EKSPORTÉR OG DEL MED ÉT TRYK
+
+Når Pluq har udtrukket dine data, er det øjeblikkeligt at få dem ud:
+
+- Eksportér som CSV — klar til regneark, CRM eller databaser
+- Eksportér som TXT — ren tekst til enhver brug
+- Kopiér individuelle elementer til udklipsholderen med et enkelt tryk
+- Del direkte via systemets delingsmenu til enhver app
+
+Dine udtrukne data går derhen, hvor du har brug for dem.
+
+UDTRÆKSHISTORIK
+
+Hver udtrækssession gemmes automatisk. Gå tilbage til enhver tidligere session for at gennemgå, gen-eksportere eller kopiere data. Pluq gemmer op til 100 sessioner med tidsstempler og kildelabels.
+
+TILPASBAR
+
+Gør Pluq til din:
+
+- Vælg dit visuelle tema: Light, Dark, Solar eller Mono
+- Slå til og fra hvilke datatyper der skal udtrækkes (e-mails, datoer, links)
+- Præferencer bevares på tværs af sessioner
+
+FULDSTÆNDIG PRIVAT
+
+Pluq fungerer 100% offline. Dine data forlader aldrig din enhed.
+
+- Al udtrækning sker lokalt på din enhed
+- Ingen konto nødvendig
+- Ingen internetforbindelse nødvendig
+- Ingen sporing, ingen analyse, ingen reklamer
+- Dine dokumenter og fotos forbliver dine
+
+HVEM ER PLUQ TIL?
+
+- Rekrutterere der samler kandidat-e-mails fra CV'er
+- Salgsteams der trækker kontakter fra eventmaterialer
+- Eventarrangører der udtrækker deltagerinfo fra tilmeldingslister
+- Studerende der samler links og datoer fra forelæsningsslides
+- Alle der nogensinde har skrevet en e-mailadresse af fra et screenshot
+
+STOP MED AT SKRIVE OM. BEGYND AT UDTRÆKKE.
+
+Pluq forvandler det kedelige arbejde med at kopiere data i hånden til en operation med ét tryk. Indsæt det, fotografér det, eller importér det — Pluq klarer resten.

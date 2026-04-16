@@ -1,0 +1,73 @@
+That screenshot full of emails? That document packed with dates and links? Stop retyping — just Pluq it.
+
+Pluq is the fastest way to extract emails, dates, and links from anything on your phone. Paste text, snap a photo, import a file, or point your camera — Pluq pulls out the data you need in seconds and lets you export it instantly.
+
+EXTRACT FROM ANYWHERE
+
+Pluq works with any source you throw at it:
+
+- Paste text from emails, chats, meeting notes, or any app
+- Use your camera to capture text from paper documents, business cards, or whiteboards in real time
+- Pick a photo from your library — Pluq reads it with OCR
+- Import files like DOCX documents and let Pluq do the rest
+
+No matter where your data lives, Pluq can reach it.
+
+WHAT CAN PLUQ EXTRACT?
+
+Emails — Every email address, found and validated automatically. Pluq catches addresses even from messy OCR scans with special characters or spacing artifacts.
+
+Dates — Dates in any common format are detected and pulled out instantly.
+
+Links — URLs buried in long documents or chat threads? Pluq finds them all.
+
+Choose which types to extract before each session, or set your defaults and go.
+
+SMART OCR BUILT IN
+
+Point your camera at a printed page, a whiteboard, or a handwritten note. Pluq uses on-device OCR to read the text and extract structured data from it — no internet connection required. It even handles tricky OCR artifacts like substituted characters and extra spaces.
+
+EXPORT & SHARE IN ONE TAP
+
+Once Pluq extracts your data, getting it out is instant:
+
+- Export as CSV — ready for spreadsheets, CRMs, or databases
+- Export as TXT — clean plain text for any use
+- Copy individual items to your clipboard with a single tap
+- Share directly via the system share menu to any app
+
+Your extracted data goes wherever you need it.
+
+EXTRACTION HISTORY
+
+Every extraction session is saved automatically. Go back to any previous session to review, re-export, or copy data you extracted days or weeks ago. Pluq stores up to 100 sessions with timestamps and source labels so you always know what came from where.
+
+CUSTOMIZABLE
+
+Make Pluq yours:
+
+- Choose your visual theme: Light, Dark, Solar, or Mono
+- Toggle which data types to extract (emails, dates, links)
+- Preferences persist across sessions
+
+COMPLETELY PRIVATE
+
+Pluq works 100% offline. Your data never leaves your device.
+
+- All extraction happens locally on your device
+- No account required
+- No internet connection needed
+- No tracking, no analytics, no ads
+- Your documents and photos stay yours
+
+WHO IS PLUQ FOR?
+
+- Recruiters collecting candidate emails from CVs
+- Sales teams pulling contacts from event materials
+- Event organisers extracting attendee info from sign-up sheets
+- Students grabbing links and dates from lecture slides
+- Anyone who's ever retyped an email address from a screenshot
+
+STOP RETYPING. START EXTRACTING.
+
+Pluq turns the tedious work of copying data by hand into a one-tap operation. Paste it, snap it, or import it — Pluq handles the rest.

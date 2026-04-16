@@ -1,0 +1,1 @@
+email,trích xuất,ocr,quét,ngày,liên kết,csv,xuất,danh bạ,văn bản,dữ liệu,ảnh,tài liệu

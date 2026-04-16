@@ -1,0 +1,1 @@
+email,ekstrak,ocr,pemindai,tanggal,tautan,csv,ekspor,kontak,teks,data,foto,dokumen,offline

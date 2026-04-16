@@ -1,0 +1,1 @@
+email,ekstraktor,ocr,skaner,data,link,csv,eksport,kontakty,tekst,dane,zdjęcie,dokument,offline

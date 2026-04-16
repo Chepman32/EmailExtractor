@@ -1,0 +1,1 @@
+sähköposti,poimija,ocr,skanneri,päivämäärä,linkki,csv,vienti,yhteystiedot,teksti,data,kuva,offline

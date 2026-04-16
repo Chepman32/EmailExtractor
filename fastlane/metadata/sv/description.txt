@@ -1,0 +1,69 @@
+Den där skärmdumpen full av e-postadresser? Det dokumentet packat med datum och länkar? Sluta skriva om — bara Pluq det.
+
+Pluq är det snabbaste sättet att extrahera e-post, datum och länkar från vad som helst på din telefon. Klistra in text, ta ett foto, importera en fil eller rikta kameran — Pluq drar ut den data du behöver på sekunder och låter dig exportera den direkt.
+
+EXTRAHERA VARIFRÅN SOM HELST
+
+Pluq fungerar med vilken källa som helst:
+
+- Klistra in text från e-post, chattar, mötesanteckningar eller vilken app som helst
+- Använd kameran för att fånga text från pappersdokument, visitkort eller whiteboards i realtid
+- Välj ett foto från ditt bibliotek — Pluq läser det med OCR
+- Importera filer som DOCX-dokument och låt Pluq göra resten
+
+Var dina data än finns, Pluq når dem.
+
+VAD KAN PLUQ EXTRAHERA?
+
+E-post — Varje e-postadress hittas och valideras automatiskt. Pluq fångar adresser även från röriga OCR-skanningar.
+
+Datum — Datum i alla vanliga format detekteras och extraheras omedelbart.
+
+Länkar — URL:er gömda i långa dokument eller chattrådar? Pluq hittar dem alla.
+
+Välj vilka typer som ska extraheras före varje session, eller ställ in dina standarder.
+
+SMART OCR INBYGGT
+
+Rikta kameran mot en tryckt sida, whiteboard eller handskriven anteckning. Pluq använder OCR på enheten — ingen internetanslutning behövs.
+
+EXPORTERA OCH DELA MED ETT TRYCK
+
+När Pluq har extraherat dina data:
+
+- Exportera som CSV — redo för kalkylblad, CRM eller databaser
+- Exportera som TXT — ren text för alla ändamål
+- Kopiera enskilda objekt till urklipp med ett tryck
+- Dela direkt via systemets delningsmeny till vilken app som helst
+
+EXTRAKTIONSHISTORIK
+
+Varje session sparas automatiskt. Pluq lagrar upp till 100 sessioner med tidsstämplar och källetiketter.
+
+ANPASSNINGSBAR
+
+- Välj visuellt tema: Light, Dark, Solar eller Mono
+- Växla datatyper att extrahera (e-post, datum, länkar)
+- Inställningar bevaras mellan sessioner
+
+HELT PRIVAT
+
+Pluq fungerar 100% offline. Dina data lämnar aldrig din enhet.
+
+- All extraktion sker lokalt på din enhet
+- Inget konto behövs
+- Ingen internetanslutning behövs
+- Ingen spårning, ingen analys, inga annonser
+- Dina dokument och foton förblir dina
+
+VEM ÄR PLUQ FÖR?
+
+- Rekryterare som samlar kandidat-e-post från CV:n
+- Säljteam som extraherar kontakter från eventmaterial
+- Eventarrangörer som extraherar deltagarinfo från anmälningslistor
+- Studenter som samlar länkar och datum från föreläsningsbilder
+- Alla som någonsin har skrivit om en e-postadress från en skärmdump
+
+SLUTA SKRIVA OM. BÖRJA EXTRAHERA.
+
+Pluq förvandlar det tråkiga arbetet med att kopiera data för hand till en operation med ett tryck. Klistra in, fota eller importera — Pluq tar hand om resten.

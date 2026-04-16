@@ -1,0 +1,69 @@
+E-posta dolu o ekran görüntüsü? Tarihler ve linklerle dolu o belge? Tekrar yazmayı bırakın — Pluq kullanın.
+
+Pluq, telefonunuzdaki her şeyden e-posta, tarih ve bağlantı çıkarmanın en hızlı yoludur. Metin yapıştırın, fotoğraf çekin, dosya içe aktarın veya kameranızı yönlendirin — Pluq ihtiyacınız olan verileri saniyeler içinde çıkarır ve anında dışa aktarmanızı sağlar.
+
+HER YERDEN ÇIKARIN
+
+Pluq her kaynakla çalışır:
+
+- E-postalardan, sohbetlerden, toplantı notlarından veya herhangi bir uygulamadan metin yapıştırın
+- Kağıt belgelerden, kartvizitlerden veya beyaz tahtalardan gerçek zamanlı metin yakalamak için kameranızı kullanın
+- Kütüphanenizden bir fotoğraf seçin — Pluq OCR ile okur
+- DOCX belgeleri gibi dosyaları içe aktarın ve gerisini Pluq'a bırakın
+
+Verileriniz nerede olursa olsun, Pluq onlara ulaşır.
+
+PLUQ NE ÇIKARABİLİR?
+
+E-postalar — Her e-posta adresi otomatik olarak bulunur ve doğrulanır. Pluq, özel karakterler veya boşluk hataları içeren düzensiz OCR taramalarından bile adresleri yakalar.
+
+Tarihler — Herhangi bir yaygın formattaki tarihler tespit edilir ve anında çıkarılır.
+
+Bağlantılar — Uzun belgelere veya sohbet dizilerine gömülü URL'ler? Pluq hepsini bulur.
+
+Her oturum öncesinde çıkarılacak türleri seçin veya varsayılanlarınızı ayarlayın.
+
+AKILLI OCR YERLEŞİK
+
+Kameranızı basılı bir sayfaya, beyaz tahtaya veya el yazısı nota yönlendirin. Pluq, cihaz üzerinde OCR kullanır — internet bağlantısı gerekmez.
+
+TEK DOKUNUŞLA DIŞA AKTAR VE PAYLAŞ
+
+Pluq verilerinizi çıkardıktan sonra:
+
+- CSV olarak dışa aktar — elektronik tablolar, CRM'ler veya veritabanları için hazır
+- TXT olarak dışa aktar — temiz düz metin
+- Tek dokunuşla öğeleri panoya kopyalayın
+- Sistem paylaşım menüsü aracılığıyla herhangi bir uygulamaya doğrudan paylaşın
+
+ÇIKARMA GEÇMİŞİ
+
+Her oturum otomatik olarak kaydedilir. Pluq, zaman damgaları ve kaynak etiketleriyle 100'e kadar oturum saklar.
+
+ÖZELLEŞTİRİLEBİLİR
+
+- Görsel tema seçin: Light, Dark, Solar veya Mono
+- Çıkarılacak veri türlerini değiştirin (e-postalar, tarihler, bağlantılar)
+- Tercihler oturumlar arasında korunur
+
+TAMAMEN GİZLİ
+
+Pluq %100 çevrimdışı çalışır. Verileriniz cihazınızdan asla ayrılmaz.
+
+- Tüm çıkarma işlemi cihazınızda yerel olarak gerçekleşir
+- Hesap gerekmez
+- İnternet bağlantısı gerekmez
+- İzleme yok, analitik yok, reklam yok
+- Belgeleriniz ve fotoğraflarınız sizin kalır
+
+PLUQ KİM İÇİN?
+
+- Özgeçmişlerden aday e-postalarını toplayan işe alım uzmanları
+- Etkinlik materyallerinden kişileri çıkaran satış ekipleri
+- Kayıt listelerinden katılımcı bilgilerini çıkaran etkinlik organizatörleri
+- Ders slaytlarından bağlantıları ve tarihleri toplayan öğrenciler
+- Ekran görüntüsünden e-posta adresi yazmış olan herkes
+
+TEKRAR YAZMAYI BIRAKIN. ÇIKARMAYI BAŞLATIN.
+
+Pluq, verileri elle kopyalamanın sıkıcı işini tek dokunuşluk bir işleme dönüştürür. Yapıştırın, fotoğraflayın veya içe aktarın — Pluq gerisini halleder.
