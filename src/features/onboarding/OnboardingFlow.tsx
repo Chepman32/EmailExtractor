@@ -33,7 +33,6 @@ const ONBOARDING_STEPS = [
   'goals',
   'pain',
   'sources',
-  'demo',
   'ready',
 ] as const;
 
@@ -128,7 +127,6 @@ export function OnboardingFlow({
     'text',
     'photos',
   ]);
-  const [hasRunPreview, setHasRunPreview] = useState(false);
   const scrollViewRef = useRef<ScrollView>(null);
   const transitionDirectionRef = useRef<1 | -1>(1);
   const hasAnimatedOnceRef = useRef(false);
@@ -168,20 +166,14 @@ export function OnboardingFlow({
           ? painPointId !== null
           : currentStep === 'sources'
             ? preferredSources.length > 0
-            : currentStep === 'demo'
-              ? true
-              : true;
+            : true;
 
   const primaryButtonLabel =
     currentStep === 'welcome'
       ? i18n.strings.common.getStarted
-      : currentStep === 'demo'
-        ? hasRunPreview
-          ? i18n.strings.common.keepGoing
-          : i18n.strings.common.runPreview
-        : currentStep === 'ready'
-          ? i18n.strings.common.startExtracting
-          : i18n.strings.common.continue;
+      : currentStep === 'ready'
+        ? i18n.strings.common.startExtracting
+        : i18n.strings.common.continue;
 
   const handleComplete = () => {
     onComplete(resolveSelection(dataTypeSelection));
@@ -198,11 +190,6 @@ export function OnboardingFlow({
 
   const handlePrimaryAction = () => {
     if (!canContinue) {
-      return;
-    }
-
-    if (currentStep === 'demo' && !hasRunPreview) {
-      setHasRunPreview(true);
       return;
     }
 
@@ -363,12 +350,6 @@ export function OnboardingFlow({
   const renderGoalsStep = () => (
     <>
       <View style={styles.questionHeader}>
-        <Text style={styles.eyebrow}>
-          {i18n.t(i18n.strings.common.stepCounter, {
-            current: 1,
-            total: ONBOARDING_STEPS.length,
-          })}
-        </Text>
         <Text style={styles.title}>{i18n.strings.onboarding.goalsTitle}</Text>
         <Text style={styles.subtitle}>{i18n.strings.onboarding.goalsSubtitle}</Text>
       </View>
@@ -425,12 +406,6 @@ export function OnboardingFlow({
   const renderPainStep = () => (
     <>
       <View style={styles.questionHeader}>
-        <Text style={styles.eyebrow}>
-          {i18n.t(i18n.strings.common.stepCounter, {
-            current: 2,
-            total: ONBOARDING_STEPS.length,
-          })}
-        </Text>
         <Text style={styles.title}>{i18n.strings.onboarding.painTitle}</Text>
         <Text style={styles.subtitle}>{i18n.strings.onboarding.painSubtitle}</Text>
       </View>
@@ -487,12 +462,6 @@ export function OnboardingFlow({
   const renderSourcesStep = () => (
     <>
       <View style={styles.questionHeader}>
-        <Text style={styles.eyebrow}>
-          {i18n.t(i18n.strings.common.stepCounter, {
-            current: 3,
-            total: ONBOARDING_STEPS.length,
-          })}
-        </Text>
         <Text style={styles.title}>{i18n.strings.onboarding.sourcesTitle}</Text>
         <Text style={styles.subtitle}>{i18n.strings.onboarding.sourcesSubtitle}</Text>
       </View>
@@ -550,69 +519,9 @@ export function OnboardingFlow({
     </>
   );
 
-  const renderDemoStep = () => (
-    <>
-      <View style={styles.questionHeader}>
-        <Text style={styles.eyebrow}>
-          {i18n.t(i18n.strings.common.stepCounter, {
-            current: 4,
-            total: ONBOARDING_STEPS.length,
-          })}
-        </Text>
-        <Text style={styles.title}>{i18n.strings.onboarding.demoTitle}</Text>
-        <Text style={styles.subtitle}>{i18n.strings.onboarding.demoSubtitle}</Text>
-      </View>
-
-      <View style={styles.demoCard}>
-        <View style={styles.previewMessage}>
-          <Text style={styles.previewLabel}>{i18n.strings.onboarding.previewThreadLabel}</Text>
-          <Text style={styles.previewText}>
-            {i18n.t(i18n.strings.onboarding.previewThreadText, {
-              sampleDate: i18n.formatSampleDate(SAMPLE_RESULTS.date),
-            })}
-          </Text>
-        </View>
-
-        <View style={styles.previewChipRow}>
-          {resolvedTypes.map(type => (
-            <View key={type} style={styles.previewChip}>
-              <Text style={styles.previewChipText}>
-                {i18n.dataTypeLabel(type)}
-              </Text>
-            </View>
-          ))}
-        </View>
-
-        {hasRunPreview ? (
-          <View style={styles.previewResultsCard}>
-            <Text style={styles.featureTitle}>{i18n.strings.onboarding.pulledOutForYou}</Text>
-            {resolvedTypes.map(type => (
-              <View key={type} style={styles.previewResultItem}>
-                <Text style={styles.previewResultType}>{i18n.dataTypeLabel(type)}</Text>
-                <Text style={styles.previewResultValue}>
-                  {type === 'date'
-                    ? i18n.formatSampleDate(SAMPLE_RESULTS[type])
-                    : SAMPLE_RESULTS[type]}
-                </Text>
-              </View>
-            ))}
-          </View>
-        ) : (
-          <Text style={styles.demoHint}>{i18n.strings.onboarding.runPreviewHint}</Text>
-        )}
-      </View>
-    </>
-  );
-
   const renderReadyStep = () => (
     <>
       <View style={styles.questionHeader}>
-        <Text style={styles.eyebrow}>
-          {i18n.t(i18n.strings.common.stepCounter, {
-            current: ONBOARDING_STEPS.length,
-            total: ONBOARDING_STEPS.length,
-          })}
-        </Text>
         <Text style={styles.title}>{i18n.strings.onboarding.readyTitle}</Text>
         <Text style={styles.subtitle}>{i18n.strings.onboarding.readySubtitle}</Text>
       </View>
@@ -687,8 +596,6 @@ export function OnboardingFlow({
         return renderPainStep();
       case 'sources':
         return renderSourcesStep();
-      case 'demo':
-        return renderDemoStep();
       case 'ready':
         return renderReadyStep();
     }
