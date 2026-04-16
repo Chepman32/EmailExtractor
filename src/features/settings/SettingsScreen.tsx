@@ -10,6 +10,8 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 import {SafeAreaView} from 'react-native-safe-area-context';
 
 import {useI18n} from '../../localization/i18n';
+import {useLocaleContext} from '../../localization/LocaleContext';
+import {SupportedLocale} from '../../localization/translations';
 import {
   DataTypeSelection,
   ExtractableDataType,
@@ -31,6 +33,18 @@ const themeIcons: Record<ThemeId, string> = {
   solar: 'white-balance-sunny',
   mono: 'circle-slice-8',
 };
+
+const LANGUAGE_OPTIONS: Array<{locale: SupportedLocale; nativeName: string}> = [
+  {locale: 'en', nativeName: 'English'},
+  {locale: 'zh-Hans', nativeName: '中文（简体）'},
+  {locale: 'ja', nativeName: '日本語'},
+  {locale: 'ko', nativeName: '한국어'},
+  {locale: 'de', nativeName: 'Deutsch'},
+  {locale: 'fr', nativeName: 'Français'},
+  {locale: 'es', nativeName: 'Español'},
+  {locale: 'pt-BR', nativeName: 'Português (BR)'},
+  {locale: 'ru', nativeName: 'Русский'},
+];
 
 const dataTypeOptions: Array<{
   icon: string;
@@ -58,6 +72,7 @@ export function SettingsScreen({
   theme = themes.light,
 }: SettingsScreenProps) {
   const i18n = useI18n();
+  const {userLocale, setUserLocale} = useLocaleContext();
   const [statusMessage, setStatusMessage] = useState<{
     kind: 'success' | 'warning';
     text: string;
@@ -242,6 +257,90 @@ export function SettingsScreen({
                     </View>
                   </View>
 
+                  <MaterialCommunityIcons
+                    color={isSelected ? theme.colors.primary : theme.colors.textMuted}
+                    name={isSelected ? 'check-circle' : 'circle-outline'}
+                    size={20}
+                  />
+                </Pressable>
+              );
+            })}
+          </View>
+        </View>
+
+        <View style={styles.dataTypeCard}>
+          <Text style={styles.sectionEyebrow}>{i18n.strings.settings.languageEyebrow}</Text>
+          <Text style={styles.sectionTitle}>{i18n.strings.settings.languageTitle}</Text>
+
+          <View style={styles.dataTypeList}>
+            <Pressable
+              onPress={() => setUserLocale(null)}
+              style={({pressed}) => [
+                styles.dataTypeOption,
+                {
+                  backgroundColor:
+                    userLocale === null
+                      ? theme.colors.primarySoft
+                      : theme.colors.surfaceMuted,
+                  borderColor:
+                    userLocale === null
+                      ? theme.colors.primary
+                      : theme.colors.border,
+                },
+                pressed && styles.dataTypeOptionPressed,
+              ]}>
+              <View style={styles.dataTypeCopy}>
+                <Text
+                  style={[
+                    styles.dataTypeTitle,
+                    {
+                      color:
+                        userLocale === null
+                          ? theme.colors.primarySoftText
+                          : theme.colors.textPrimary,
+                    },
+                  ]}>
+                  {i18n.strings.settings.deviceLanguage}
+                </Text>
+              </View>
+              <MaterialCommunityIcons
+                color={userLocale === null ? theme.colors.primary : theme.colors.textMuted}
+                name={userLocale === null ? 'check-circle' : 'circle-outline'}
+                size={20}
+              />
+            </Pressable>
+
+            {LANGUAGE_OPTIONS.map(option => {
+              const isSelected = userLocale === option.locale;
+              return (
+                <Pressable
+                  key={option.locale}
+                  onPress={() => setUserLocale(option.locale)}
+                  style={({pressed}) => [
+                    styles.dataTypeOption,
+                    {
+                      backgroundColor: isSelected
+                        ? theme.colors.primarySoft
+                        : theme.colors.surfaceMuted,
+                      borderColor: isSelected
+                        ? theme.colors.primary
+                        : theme.colors.border,
+                    },
+                    pressed && styles.dataTypeOptionPressed,
+                  ]}>
+                  <View style={styles.dataTypeCopy}>
+                    <Text
+                      style={[
+                        styles.dataTypeTitle,
+                        {
+                          color: isSelected
+                            ? theme.colors.primarySoftText
+                            : theme.colors.textPrimary,
+                        },
+                      ]}>
+                      {option.nativeName}
+                    </Text>
+                  </View>
                   <MaterialCommunityIcons
                     color={isSelected ? theme.colors.primary : theme.colors.textMuted}
                     name={isSelected ? 'check-circle' : 'circle-outline'}

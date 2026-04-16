@@ -32,6 +32,7 @@ import {
   hasEnabledDataType,
 } from './src/shared/extractedData';
 import {useI18n} from './src/localization/i18n';
+import {LocaleProvider} from './src/localization/LocaleContext';
 import {HistorySession} from './src/shared/types';
 import {persistThemePreference, readThemePreference} from './src/theme/themeStorage';
 import {AppTheme, ThemeId, themes, createShadow} from './src/theme/themes';
@@ -318,9 +319,11 @@ function AppShell() {
 
 function App() {
   return (
-    <SafeAreaProvider>
-      <AppShell />
-    </SafeAreaProvider>
+    <LocaleProvider>
+      <SafeAreaProvider>
+        <AppShell />
+      </SafeAreaProvider>
+    </LocaleProvider>
   );
 }
 

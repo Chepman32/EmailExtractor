@@ -1,6 +1,8 @@
 import {useMemo} from 'react';
 import {getLocales} from 'react-native-localize';
 
+import {useLocaleContext} from './LocaleContext';
+
 import {ExtractableDataType} from '../shared/extractedData';
 import {ExtractionSource} from '../shared/types';
 import {ThemeId} from '../theme/themes';
@@ -288,5 +290,9 @@ export function createI18n(locale = resolveSupportedLocale()) {
 }
 
 export function useI18n() {
-  return useMemo(() => createI18n(), []);
+  const {userLocale} = useLocaleContext();
+  return useMemo(
+    () => createI18n(userLocale ?? undefined),
+    [userLocale],
+  );
 }
