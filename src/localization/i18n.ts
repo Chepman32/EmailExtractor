@@ -25,10 +25,13 @@ function interpolate(
 }
 
 function createPluralRules(locale: SupportedLocale) {
+  if (typeof Intl === 'undefined' || typeof Intl.PluralRules === 'undefined') {
+    return null;
+  }
   try {
     return new Intl.PluralRules(locale);
   } catch {
-    return new Intl.PluralRules('en');
+    return null;
   }
 }
 
@@ -71,7 +74,9 @@ function pickPluralForm(
   locale: SupportedLocale,
 ): string {
   const pluralRules = createPluralRules(locale);
-  const category = pluralRules.select(count) as keyof CountForms;
+  const category = pluralRules
+    ? (pluralRules.select(count) as keyof CountForms)
+    : 'other';
 
   return (
     forms[category] ??

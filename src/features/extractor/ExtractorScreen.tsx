@@ -17,6 +17,7 @@ import {
   StyleSheet,
   Text,
   TextInput,
+  Image,
   useWindowDimensions,
   View,
 } from 'react-native';
@@ -636,7 +637,12 @@ export const ExtractorScreen = forwardRef<
             <ActivityIndicator color={theme.colors.primaryOn} />
           ) : (
             <View style={styles.extractButtonArrow}>
-              <Text style={styles.extractButtonArrowText}>{'>'}</Text>
+              <Image
+                // eslint-disable-next-line @typescript-eslint/no-require-imports
+                source={require('../../assets/icons/simple-white-right-arrow-icon-3d-render-photo-png-image_13333205.png')}
+                style={styles.extractButtonArrowImage}
+                resizeMode="contain"
+              />
             </View>
           )}
         </Pressable>
@@ -1067,10 +1073,9 @@ function createStyles(theme: AppTheme) {
       alignItems: 'center',
       justifyContent: 'center',
     },
-    extractButtonArrowText: {
-      fontSize: 20,
-      fontWeight: '700',
-      color: theme.colors.primaryOn,
+    extractButtonArrowImage: {
+      width: 24,
+      height: 24,
     },
     messageCard: {
       borderRadius: 20,

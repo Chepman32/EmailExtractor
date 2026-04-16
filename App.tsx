@@ -21,6 +21,7 @@ import {
   readDataTypeSelection,
 } from './src/features/settings/dataTypeStorage';
 import {OnboardingFlow} from './src/features/onboarding/OnboardingFlow';
+import {SplashScreen} from './src/features/splash/SplashScreen';
 import {
   persistOnboardingCompletion,
   readOnboardingCompletion,
@@ -65,6 +66,7 @@ function AppShell() {
     createDefaultDataTypeSelection(),
   );
   const [themeId, setThemeId] = useState<ThemeId>('light');
+  const [splashDone, setSplashDone] = useState(false);
   const [hasCompletedOnboarding, setHasCompletedOnboarding] = useState<boolean | null>(
     null,
   );
@@ -161,11 +163,11 @@ function AppShell() {
 
   const activePillTranslateX = Animated.multiply(animatedTabIndex, tabSegmentWidth);
 
-  if (hasCompletedOnboarding === null) {
+  if (!splashDone || hasCompletedOnboarding === null) {
     return (
       <>
-        <StatusBar barStyle={theme.statusBarStyle} />
-        <View style={styles.app} testID="app-loading" />
+        <StatusBar barStyle="light-content" />
+        <SplashScreen onComplete={() => setSplashDone(true)} />
       </>
     );
   }
