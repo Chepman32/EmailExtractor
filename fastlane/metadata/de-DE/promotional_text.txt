@@ -1,1 +1,1 @@
-Text einfügen, Foto machen oder Datei auswählen — Pluq extrahiert sofort jede E-Mail, jedes Datum und jeden Link. Export als CSV mit einem Tipp. Kein Konto, kein Internet nötig.
+Text einfügen, Foto machen oder Datei wählen — Pluq extrahiert sofort E-Mails, Daten & Links. CSV-Export mit einem Tipp. Kein Konto, kein Internet nötig.
