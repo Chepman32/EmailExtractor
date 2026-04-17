@@ -19,7 +19,7 @@ const TOP_PAD = 20;
 
 // ─── Timing ───────────────────────────────────────────────────────────────────
 const SPAWN_INTERVAL_MS = 6;  // ms between consecutive item spawns
-const SPLASH_MS = 800;        // total splash duration
+const SPLASH_MS = 1100;        // total splash duration
 const FADEOUT_MS = 130;       // crossfade out at the very end
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -31,8 +31,15 @@ type FallingItem = {
   kind: ItemKind;
   column: number;
   restingY: number;
+  offsetX: number;
+  widthScale: number;
+  rotation: number;
   delay: number;
+  velocity: number;
+  tension: number;
+  friction: number;
   animY: Animated.Value;
+  animX: Animated.Value;
   opacity: Animated.Value;
 };
 
@@ -69,6 +76,21 @@ const KIND_ICON: Record<ItemKind, string> = {
   link:  '↗',
 };
 
+// ─── Pick column biased toward least-full ────────────────────────────────────
+function pickColumn(columnCounts: number[], numCols: number): number {
+  // 70% chance: pick the least-full column (random among ties)
+  // 30% chance: pick any column at random
+  if (Math.random() < 0.7) {
+    const minCount = Math.min(...columnCounts);
+    const candidates: number[] = [];
+    for (let c = 0; c < numCols; c++) {
+      if (columnCounts[c] === minCount) { candidates.push(c); }
+    }
+    return candidates[Math.floor(Math.random() * candidates.length)];
+  }
+  return Math.floor(Math.random() * numCols);
+}
+
 // ─── Item builder (runs once on mount) ───────────────────────────────────────
 function buildItems(screenW: number, screenH: number): FallingItem[] {
   // Interleave all three data types for even visual distribution
@@ -94,15 +116,24 @@ function buildItems(screenW: number, screenH: number): FallingItem[] {
   const items: FallingItem[] = [];
 
   for (let i = 0; i < Math.min(pool.length, total); i++) {
-    const col = i % NUM_COLUMNS;
+    const col = pickColumn(columnCounts, NUM_COLUMNS);
     const slotIndex = columnCounts[col]; // 0 = bottommost slot in this column
     columnCounts[col]++;
 
+    // Vertical jitter in resting position
+    const yJitter = Math.random() * 6 - 2;
     // Final resting position (absolute `top`): build from bottom upward
-    const restingY = screenH - FLOOR_PAD - ITEM_H - slotIndex * slotH;
+    const restingY = screenH - FLOOR_PAD - ITEM_H - slotIndex * slotH + yJitter;
 
     // translateY starts highly negative (item is above screen), animates to 0
     const startTranslateY = -(restingY + ITEM_H + 20);
+
+    // Horizontal starting drift — items tumble sideways as they fall
+    const startDriftX = Math.random() * 40 - 20;
+
+    // Randomized delay with jitter
+    const baseDelay = i * SPAWN_INTERVAL_MS;
+    const delayJitter = Math.random() * 30 - 10;
 
     items.push({
       id: i,
@@ -110,8 +141,15 @@ function buildItems(screenW: number, screenH: number): FallingItem[] {
       kind: pool[i].kind,
       column: col,
       restingY,
-      delay: i * SPAWN_INTERVAL_MS,
+      offsetX: Math.random() * 16 - 8,
+      widthScale: 0.85 + Math.random() * 0.15,
+      rotation: Math.random() * 6 - 3,
+      delay: Math.max(0, baseDelay + delayJitter),
+      velocity: 18 + Math.random() * 12,
+      tension: 30 + Math.random() * 20,
+      friction: 6 + Math.random() * 4,
       animY: new Animated.Value(startTranslateY),
+      animX: new Animated.Value(startDriftX),
       opacity: new Animated.Value(0),
     });
   }
@@ -132,10 +170,6 @@ export function SplashScreen({onComplete}: Props) {
   useEffect(() => {
     // Launch every item's fall animation (staggered by delay)
     items.forEach(item => {
-      // Slight per-item variation for organic feel
-      const vJitter  = (item.id % 7) * 0.55;
-      const fJitter  = (item.id % 5) * 0.10;
-
       Animated.sequence([
         Animated.delay(item.delay),
         Animated.parallel([
@@ -145,13 +179,21 @@ export function SplashScreen({onComplete}: Props) {
             duration: 35,
             useNativeDriver: true,
           }),
-          // Spring fall — high initial velocity + slight bounce at landing
+          // Spring fall — per-item velocity/tension/friction for chaotic feel
           Animated.spring(item.animY, {
             toValue: 0,
             useNativeDriver: true,
-            velocity: 22 + vJitter,
-            tension: 36,
-            friction: 7.5 + fJitter,
+            velocity: item.velocity,
+            tension: item.tension,
+            friction: item.friction,
+          }),
+          // Horizontal drift settles to 0
+          Animated.spring(item.animX, {
+            toValue: 0,
+            useNativeDriver: true,
+            velocity: 5,
+            tension: 25,
+            friction: 8,
           }),
         ]),
       ]).start();
@@ -183,8 +225,8 @@ export function SplashScreen({onComplete}: Props) {
       <View style={[styles.glow, styles.glowGreen]} />
 
       {items.map(item => {
-        const left = item.column * colWidth + COL_H_PAD;
-        const itemWidth = colWidth - COL_H_PAD * 2;
+        const left = item.column * colWidth + COL_H_PAD + item.offsetX;
+        const itemWidth = (colWidth - COL_H_PAD * 2) * item.widthScale;
 
         return (
           <Animated.View
@@ -197,7 +239,11 @@ export function SplashScreen({onComplete}: Props) {
                 width: itemWidth,
                 backgroundColor: KIND_BG[item.kind],
                 opacity: item.opacity,
-                transform: [{translateY: item.animY}],
+                transform: [
+                  {translateX: item.animX},
+                  {translateY: item.animY},
+                  {rotate: `${item.rotation}deg`},
+                ],
               },
             ]}>
             <Text style={styles.icon}>{KIND_ICON[item.kind]}</Text>

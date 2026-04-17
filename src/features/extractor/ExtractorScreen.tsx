@@ -2,6 +2,7 @@ import React, {
   forwardRef,
   useImperativeHandle,
   useMemo,
+  useRef,
   useState,
 } from 'react';
 import {
@@ -142,6 +143,9 @@ export const ExtractorScreen = forwardRef<
   const [result, setResult] = useState<ExtractionResult | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isExtracting, setIsExtracting] = useState(false);
+  const flatListRef = useRef<FlatList>(null);
+  const extractButtonYRef = useRef<number>(0);
+  const resultsPanelYRef = useRef<number>(0);
   const styles = useMemo(() => createStyles(theme), [theme]);
   const enabledTypes = useMemo(
     () => getEnabledDataTypes(dataTypeSelection),
@@ -272,6 +276,12 @@ export const ExtractorScreen = forwardRef<
       });
 
       setResult(extraction);
+      setTimeout(() => {
+        flatListRef.current?.scrollToOffset({
+          offset: resultsPanelYRef.current,
+          animated: true,
+        });
+      }, 150);
     } catch (err) {
       const message =
         err instanceof Error
@@ -328,6 +338,13 @@ export const ExtractorScreen = forwardRef<
       setErrorMessage(null);
       setResult(null);
       setText(clipboardText);
+      Keyboard.dismiss();
+      setTimeout(() => {
+        flatListRef.current?.scrollToOffset({
+          offset: extractButtonYRef.current,
+          animated: true,
+        });
+      }, 100);
     } catch {
       setErrorMessage(i18n.strings.extractor.pasteClipboardError);
     }
@@ -469,7 +486,7 @@ export const ExtractorScreen = forwardRef<
   );
 
   const screenHeader = (
-    <>
+    <View>
       <View style={styles.heroCard}>
         <View style={styles.heroGlowPrimary} />
         <View style={styles.heroGlowSecondary} />
@@ -615,6 +632,9 @@ export const ExtractorScreen = forwardRef<
         <Pressable
           testID="extract-button"
           disabled={!canExtract || isExtracting}
+          onLayout={e => {
+            extractButtonYRef.current = e.nativeEvent.layout.y;
+          }}
           onPress={() => {
             handleExtract().catch((err: unknown) => {
               const msg =
@@ -666,7 +686,11 @@ export const ExtractorScreen = forwardRef<
         ) : null}
       </View>
 
-      <View style={styles.resultsPanel}>
+      <View
+        style={styles.resultsPanel}
+        onLayout={e => {
+          resultsPanelYRef.current = e.nativeEvent.layout.y;
+        }}>
         <View style={styles.resultsHeader}>
           <View style={styles.resultsCopy}>
             <Text style={styles.sectionEyebrow}>{i18n.strings.extractor.resultsEyebrow}</Text>
@@ -687,7 +711,7 @@ export const ExtractorScreen = forwardRef<
           </View>
         </View>
       </View>
-    </>
+    </View>
   );
 
   return (
@@ -696,6 +720,7 @@ export const ExtractorScreen = forwardRef<
         behavior={Platform.select({ios: 'padding', default: undefined})}
         style={styles.flex}>
         <FlatList
+          ref={flatListRef}
           data={resultSections}
           keyExtractor={item => item.type}
           keyboardShouldPersistTaps="handled"
