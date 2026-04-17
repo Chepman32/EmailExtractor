@@ -400,13 +400,7 @@ export const ExtractorScreen = forwardRef<
 
     try {
       const exported = await exportExtractedItems(itemType, items, format);
-      await Share.share({
-        url: exported.fileUri,
-        message: i18n.t(i18n.strings.extractor.exportedMessage, {
-          countLabel: i18n.formatCount(itemType, items.length),
-          format: format.toUpperCase(),
-        }),
-      });
+      await Share.share({url: exported.fileUri});
     } catch {
       setErrorMessage(
         i18n.t(i18n.strings.extractor.exportError, {

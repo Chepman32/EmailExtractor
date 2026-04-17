@@ -15,8 +15,8 @@ export const DATA_TYPE_LABELS: Record<ExtractableDataType, string> = {
 export function createDefaultDataTypeSelection(): DataTypeSelection {
   return {
     email: true,
-    date: false,
-    link: false,
+    date: true,
+    link: true,
   };
 }
 

@@ -25,7 +25,7 @@ describe('SettingsScreen', () => {
     const onDataTypeSelectionChange = jest.fn();
     const {getByTestId, getByText} = render(
       <SettingsScreen
-        dataTypeSelection={createDefaultDataTypeSelection()}
+        dataTypeSelection={{email: true, date: false, link: false}}
         onDataTypeSelectionChange={onDataTypeSelectionChange}
         onThemeChange={jest.fn()}
         selectedThemeId="light"

@@ -13,8 +13,8 @@ describe('dataTypeStorage', () => {
   it('returns the default selection when nothing is stored', async () => {
     await expect(readDataTypeSelection()).resolves.toEqual({
       email: true,
-      date: false,
-      link: false,
+      date: true,
+      link: true,
     });
   });
 
@@ -40,8 +40,8 @@ describe('dataTypeStorage', () => {
 
     await expect(readDataTypeSelection()).resolves.toEqual({
       email: true,
-      date: false,
-      link: false,
+      date: true,
+      link: true,
     });
   });
 });

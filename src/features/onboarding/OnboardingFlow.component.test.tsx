@@ -17,7 +17,7 @@ describe('OnboardingFlow', () => {
     );
 
     fireEvent.press(getByTestId('onboarding-primary'));
-    fireEvent.press(getByTestId('onboarding-goal-link'));
+    fireEvent.press(getByTestId('onboarding-goal-date'));
     fireEvent.press(getByTestId('onboarding-primary'));
     fireEvent.press(getByTestId('onboarding-pain-screenshots'));
     fireEvent.press(getByTestId('onboarding-primary'));
